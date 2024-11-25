@@ -3,6 +3,9 @@ syntax = "proto3";
 option go_package = "./protos/handler";
 
 service Handler {
+    rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+
     rpc BotResponseUnmarshal (BotResponseUnmarshalRequest) returns (BotResponseUnmarshalResponse);
 }
 
@@ -309,6 +312,20 @@ message BE_Connected {
     string BotId = 2;
 }
 
+
+message HealthCheckRequest {
+    string service = 1;
+}
+
+message HealthCheckResponse {
+    enum ServingStatus {
+        UNKNOWN = 0;
+        SERVING = 1;
+        NOT_SERVING = 2;
+        SERVICE_UNKNOWN = 3;  // Used only by the Watch method.
+    }
+    ServingStatus status = 1;
+}
 
 message BotResponseUnmarshalRequest {
     bytes Buf = 1;

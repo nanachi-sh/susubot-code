@@ -19,6 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	Handler_Check_FullMethodName                = "/Handler/Check"
+	Handler_Watch_FullMethodName                = "/Handler/Watch"
 	Handler_BotResponseUnmarshal_FullMethodName = "/Handler/BotResponseUnmarshal"
 )
 
@@ -26,6 +28,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HandlerClient interface {
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HealthCheckResponse], error)
 	BotResponseUnmarshal(ctx context.Context, in *BotResponseUnmarshalRequest, opts ...grpc.CallOption) (*BotResponseUnmarshalResponse, error)
 }
 
@@ -36,6 +40,35 @@ type handlerClient struct {
 func NewHandlerClient(cc grpc.ClientConnInterface) HandlerClient {
 	return &handlerClient{cc}
 }
+
+func (c *handlerClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, Handler_Check_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *handlerClient) Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[HealthCheckResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Handler_ServiceDesc.Streams[0], Handler_Watch_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[HealthCheckRequest, HealthCheckResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Handler_WatchClient = grpc.ServerStreamingClient[HealthCheckResponse]
 
 func (c *handlerClient) BotResponseUnmarshal(ctx context.Context, in *BotResponseUnmarshalRequest, opts ...grpc.CallOption) (*BotResponseUnmarshalResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -51,6 +84,8 @@ func (c *handlerClient) BotResponseUnmarshal(ctx context.Context, in *BotRespons
 // All implementations must embed UnimplementedHandlerServer
 // for forward compatibility.
 type HandlerServer interface {
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	Watch(*HealthCheckRequest, grpc.ServerStreamingServer[HealthCheckResponse]) error
 	BotResponseUnmarshal(context.Context, *BotResponseUnmarshalRequest) (*BotResponseUnmarshalResponse, error)
 	mustEmbedUnimplementedHandlerServer()
 }
@@ -62,6 +97,12 @@ type HandlerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedHandlerServer struct{}
 
+func (UnimplementedHandlerServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (UnimplementedHandlerServer) Watch(*HealthCheckRequest, grpc.ServerStreamingServer[HealthCheckResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
+}
 func (UnimplementedHandlerServer) BotResponseUnmarshal(context.Context, *BotResponseUnmarshalRequest) (*BotResponseUnmarshalResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BotResponseUnmarshal not implemented")
 }
@@ -85,6 +126,35 @@ func RegisterHandlerServer(s grpc.ServiceRegistrar, srv HandlerServer) {
 	}
 	s.RegisterService(&Handler_ServiceDesc, srv)
 }
+
+func _Handler_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HandlerServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Handler_Check_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HandlerServer).Check(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Handler_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(HealthCheckRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(HandlerServer).Watch(m, &grpc.GenericServerStream[HealthCheckRequest, HealthCheckResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Handler_WatchServer = grpc.ServerStreamingServer[HealthCheckResponse]
 
 func _Handler_BotResponseUnmarshal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BotResponseUnmarshalRequest)
@@ -112,10 +182,20 @@ var Handler_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*HandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Check",
+			Handler:    _Handler_Check_Handler,
+		},
+		{
 			MethodName: "BotResponseUnmarshal",
 			Handler:    _Handler_BotResponseUnmarshal_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Watch",
+			Handler:       _Handler_Watch_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "handler.proto",
 }

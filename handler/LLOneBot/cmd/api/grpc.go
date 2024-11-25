@@ -70,3 +70,13 @@ func (*handlerService) BotResponseUnmarshal(ctx context.Context, req *handler.Bo
 		return x.data, nil
 	}
 }
+
+func (*handlerService) Check(ctx context.Context, req *handler.HealthCheckRequest) (*handler.HealthCheckResponse, error) {
+	return &handler.HealthCheckResponse{
+		Status: handler.HealthCheckResponse_SERVING,
+	}, nil
+}
+
+func (*handlerService) Watch(req *handler.HealthCheckRequest, stream grpc.ServerStreamingServer[handler.HealthCheckResponse]) error {
+	return errors.ErrUnsupported
+}
