@@ -38,6 +38,10 @@ const (
 )
 
 type (
+	JSON_cmdEvent_Echo struct {
+		Echo string `json:"echo"`
+	}
+
 	JSON_cmdEvent_GetFriendList struct {
 		Status  string                              `json:"status"`
 		Retcode int                                 `json:"retcode"`

@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/nanachi-sh/susubot-code/handler/protos/handler"
-	"github.com/nanachi-sh/susubot-code/handler/response"
+	response_pb "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/response"
+	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/response"
 	"google.golang.org/grpc"
 )
 
-type handlerService struct {
-	handler.HandlerServer
+type responseService struct {
+	response_pb.ResponseHandlerServer
 }
 
 func GRPCServe() error {
@@ -33,15 +33,15 @@ func GRPCServe() error {
 	if err != nil {
 		return err
 	}
-	hs := new(handlerService)
-	s := grpc.NewServer()
-	s.RegisterService(&handler.Handler_ServiceDesc, hs)
-	return s.Serve(l)
+	respS := new(responseService)
+	gs := grpc.NewServer()
+	response_pb.RegisterResponseHandlerServer(gs, respS)
+	return gs.Serve(l)
 }
 
-func (*handlerService) BotResponseUnmarshal(ctx context.Context, req *handler.BotResponseUnmarshalRequest) (*handler.BotResponseUnmarshalResponse, error) {
+func (*responseService) BotResponseUnmarshal(ctx context.Context, req *response_pb.BotResponseUnmarshalRequest) (*response_pb.BotResponseUnmarshalResponse, error) {
 	type d struct {
-		data *handler.BotResponseUnmarshalResponse
+		data *response_pb.BotResponseUnmarshalResponse
 		err  error
 	}
 	ch := make(chan *d, 1)
@@ -69,14 +69,4 @@ func (*handlerService) BotResponseUnmarshal(ctx context.Context, req *handler.Bo
 		}
 		return x.data, nil
 	}
-}
-
-func (*handlerService) Check(ctx context.Context, req *handler.HealthCheckRequest) (*handler.HealthCheckResponse, error) {
-	return &handler.HealthCheckResponse{
-		Status: handler.HealthCheckResponse_SERVING,
-	}, nil
-}
-
-func (*handlerService) Watch(req *handler.HealthCheckRequest, stream grpc.ServerStreamingServer[handler.HealthCheckResponse]) error {
-	return errors.ErrUnsupported
 }

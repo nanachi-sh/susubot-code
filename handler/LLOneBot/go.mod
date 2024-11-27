@@ -1,4 +1,4 @@
-module github.com/nanachi-sh/susubot-code/handler
+module github.com/nanachi-sh/susubot-code/handler/LLOneBot
 
 go 1.23.0
 

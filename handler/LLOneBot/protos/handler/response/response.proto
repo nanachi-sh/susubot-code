@@ -1,0 +1,238 @@
+syntax = "proto3";
+
+import "handler/LLOneBot/protos/handler/define.proto";
+
+option go_package = "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/response";
+
+service ResponseHandler {
+    rpc BotResponseUnmarshal (BotResponseUnmarshalRequest) returns (BotResponseUnmarshalResponse);
+}
+
+message Response_Message { //消息事件
+    optional define.MessageType Type = 1;
+    optional Response_Message_Private Private = 2;
+    optional Response_Message_Group Group = 3;
+}
+message Response_Message_Private {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    repeated define.MessageChainObject MessageChain = 6;
+}
+message Response_Message_Group {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    string GroupId = 6;
+    optional define.GroupRole SenderRole = 7;
+    optional define.GroupRole BotRole = 8;
+    repeated define.MessageChainObject MessageChain = 9;
+}
+
+message Response_QQEvent {   //QQ事件
+    optional define.QQEventType Type = 1;
+    optional Response_QQEvent_GroupAdd GroupAdd = 2;
+    optional Response_QQEvent_GroupRemove GroupRemove = 3;
+    optional Response_QQEvent_GroupMute GroupMute = 4;
+    optional Response_QQEvent_GroupUnmute GroupUnmute = 5;
+    optional Response_QQEvent_MessageRecall MessageRecall = 6;
+}
+message Response_QQEvent_GroupAdd {
+    optional define.QQEventType_GroupAddType Type = 1;
+    optional Response_QQEvent_GroupAdd_Direct Direct = 2;
+    optional Response_QQEvent_GroupAdd_Invite Invite = 3;
+}
+message Response_QQEvent_GroupAdd_Direct {
+    string JoinerId = 1;    //新加入成员Id
+    optional string JoinerName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string ApproverId = 6;
+    optional string ApproverName = 7;
+}
+message Response_QQEvent_GroupAdd_Invite {
+    string JoinerId = 1;    //新加入成员Id
+    optional string JoinerName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string InviterId = 6;   //邀请者Id
+    optional string InviterName = 7;
+    string ApproverId = 8;  //审核者Id
+    optional string ApproverName = 9;
+}
+
+message Response_QQEvent_GroupRemove {
+    optional define.QQEventType_GroupRemoveType Type = 1;
+    optional Response_QQEvent_GroupRemove_Manual Manual = 2;
+    optional Response_QQEvent_GroupRemove_Kick Kick = 3;
+}
+message Response_QQEvent_GroupRemove_Manual {
+    string QuiterId = 1;    //退出者Id
+    optional string QuiterName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+}
+message Response_QQEvent_GroupRemove_Kick {
+    string TargetId = 1;    //被踢出者Id
+    optional string TargetName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string OperatorId = 6;
+    optional string OperatorName = 7;
+}
+
+message Response_QQEvent_GroupMute {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    int32 Duration = 6;
+    string GroupId = 7;
+    string BotId = 8;
+}
+
+message Response_QQEvent_GroupUnmute {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    string GroupId = 6;
+    string BotId = 7;
+}
+
+message Response_QQEvent_MessageRecall {
+    optional define.QQEventType_MessageRecallType Type = 1;
+    optional Response_QQEvent_MessageRecall_Group Group = 2;
+    optional Response_QQEvent_MessageRecall_Private Private = 3;
+}
+message Response_QQEvent_MessageRecall_Group {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    string GroupId = 6;
+    string BotId = 7;
+    string MessageId = 8;
+}
+message Response_QQEvent_MessageRecall_Private {
+    string RecallerId = 1;
+    optional string RecallerName = 2;
+    int64 Timestamp = 3;
+    string BotId = 4;
+    string MessageId = 5;
+}
+
+message Response_CmdEvent {
+    optional define.CmdEventType Type = 1;
+    string Echo = 2;
+    optional Response_CmdEvent_GetGroupInfo GetGroupInfo = 3;
+    optional Response_CmdEvent_GetGroupMemberInfo GetGroupMemberInfo = 4;
+    optional Response_CmdEvent_GetMessage GetMessage = 5;
+    optional Response_CmdEvent_GetFriendList GetFriendList = 6;
+}
+message Response_CmdEvent_GetGroupInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string GroupId = 3;
+    string GroupName = 4;
+    int32 MemberMax = 5;
+    int32 MemberNow = 6;
+}
+message Response_CmdEvent_GetGroupMemberInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string GroupId = 3;
+    string UserId = 4;
+    string UserName = 5;
+    optional string Card = 6;   //群内自定义名称
+    optional int64 JoinTime = 7;
+    optional int64 LastActiveTime = 8;  //上次操作时间
+    optional int64 LastSentTime = 9;    //上次发送信息时间
+    define.GroupRole Role = 10;
+}
+message Response_CmdEvent_GetMessage {
+    bool OK = 1;
+    optional string Retcode = 2;
+    optional Response_CmdEvent_Message Message = 3;
+}
+message Response_CmdEvent_Message {
+    optional define.MessageType Type = 1;
+    optional Response_CmdEvent_Message_Private Private = 2;
+    optional Response_CmdEvent_Message_Group Group = 3;
+}
+message Response_CmdEvent_Message_Private {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    repeated define.MessageChainObject MessageChain = 6;
+}
+message Response_CmdEvent_Message_Group {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    string GroupId = 6;
+    optional define.GroupRole SenderRole = 7;
+    optional define.GroupRole BotRole = 8;
+    repeated define.MessageChainObject MessageChain = 9;
+}
+message Response_CmdEvent_GetFriendList {
+    message FriendInfo {
+        string UserName = 1;
+        string UserId = 2;
+        optional string Remark = 3;
+    }
+
+    bool OK = 1;
+    optional string Retcode = 2;
+    repeated FriendInfo Friends = 3;
+}
+
+message Response_BotEvent {
+    optional define.BotEventType Type = 1;
+    optional Response_BotEvent_HeartPacket HeartPacket = 2;
+    optional Response_BotEvent_Connected Connected = 3;
+}
+message Response_BotEvent_HeartPacket {
+    message status {
+        bool Online = 1;
+        bool Good = 2;
+    }
+
+    int64 Timestamp = 1;
+    string BotId = 2;
+    int64 Interval = 3; //每隔多久发送一次心跳包(ms)
+    status Status = 4;
+}
+message Response_BotEvent_Connected {
+    int64 Timestamp = 1;
+    string BotId = 2;
+}
+
+message BotResponseUnmarshalRequest {
+    bytes Buf = 1;
+    optional define.ResponseType Type = 2;
+    optional define.CmdEventType CmdEventType = 3; //ResponseType == CmdEvent need
+}
+
+message BotResponseUnmarshalResponse {
+    optional define.ResponseType Type = 1;
+    optional Response_Message Message = 2;
+    optional Response_QQEvent QQEvent = 3;
+    optional Response_CmdEvent CmdEvent = 4;
+    optional Response_BotEvent BotEvent = 5;
+}

@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package define;
+
+option go_package = "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler";
+
+enum ResponseType {     //机器人响应类型
+    ResponseType_Message = 0;     //消息事件
+    ResponseType_QQEvent = 1;     //QQ事件
+    ResponseType_CmdEvent = 2;    //命令响应
+    ResponseType_BotEvent = 3;    //机器人事件
+}
+
+enum MessageType {      //消息事件类型
+    MessageType_Private = 0;     //私聊消息
+    MessageType_Group = 1;       //群组消息
+}
+
+enum MessageChainType {
+    MessageChainType_Text = 0;   //纯文本
+    MessageChainType_Image = 1;  //图片 or 动图
+    MessageChainType_Voice = 2;  //语音
+    MessageChainType_Video = 3;  //视频
+    MessageChainType_At = 4;     //At
+    MessageChainType_Reply = 5;  //回复
+}
+message MessageChainObject {
+    optional MessageChainType Type = 1;
+    optional MessageChain_Text Text = 2;
+    optional MessageChain_Image Image = 3;
+    optional MessageChain_Voice Voice = 4;
+    optional MessageChain_Video Video = 5;
+    optional MessageChain_At At = 6;
+    optional MessageChain_Reply Reply = 7;
+}
+message MessageChain_Text {
+    string Text = 1;
+}
+message MessageChain_Image {
+    string URL = 1;
+}
+message MessageChain_Voice {
+    string URL = 1;
+}
+message MessageChain_Video {
+    string URL = 1;
+}
+message MessageChain_At {
+    string TargetId = 1;
+}
+message MessageChain_Reply {
+    string MessageId = 1;
+}
+
+enum QQEventType {      //QQ事件类型
+    QQEventType_GroupAdd = 0;    //群聊成员增加
+    QQEventType_GroupRemove = 1; //群聊成员减少
+    QQEventType_GroupMute = 2;   //群聊成员被禁言
+    QQEventType_GroupUnmute = 3; //群聊成员被解除禁言
+    QQEventType_MessageRecall = 4;   //消息撤回
+}
+enum QQEventType_GroupAddType {
+    QQEventType_GroupAddType_Direct = 0; //直接加入群聊
+    QQEventType_GroupAddType_Invite = 1; //群聊成员邀请加入
+}
+enum QQEventType_GroupRemoveType {
+    QQEventType_GroupRemoveType_Manual = 0; //主动退出群聊
+    QQEventType_GroupRemoveType_Kick = 1;   //被踢出群聊
+}
+enum QQEventType_MessageRecallType {
+    QQEventType_MessageRecallType_Group = 0;  //群聊消息撤回
+    QQEventType_MessageRecallType_Private = 1;    //私聊消息撤回
+}
+
+enum CmdEventType {   //命令响应类型
+    CmdEventType_GetGroupInfo = 0;   //获取指定群聊信息
+    CmdEventType_GetGroupMemberInfo = 1; //获取指定群聊指定成员信息
+    CmdEventType_GetMessage = 2; //获取消息事件(通过MessageId)
+    CmdEventType_GetFriendList = 3;  //获取所有好友信息
+}
+
+enum BotEventType {     //机器人事件类型
+    BotEventType_HeartPacket = 0;
+    BotEventType_Connected = 1;
+}
+
+enum GroupRole {     //群组成员身份
+    GroupRole_Member = 0;   //普通成员
+    GroupRole_Admin = 1;    //管理员
+    GroupRole_Owner = 2;    //群主
+}

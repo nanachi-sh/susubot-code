@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+import "handler/LLOneBot/protos/handler/define.proto";
+
+option go_package = "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/request";
+
+service RequestHandler {
+    rpc BotRequestMarshal (BotRequestMarshalRequest) returns (BotRequestMarshalResponse);
+}
+
+enum RequestType {
+    RequestType_SendGroupMessage = 0;
+    RequestType_SendFriendMessage = 1;
+    RequestType_MessageRecall = 2;
+    RequestType_GetMessage = 3;
+    RequestType_GetGroupInfo = 4;
+    RequestType_GetGroupMemberInfo = 5;
+    RequestType_GetFriendList = 6;
+}
+
+message Request_SendGroupMessage {
+    string GroupId = 1;
+    repeated define.MessageChainObject MessageChain = 2;
+}
+
+message Request_SendFriendMessage {
+    string FriendId = 1;
+    repeated define.MessageChainObject MessageChain = 2;
+}
+
+message Request_MessageRecall {
+    string MessageId = 1;
+}
+
+message Request_GetMessage {
+    string MessageId = 1;
+}
+
+message Request_GetGroupInfo {
+    string GroupId = 1;
+}
+
+message Request_GetGroupMemberInfo {
+    string GroupId = 1;
+    string UserId = 2;
+}
+
+message Request_GetFriendList {}
+
+message BotRequestMarshalRequest {
+    RequestType Type = 1;
+    optional string Echo = 2;
+    optional Request_SendGroupMessage SendGroupMessage = 3;
+    optional Request_SendFriendMessage SendFriendMessage = 4;
+    optional Request_MessageRecall MessageRecall = 5;
+    optional Request_GetMessage GetMessage = 6;
+    optional Request_GetGroupInfo GetGroupInfo = 7;
+    optional Request_GetGroupMemberInfo GetGroupMemberInfo = 8;
+    optional Request_GetFriendList GetFriendList = 9;
+}
+
+message BotRequestMarshalResponse {
+    bytes Buf = 1;
+}
