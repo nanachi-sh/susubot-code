@@ -151,13 +151,13 @@ func (c *Connector) readAndwrite() error {
 
 // 幂等
 func (c *Connector) close() error {
+	c.closeLock.Lock()
+	defer c.closeLock.Unlock()
 	select {
 	case <-c.closed:
 		return errors.New("Closed")
 	default:
 	}
-	c.closeLock.Lock()
-	defer c.closeLock.Unlock()
 	defer func() {
 		close(c.closed)
 		c.conn = nil
