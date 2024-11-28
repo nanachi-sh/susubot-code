@@ -168,6 +168,7 @@ func (c *Connector) readAndwrite() error {
 }
 
 func (c *Connector) readReset() {
+	c.now = context.WithoutCancel(c.now)
 	c.now, c.now_cancel = context.WithCancel(c.now)
 }
 
