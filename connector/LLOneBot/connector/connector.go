@@ -134,18 +134,24 @@ func (c *Connector) read() ([]byte, error) {
 }
 
 func (c *Connector) readAndwrite() error {
+	fmt.Println("reading")
 	buf, err := c.read()
 	if err != nil {
 		return err
 	}
+	fmt.Println("readed")
 	//确保读取返回已结束
+	fmt.Println("check reting")
 	select {
 	case <-c.now.Done(): //若正在返回则等待
+		fmt.Println("reting, wait")
 		c.readLock.Lock()
 		c.readLock.Unlock()
 	default:
 	}
+	fmt.Println("write")
 	c.now = context.WithValue(c.now, responseBuf{}, buf)
+	fmt.Println("cancel")
 	c.now_cancel()
 	return nil
 }
