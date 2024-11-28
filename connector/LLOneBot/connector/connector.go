@@ -41,6 +41,11 @@ func New() *Connector {
 }
 
 func (c *Connector) Connect(req *connector.ConnectRequest) error {
+	select {
+	case <-c.closed:
+	default:
+		return errors.New("已连接服务器")
+	}
 	dialer := &websocket.Dialer{}
 	addr := req.Addr
 	port := req.Port
@@ -130,10 +135,10 @@ func (c *Connector) close() error {
 	}
 	c.closeLock.Lock()
 	defer c.closeLock.Unlock()
+	close(c.closed)
 	if err := c.conn.Close(); err != nil {
 		return err
 	}
-	close(c.closed)
 	return nil
 }
 
