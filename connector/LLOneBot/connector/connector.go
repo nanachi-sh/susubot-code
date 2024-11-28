@@ -44,6 +44,9 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	dialer := &websocket.Dialer{}
 	addr := req.Addr
 	port := req.Port
+	if port <= 0 || port > 65535 {
+		return errors.New("服务器端口范围不正确")
+	}
 	if addr == "" {
 		return errors.New("服务器地址为空")
 	}
