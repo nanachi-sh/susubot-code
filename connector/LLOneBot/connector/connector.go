@@ -129,6 +129,7 @@ func (c *Connector) read() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(string(buf))
 	return buf, nil
 }
 
