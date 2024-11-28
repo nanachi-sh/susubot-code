@@ -84,17 +84,22 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if req.Token != nil {
 		headers.Add("Authorization", "Bearer "+*req.Token)
 	}
+	fmt.Println("dial")
 	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
 		return err
 	}
+	fmt.Println("var")
 	c.conn = conn
 	c.closed = make(chan struct{})
+	fmt.Println("read check")
 	if err := c.readAndwrite(); err != nil {
 		go c.close()
 		return err
 	}
+	fmt.Println("reset")
 	c.readReset()
+	fmt.Println("run RTE")
 	go c.readToEnd()
 	return nil
 }
