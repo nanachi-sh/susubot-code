@@ -84,10 +84,11 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if req.Token != nil {
 		headers.Add("Authorization", "Bearer "+*req.Token)
 	}
-	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
+	conn, resp, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
 		return err
 	}
+	fmt.Println(resp.Header)
 	c.conn = conn
 	c.closed = make(chan struct{})
 	go c.readToEnd()
@@ -97,17 +98,13 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 // 连接后调用，连接结束或发生错误自行退出
 func (c *Connector) readToEnd() {
 	for {
-		mt, r, err := c.conn.NextReader()
+		_, r, err := c.conn.NextReader()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			fmt.Fprintf(os.Stdout, "MessageType: %v\n", mt)
-			switch err {
-			case websocket.ErrBadHandshake, websocket.ErrCloseSent:
-				if err := c.close(); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-				}
-				return
+			if err := c.close(); err != nil {
+				fmt.Fprintln(os.Stderr, err)
 			}
+			return
 		}
 		buf, err := io.ReadAll(r)
 		if err != nil {
