@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "github.com/nanachi-sh/susubot-code/connector/LLOneBot/protos/connector";
+
+service Connector {
+    rpc Connect (ConnectRequest) returns (ConnectResponse);
+    rpc Read (Empty) returns (stream ReadResponse);
+    rpc Write (WriteRequest) returns (Empty);
+    rpc Close (Empty) returns (CloseResponse);
+}
+
+message Empty{}
+
+message ConnectRequest {
+    string Addr = 1;
+    int32 Port = 2;
+    optional string Token = 3;
+}
+
+message ConnectResponse {
+    bool OK = 1;
+}
+
+message ReadResponse {
+    bool isClose = 1;
+    bytes buf = 2;
+}
+
+message WriteRequest {
+    bytes buf = 1;
+}
+
+message CloseResponse {
+    bool OK = 1;
+}
