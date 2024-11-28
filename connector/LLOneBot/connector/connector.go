@@ -79,7 +79,7 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if req.Token != nil {
 		headers.Add("Authorization", "Bearer "+*req.Token)
 	}
-	conn, _, err := dialer.DialContext(context.Background(), c.addr.String(), headers)
+	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
 		return err
 	}
