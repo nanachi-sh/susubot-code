@@ -88,11 +88,12 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if err != nil {
 		return err
 	}
-	if err := c.readAndwrite(); err != nil {
-		return err
-	}
 	c.conn = conn
 	c.closed = make(chan struct{})
+	if err := c.readAndwrite(); err != nil {
+		go c.close()
+		return err
+	}
 	go c.readToEnd()
 	return nil
 }
@@ -158,6 +159,8 @@ func (c *Connector) close() error {
 	c.closeLock.Lock()
 	defer c.closeLock.Unlock()
 	close(c.closed)
+	c.conn = nil
+	c.addr = nil
 	if err := c.conn.Close(); err != nil {
 		return err
 	}
