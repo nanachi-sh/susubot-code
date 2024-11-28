@@ -94,6 +94,7 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 		go c.close()
 		return err
 	}
+	c.readReset()
 	go c.readToEnd()
 	return nil
 }
@@ -161,6 +162,10 @@ func (c *Connector) readAndwrite() error {
 	return nil
 }
 
+func (c *Connector) readReset() {
+	c.now = context.WithoutCancel(c.now)
+}
+
 // 幂等
 func (c *Connector) close() error {
 	c.closeLock.Lock()
@@ -193,7 +198,7 @@ func (c *Connector) Read() ([]byte, error) {
 		select {
 		case <-c.now.Done():
 			fmt.Println("is frist wait")
-			c.now = context.WithoutCancel(c.now)
+			c.readReset()
 		default:
 		}
 		c.readLock.Unlock()
