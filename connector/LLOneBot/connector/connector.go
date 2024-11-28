@@ -84,22 +84,17 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if req.Token != nil {
 		headers.Add("Authorization", "Bearer "+*req.Token)
 	}
-	fmt.Println("dial")
 	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
 		return err
 	}
-	fmt.Println("var")
 	c.conn = conn
 	c.closed = make(chan struct{})
-	fmt.Println("read check")
 	if err := c.readAndwrite(); err != nil {
 		go c.close()
 		return err
 	}
-	fmt.Println("reset")
 	c.readReset()
-	fmt.Println("run RTE")
 	go c.readToEnd()
 	return nil
 }
@@ -107,14 +102,11 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 // 连接后调用，连接结束或发生错误自行退出
 func (c *Connector) readToEnd() {
 	for {
-		fmt.Println("readToEnd for start")
 		select {
 		case <-c.closed:
 			return
 		default:
 		}
-		fmt.Println("select out")
-		fmt.Println("read and write ing")
 		if err := c.readAndwrite(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			if err := c.close(); err != nil {
@@ -122,7 +114,6 @@ func (c *Connector) readToEnd() {
 			}
 			return
 		}
-		fmt.Println("rte for next")
 	}
 }
 
@@ -140,29 +131,22 @@ func (c *Connector) read() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(buf))
 	return buf, nil
 }
 
 func (c *Connector) readAndwrite() error {
-	fmt.Println("reading")
 	buf, err := c.read()
 	if err != nil {
 		return err
 	}
-	fmt.Println("readed")
 	//确保读取返回已结束
-	fmt.Println("check reting")
 	select {
 	case <-c.now.Done(): //若正在返回则等待
-		fmt.Println("reting, wait")
 		c.readLock.Lock()
 		c.readLock.Unlock()
 	default:
 	}
-	fmt.Println("write")
 	c.now = context.WithValue(c.now, responseBuf{}, buf)
-	fmt.Println("cancel")
 	c.now_cancel()
 	return nil
 }
@@ -193,36 +177,26 @@ func (c *Connector) close() error {
 }
 
 func (c *Connector) Read() ([]byte, error) {
-	fmt.Println("enter read")
 	//检查是否在返回过程中
-	fmt.Println("check reting")
 	select {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		fmt.Println("reting")
 		c.readLock.Lock()
 		//第一个通过等待队列的负责重置ctx
 		select {
 		case <-c.now.Done():
-			fmt.Println("is frist wait")
 			c.readReset()
 		default:
 		}
 		c.readLock.Unlock()
-		fmt.Println("exit wait")
 	default: //若不通则进入阻塞队列
 	}
-	fmt.Println("no reting")
 	//
-	fmt.Println("enter block queue")
 	c.readLock.RLock()
 	defer c.readLock.RUnlock()
-	fmt.Println("block")
 	select {
 	case <-c.closed:
-		fmt.Println("is close")
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
-		fmt.Println("exit block")
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
