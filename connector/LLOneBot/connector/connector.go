@@ -158,9 +158,11 @@ func (c *Connector) close() error {
 	}
 	c.closeLock.Lock()
 	defer c.closeLock.Unlock()
-	close(c.closed)
-	c.conn = nil
-	c.addr = nil
+	defer func() {
+		close(c.closed)
+		c.conn = nil
+		c.addr = nil
+	}()
 	if err := c.conn.Close(); err != nil {
 		return err
 	}
