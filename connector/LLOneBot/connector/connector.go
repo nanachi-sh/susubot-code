@@ -101,17 +101,22 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 // 连接后调用，连接结束或发生错误自行退出
 func (c *Connector) readToEnd() {
 	for {
+		fmt.Println("readToEnd for start")
 		select {
 		case <-c.closed:
 			return
 		default:
 		}
+		fmt.Println("select out")
+		fmt.Println("read and write ing")
 		if err := c.readAndwrite(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			if err := c.close(); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
 			return
 		}
+		fmt.Println("rte for next")
 	}
 }
 
