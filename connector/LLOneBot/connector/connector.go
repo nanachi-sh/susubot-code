@@ -84,11 +84,13 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	if req.Token != nil {
 		headers.Add("Authorization", "Bearer "+*req.Token)
 	}
-	conn, resp, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
+	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp.Header)
+	if err := c.readAndwrite(); err != nil {
+		return err
+	}
 	c.conn = conn
 	c.closed = make(chan struct{})
 	go c.readToEnd()
@@ -98,29 +100,52 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 // 连接后调用，连接结束或发生错误自行退出
 func (c *Connector) readToEnd() {
 	for {
-		_, r, err := c.conn.NextReader()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+		select {
+		case <-c.closed:
+			return
+		default:
+		}
+		if err := c.readAndwrite(); err != nil {
 			if err := c.close(); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
 			return
 		}
-		buf, err := io.ReadAll(r)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			continue
-		}
-		//确保读取返回已结束
-		select {
-		case <-c.now.Done(): //若正在返回则等待
-			c.readLock.Lock()
-			c.readLock.Unlock()
-		default:
-		}
-		c.now = context.WithValue(c.now, responseBuf{}, buf)
-		c.now_cancel()
 	}
+}
+
+func (c *Connector) read() ([]byte, error) {
+	select {
+	case <-c.closed:
+		return nil, errors.New("服务器已断开或未连接")
+	default:
+	}
+	_, r, err := c.conn.NextReader()
+	if err != nil {
+		return nil, err
+	}
+	buf, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (c *Connector) readAndwrite() error {
+	buf, err := c.read()
+	if err != nil {
+		return err
+	}
+	//确保读取返回已结束
+	select {
+	case <-c.now.Done(): //若正在返回则等待
+		c.readLock.Lock()
+		c.readLock.Unlock()
+	default:
+	}
+	c.now = context.WithValue(c.now, responseBuf{}, buf)
+	c.now_cancel()
+	return nil
 }
 
 // 幂等
