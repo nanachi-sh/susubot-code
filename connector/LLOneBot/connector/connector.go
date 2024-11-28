@@ -178,25 +178,33 @@ func (c *Connector) close() error {
 
 func (c *Connector) Read() ([]byte, error) {
 	//检查是否在返回过程中
+	fmt.Println("check reting")
 	select {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
+		fmt.Println("reting")
 		c.readLock.Lock()
 		//第一个通过等待队列的负责重置ctx
 		select {
 		case <-c.now.Done():
+			fmt.Println("is frist")
 			c.readReset()
 		default:
 		}
 		c.readLock.Unlock()
+		fmt.Println("exit reting")
 	default: //若不通则进入阻塞队列
 	}
 	//
+	fmt.Println("rlock")
 	c.readLock.RLock()
 	defer c.readLock.RUnlock()
+	fmt.Println("block")
 	select {
 	case <-c.closed:
+		fmt.Println("closed")
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
+		fmt.Println("recv")
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
