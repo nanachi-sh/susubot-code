@@ -203,13 +203,6 @@ func (c *Connector) Read() ([]byte, error) {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
 		fmt.Printf("%v: reting\n", time.Now().Format("2006-01-02 15:04:05"))
 		c.readLock.Lock()
-		//第一个通过等待队列的负责重置ctx
-		select {
-		case <-c.now.Done():
-			fmt.Printf("%v: is frist\n", time.Now().Format("2006-01-02 15:04:05"))
-			c.readReset()
-		default:
-		}
 		c.readLock.Unlock()
 		fmt.Printf("%v: exit reting\n", time.Now().Format("2006-01-02 15:04:05"))
 	default: //若不通则进入阻塞队列
@@ -217,6 +210,18 @@ func (c *Connector) Read() ([]byte, error) {
 	//
 	fmt.Printf("%v: rlock\n", time.Now().Format("2006-01-02 15:04:05"))
 	c.readLock.RLock()
+	//检查是否为最后一个
+	defer func() {
+		select {
+		case <-c.closed:
+			return
+		default:
+			if c.readLock.TryLock() {
+				fmt.Println("is last")
+				c.readReset()
+			}
+		}
+	}()
 	defer c.readLock.RUnlock()
 	fmt.Printf("%v: block\n", time.Now().Format("2006-01-02 15:04:05"))
 	select {
@@ -224,7 +229,8 @@ func (c *Connector) Read() ([]byte, error) {
 		fmt.Printf("%v: closed\n", time.Now().Format("2006-01-02 15:04:05"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
-		fmt.Printf("%v: recv\n", time.Now().Format("2006-01-02 15:04:05"))
+
+		fmt.Printf("%v: recv\n\n", time.Now().Format("2006-01-02 15:04:05"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
