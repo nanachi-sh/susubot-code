@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand/v2"
 	"net"
 	"net/http"
 	"net/netip"
@@ -33,13 +32,13 @@ type responseBuf struct{}
 func New() *Connector {
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan struct{})
-	// close(ch)
+	close(ch)
 	c := &Connector{
 		now:        ctx,
 		now_cancel: cancel,
 		closed:     ch,
 	}
-	go c.test()
+	// go c.test()
 	return c
 }
 
@@ -163,18 +162,18 @@ func (c *Connector) readReset() {
 	c.now, c.now_cancel = context.WithCancel(c.now)
 }
 
-func (c *Connector) test() {
-	for {
-		time.Sleep(time.Second * 2)
-		select {
-		case <-c.now.Done(): //若正在返回则等待
-			c.readLock.Lock()
-			c.readLock.Unlock()
-		default:
-		}
-		c.write([]byte{byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256))})
-	}
-}
+// func (c *Connector) test() {
+// 	for {
+// 		time.Sleep(time.Second * 2)
+// 		select {
+// 		case <-c.now.Done(): //若正在返回则等待
+// 			c.readLock.Lock()
+// 			c.readLock.Unlock()
+// 		default:
+// 		}
+// 		c.write([]byte{byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256))})
+// 	}
+// }
 
 // 幂等
 func (c *Connector) close() error {
