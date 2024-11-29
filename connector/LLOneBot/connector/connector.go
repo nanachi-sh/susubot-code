@@ -23,6 +23,7 @@ type Connector struct {
 	now        context.Context
 	now_cancel context.CancelFunc
 	readLock   sync.RWMutex
+	writeLock  sync.Mutex
 	closeLock  sync.Mutex
 	closed     chan struct{}
 	reting     int
@@ -251,6 +252,8 @@ func (c *Connector) readLast() []byte {
 }
 
 func (c *Connector) Write(buf []byte) error {
+	c.writeLock.Lock()
+	defer c.writeLock.Unlock()
 	select {
 	case <-c.closed:
 		return errors.New("连接已断开或未连接")
