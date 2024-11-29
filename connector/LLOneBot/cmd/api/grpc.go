@@ -76,7 +76,7 @@ func (cs *connectorService) Connect(ctx context.Context, req *connector_pb.Conne
 }
 
 func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStreamingServer[connector_pb.ReadResponse]) error {
-	now := time.Now().UnixMilli()
+	now := time.Now().UnixMicro()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	ch := make(chan []byte)
