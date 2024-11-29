@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/nanachi-sh/susubot-code/connector/LLOneBot/connector"
 	connector_pb "github.com/nanachi-sh/susubot-code/connector/LLOneBot/protos/connector"
@@ -73,8 +74,9 @@ func (cs *connectorService) Connect(ctx context.Context, req *connector_pb.Conne
 }
 
 func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStreamingServer[connector_pb.ReadResponse]) error {
+	now := time.Now().Unix()
 	for {
-		buf, err := cs.connectorH.Read()
+		buf, err := cs.connectorH.Read(now)
 		if err != nil {
 			return err
 		}
