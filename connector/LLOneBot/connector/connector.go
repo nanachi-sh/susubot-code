@@ -22,7 +22,8 @@ type Connector struct {
 	conn       *websocket.Conn
 	now        context.Context
 	now_cancel context.CancelFunc
-	readLock   sync.RWMutex
+	readBlock  sync.RWMutex
+	readWait   sync.RWMutex
 	writeLock  sync.Mutex
 	closeLock  sync.Mutex
 	closed     chan struct{}
@@ -145,24 +146,24 @@ func (c *Connector) write(buf []byte) {
 }
 
 func (c *Connector) readAndwrite() error {
-	fmt.Printf("%v: reading\n", time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v: reading\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	buf, err := c.read()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v: readed\n", time.Now().Format("2006-01-02 15:04:05.000"))
-	fmt.Printf("%v: Response: %v\n", time.Now().Format("2006-01-02 15:04:05.000"), string(buf))
+	fmt.Printf("%v: readed\n", time.Now().Format("2006-01-02 15:04:05.000000"))
+	fmt.Printf("%v: Response: %v\n", time.Now().Format("2006-01-02 15:04:05.000000"), string(buf))
 	//确保读取返回已结束
 	select {
 	case <-c.now.Done(): //若正在返回则等待
-		fmt.Printf("%v: write wLock\n", time.Now().Format("2006-01-02 15:04:05.000"))
-		c.readLock.Lock()
-		c.readLock.Unlock()
-		fmt.Printf("%v: write wUnlock\n", time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v: write wLock\n", time.Now().Format("2006-01-02 15:04:05.000000"))
+		c.readWait.RLock()
+		c.readWait.RUnlock()
+		fmt.Printf("%v: write wUnlock\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 
 	default:
 	}
-	fmt.Printf("%v: write\n", time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v: write\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	c.write(buf)
 	return nil
 }
@@ -207,39 +208,40 @@ func (c *Connector) close() error {
 
 func (c *Connector) Read(a int64) ([]byte, error) {
 	//检查是否在返回过程中
-	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	select {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-		c.readLock.Lock()
-		c.readLock.Unlock()
-		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+		//进入等待队列
+		c.readWait.RLock()
+		c.readWait.RUnlock()
+		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	default: //若不通则进入阻塞队列
 	}
 	//
-	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-	c.readLock.RLock()
-	defer c.readLock.RUnlock()
+	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+	//进入阻塞队列
+	c.readBlock.RLock()
+	defer c.readBlock.RUnlock()
+	//第一个会话负责关闭等待队列
+	c.readWait.TryLock()
 	//检查是否为最后一个
 	defer func() {
-		go func() {
-			//避免重置过程中通过新会话
-			c.readLock.Lock()
-			if c.reting == 0 {
-				c.readReset()
-			}
-			c.readLock.Unlock()
-		}()
+		if c.reting == 0 {
+			c.readReset()
+			//重置后关闭等待队列，会话退出等待队列
+			c.readWait.Unlock()
+		}
 	}()
 	c.reting++
-	fmt.Printf("%v %v: Block\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: Block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	select {
 	case <-c.closed:
-		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
 		defer func() { c.reting-- }()
-		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
@@ -277,4 +279,36 @@ func (c *Connector) Write(buf []byte) error {
 
 func (c *Connector) Close() error {
 	return c.close()
+}
+
+func (c *Connector) Read1(a int64) ([]byte, error) {
+	//检查是否在返回过程中
+	select {
+	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
+		//进入等待队列
+		c.readWait.RLock()
+		c.readWait.RUnlock()
+	default: //若不通则进入阻塞队列
+	}
+	//进入阻塞队列
+	c.readBlock.RLock()
+	defer c.readBlock.RUnlock()
+	//第一个会话负责关闭等待队列
+	c.readWait.TryLock()
+	//检查是否为最后一个
+	defer func() {
+		if c.reting == 0 {
+			c.readReset()
+			//重置后关闭等待队列，会话退出等待队列
+			c.readWait.Unlock()
+		}
+	}()
+	c.reting++
+	select {
+	case <-c.closed:
+		return nil, nil
+	case <-c.now.Done():
+		defer func() { c.reting-- }()
+		return nil, nil
+	}
 }
