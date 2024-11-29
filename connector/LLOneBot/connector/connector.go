@@ -223,8 +223,6 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 	//进入阻塞队列
 	c.readBlock.RLock()
 	defer c.readBlock.RUnlock()
-	//第一个会话负责关闭等待队列
-	c.readWait.TryLock()
 	//检查是否为最后一个
 	defer func() {
 		if c.reting == 0 {
@@ -240,6 +238,8 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
+		//第一个会话负责关闭等待队列
+		c.readWait.TryLock()
 		defer func() { c.reting-- }()
 		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		if buf := c.readLast(); buf == nil {
