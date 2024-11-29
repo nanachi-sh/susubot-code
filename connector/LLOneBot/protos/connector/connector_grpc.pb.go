@@ -32,7 +32,7 @@ type ConnectorClient interface {
 	Connect(ctx context.Context, in *ConnectRequest, opts ...grpc.CallOption) (*ConnectResponse, error)
 	Read(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ReadResponse], error)
 	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*Empty, error)
-	Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*CloseResponse, error)
+	Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type connectorClient struct {
@@ -82,9 +82,9 @@ func (c *connectorClient) Write(ctx context.Context, in *WriteRequest, opts ...g
 	return out, nil
 }
 
-func (c *connectorClient) Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*CloseResponse, error) {
+func (c *connectorClient) Close(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CloseResponse)
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, Connector_Close_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ type ConnectorServer interface {
 	Connect(context.Context, *ConnectRequest) (*ConnectResponse, error)
 	Read(*Empty, grpc.ServerStreamingServer[ReadResponse]) error
 	Write(context.Context, *WriteRequest) (*Empty, error)
-	Close(context.Context, *Empty) (*CloseResponse, error)
+	Close(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedConnectorServer()
 }
 
@@ -119,7 +119,7 @@ func (UnimplementedConnectorServer) Read(*Empty, grpc.ServerStreamingServer[Read
 func (UnimplementedConnectorServer) Write(context.Context, *WriteRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedConnectorServer) Close(context.Context, *Empty) (*CloseResponse, error) {
+func (UnimplementedConnectorServer) Close(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Close not implemented")
 }
 func (UnimplementedConnectorServer) mustEmbedUnimplementedConnectorServer() {}

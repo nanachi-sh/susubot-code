@@ -42,20 +42,20 @@ func New() *Connector {
 	return c
 }
 
-func (c *Connector) Connect(req *connector.ConnectRequest) error {
+func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 	select {
 	case <-c.closed:
 	default:
-		return errors.New("已连接服务器")
+		return nil, errors.New("已连接服务器")
 	}
 	dialer := &websocket.Dialer{}
 	addr := req.Addr
 	port := req.Port
 	if port <= 0 || port > 65535 {
-		return errors.New("服务器端口范围不正确")
+		return nil, errors.New("服务器端口范围不正确")
 	}
 	if addr == "" {
-		return errors.New("服务器地址为空")
+		return nil, errors.New("服务器地址为空")
 	}
 	if ip := net.ParseIP(addr); ip != nil { //为IP
 		addr = ip.String()
@@ -64,22 +64,22 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 		defer cancel()
 		ips, err := net.DefaultResolver.LookupIP(ctx, "ip", addr)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if len(ips) == 0 {
-			return errors.New("域名无IP返回")
+			return nil, errors.New("域名无IP返回")
 		}
 		addr = ips[0].String()
 	} else { //若无错误，为未知
 		if err != nil {
-			return err
+			return nil, err
 		} else {
-			return errors.New("服务器地址设置有误")
+			return nil, errors.New("服务器地址设置有误")
 		}
 	}
 	netipaddr, err := netip.ParseAddr(addr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	c.addr = net.TCPAddrFromAddrPort(netip.AddrPortFrom(netipaddr, uint16(port)))
 	headers := make(http.Header)
@@ -88,17 +88,18 @@ func (c *Connector) Connect(req *connector.ConnectRequest) error {
 	}
 	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	c.conn = conn
 	c.closed = make(chan struct{})
 	if err := c.readAndwrite(); err != nil {
 		go c.close()
-		return err
+		return nil, err
 	}
+	buf := c.readLast()
 	c.readReset()
 	go c.readToEnd()
-	return nil
+	return buf, nil
 }
 
 // 连接后调用，连接结束或发生错误自行退出

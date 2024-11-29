@@ -52,12 +52,13 @@ func (cs *connectorService) Connect(ctx context.Context, req *connector_pb.Conne
 	go func() {
 		ret := &ret{}
 		defer func() { ch <- ret }()
-		if err := cs.connectorH.Connect(req); err != nil {
+		buf, err := cs.connectorH.Connect(req)
+		if err != nil {
 			ret.err = err
 			return
 		}
 		ret.data = &connector_pb.ConnectResponse{
-			OK: true,
+			Buf: buf,
 		}
 	}()
 	select {
@@ -108,10 +109,9 @@ func (cs *connectorService) Write(ctx context.Context, req *connector_pb.WriteRe
 	}
 }
 
-func (cs *connectorService) Close(ctx context.Context, _ *connector_pb.Empty) (*connector_pb.CloseResponse, error) {
+func (cs *connectorService) Close(ctx context.Context, _ *connector_pb.Empty) (*connector_pb.Empty, error) {
 	type ret struct {
-		data *connector_pb.CloseResponse
-		err  error
+		err error
 	}
 	ch := make(chan *ret, 1)
 	go func() {
@@ -121,9 +121,6 @@ func (cs *connectorService) Close(ctx context.Context, _ *connector_pb.Empty) (*
 			ret.err = err
 			return
 		}
-		ret.data = &connector_pb.CloseResponse{
-			OK: true,
-		}
 	}()
 	select {
 	case <-ctx.Done():
@@ -132,6 +129,6 @@ func (cs *connectorService) Close(ctx context.Context, _ *connector_pb.Empty) (*
 		if x.err != nil {
 			return nil, x.err
 		}
-		return x.data, nil
+		return &connector_pb.Empty{}, nil
 	}
 }
