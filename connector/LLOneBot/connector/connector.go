@@ -218,7 +218,7 @@ func (c *Connector) Read() ([]byte, error) {
 		default:
 			if c.readLock.TryLock() {
 				c.readLock.Unlock()
-				fmt.Println("is last")
+				fmt.Printf("%v: is last\n", time.Now().Format("2006-01-02 15:04:05"))
 				c.readReset()
 			}
 		}
@@ -231,7 +231,7 @@ func (c *Connector) Read() ([]byte, error) {
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
 
-		fmt.Printf("%v: recv\n\n", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Printf("%v: recv\n", time.Now().Format("2006-01-02 15:04:05"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
