@@ -217,6 +217,7 @@ func (c *Connector) Read() ([]byte, error) {
 			return
 		default:
 			if c.readLock.TryLock() {
+				c.readLock.Unlock()
 				fmt.Println("is last")
 				c.readReset()
 			}
