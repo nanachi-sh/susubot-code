@@ -80,6 +80,14 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	ch := make(chan []byte)
+	send := make(chan *connector_pb.ReadResponse, 1)
+	go func() {
+		if err := stream.Send(<-send); err != nil {
+			ctx = context.WithValue(ctx, myerror{}, err)
+			cancel()
+			return
+		}
+	}()
 	for {
 		go func() {
 			buf, err := cs.connectorH.Read(now)
@@ -99,16 +107,10 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 				return nil
 			}
 		case buf := <-ch: //新响应
-			go func(buf []byte) {
-				if err := stream.Send(&connector_pb.ReadResponse{
-					IsClose: false,
-					Buf:     buf,
-				}); err != nil {
-					ctx = context.WithValue(ctx, myerror{}, err)
-					cancel()
-					return
-				}
-			}(buf)
+			send <- &connector_pb.ReadResponse{
+				IsClose: false,
+				Buf:     buf,
+			}
 		}
 	}
 }
