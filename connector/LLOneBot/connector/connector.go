@@ -216,9 +216,12 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 	//检查是否为最后一个
 	defer func() {
 		go func() {
+			//避免重置过程中通过新会话
+			c.readLock.Lock()
 			if c.reting == 0 {
 				c.readReset()
 			}
+			c.readLock.Unlock()
 		}()
 	}()
 	c.reting++
