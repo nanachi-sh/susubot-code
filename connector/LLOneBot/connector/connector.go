@@ -198,11 +198,11 @@ func (c *Connector) close() error {
 
 func (c *Connector) Read(a int64) ([]byte, error) {
 	//检查是否在返回过程中
-	fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: Waiting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	c.readWG.Wait()
-	fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: WaitDone\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	//
-	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: WaitAdd\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	c.readWG.Add(1)
 	defer c.readWG.Done()
 	//检查是否为最后一个
