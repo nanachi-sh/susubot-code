@@ -22,7 +22,7 @@ type Connector struct {
 	conn       *websocket.Conn
 	now        context.Context
 	now_cancel context.CancelFunc
-	readLock   sync.RWMutex
+	readWG     sync.WaitGroup
 	closeLock  sync.Mutex
 	closed     chan struct{}
 	reting     int
@@ -151,8 +151,7 @@ func (c *Connector) readAndwrite() error {
 	//确保读取返回已结束
 	select {
 	case <-c.now.Done(): //若正在返回则等待
-		c.readLock.Lock()
-		c.readLock.Unlock()
+		c.readWG.Wait()
 	default:
 	}
 	c.write(buf)
@@ -199,19 +198,13 @@ func (c *Connector) close() error {
 
 func (c *Connector) Read(a int64) ([]byte, error) {
 	//检查是否在返回过程中
-	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-	select {
-	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-		c.readLock.Lock()
-		c.readLock.Unlock()
-		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-	default: //若不通则进入阻塞队列
-	}
+	fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	c.readWG.Wait()
+	fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	//
 	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-	c.readLock.RLock()
-	defer c.readLock.RUnlock()
+	c.readWG.Add(1)
+	defer c.readWG.Done()
 	//检查是否为最后一个
 	defer func() {
 		if c.reting == 0 {
