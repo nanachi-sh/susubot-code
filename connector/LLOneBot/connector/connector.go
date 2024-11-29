@@ -25,6 +25,7 @@ type Connector struct {
 	readLock   sync.RWMutex
 	closeLock  sync.Mutex
 	closed     chan struct{}
+	reting     int
 }
 
 type responseBuf struct{}
@@ -210,26 +211,21 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 	//
 	fmt.Printf("%v %v: rlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	c.readLock.RLock()
+	defer c.readLock.RUnlock()
 	//检查是否为最后一个
 	defer func() {
-		select {
-		case <-c.closed:
-			return
-		default:
-			if c.readLock.TryLock() {
-				fmt.Printf("%v %v: is last\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
-				c.readReset()
-				c.readLock.Unlock()
-			}
+		if c.reting == 0 {
+			c.readReset()
 		}
 	}()
-	defer c.readLock.RUnlock()
+	c.reting++
 	fmt.Printf("%v %v: block\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	select {
 	case <-c.closed:
 		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
+		defer func() { c.reting-- }()
 		fmt.Printf("%v %v: recv\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
