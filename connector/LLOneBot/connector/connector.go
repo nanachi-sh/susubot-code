@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"net"
 	"net/http"
 	"net/netip"
@@ -32,12 +33,14 @@ type responseBuf struct{}
 func New() *Connector {
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan struct{})
-	close(ch)
-	return &Connector{
+	// close(ch)
+	c := &Connector{
 		now:        ctx,
 		now_cancel: cancel,
 		closed:     ch,
 	}
+	go c.test()
+	return c
 }
 
 func (c *Connector) Connect(req *connector.ConnectRequest) error {
@@ -134,6 +137,11 @@ func (c *Connector) read() ([]byte, error) {
 	return buf, nil
 }
 
+func (c *Connector) write(buf []byte) {
+	c.now = context.WithValue(c.now, responseBuf{}, buf)
+	c.now_cancel()
+}
+
 func (c *Connector) readAndwrite() error {
 	buf, err := c.read()
 	if err != nil {
@@ -146,14 +154,26 @@ func (c *Connector) readAndwrite() error {
 		c.readLock.Unlock()
 	default:
 	}
-	c.now = context.WithValue(c.now, responseBuf{}, buf)
-	c.now_cancel()
+	c.write(buf)
 	return nil
 }
 
 func (c *Connector) readReset() {
 	c.now = context.WithoutCancel(c.now)
 	c.now, c.now_cancel = context.WithCancel(c.now)
+}
+
+func (c *Connector) test() {
+	for {
+		time.Sleep(time.Second * 2)
+		select {
+		case <-c.now.Done(): //若正在返回则等待
+			c.readLock.Lock()
+			c.readLock.Unlock()
+		default:
+		}
+		c.write([]byte{byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256))})
+	}
 }
 
 // 幂等
