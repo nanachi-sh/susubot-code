@@ -142,17 +142,23 @@ func (c *Connector) write(buf []byte) {
 }
 
 func (c *Connector) readAndwrite() error {
+	fmt.Printf("%v: reading\n", time.Now().Format("2006-01-02 15:04:05"))
 	buf, err := c.read()
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%v: readed\n", time.Now().Format("2006-01-02 15:04:05"))
 	//确保读取返回已结束
+	fmt.Printf("%v: check reting\n", time.Now().Format("2006-01-02 15:04:05"))
 	select {
 	case <-c.now.Done(): //若正在返回则等待
+		fmt.Printf("%v: reting, wating\n", time.Now().Format("2006-01-02 15:04:05"))
 		c.readLock.Lock()
 		c.readLock.Unlock()
+		fmt.Printf("%v: reting out\n", time.Now().Format("2006-01-02 15:04:05"))
 	default:
 	}
+	fmt.Printf("%v: write\n", time.Now().Format("2006-01-02 15:04:05"))
 	c.write(buf)
 	return nil
 }
