@@ -199,20 +199,20 @@ func (c *Connector) close() error {
 func (c *Connector) Read(a int64) ([]byte, error) {
 	//检查是否在返回过程中
 	fmt.Print(a, " ")
-	fmt.Printf("%v: check reting\n", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("%v: check reting\n", time.Now().Format("2006-01-02 15:04:05.000"))
 	select {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
 		fmt.Print(a, " ")
-		fmt.Printf("%v: reting\n", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Printf("%v: reting\n", time.Now().Format("2006-01-02 15:04:05.000"))
 		c.readLock.Lock()
 		c.readLock.Unlock()
 		fmt.Print(a, " ")
-		fmt.Printf("%v: exit reting\n", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Printf("%v: exit reting\n", time.Now().Format("2006-01-02 15:04:05.000"))
 	default: //若不通则进入阻塞队列
 	}
 	//
 	fmt.Print(a, " ")
-	fmt.Printf("%v: rlock\n", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("%v: rlock\n", time.Now().Format("2006-01-02 15:04:05.000"))
 	c.readLock.RLock()
 	//检查是否为最后一个
 	defer func() {
@@ -222,7 +222,7 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 		default:
 			if c.readLock.TryLock() {
 				fmt.Print(a, " ")
-				fmt.Printf("%v: is last\n", time.Now().Format("2006-01-02 15:04:05"))
+				fmt.Printf("%v: is last\n", time.Now().Format("2006-01-02 15:04:05.000"))
 				c.readReset()
 				c.readLock.Unlock()
 			}
@@ -230,15 +230,15 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 	}()
 	defer c.readLock.RUnlock()
 	fmt.Print(a, " ")
-	fmt.Printf("%v: block\n", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("%v: block\n", time.Now().Format("2006-01-02 15:04:05.000"))
 	select {
 	case <-c.closed:
 		fmt.Print(a, " ")
-		fmt.Printf("%v: closed\n", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Printf("%v: closed\n", time.Now().Format("2006-01-02 15:04:05.000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
 		fmt.Print(a, " ")
-		fmt.Printf("%v: recv\n", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Printf("%v: recv\n", time.Now().Format("2006-01-02 15:04:05.000"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
