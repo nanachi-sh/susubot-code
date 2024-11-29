@@ -82,11 +82,13 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 	ch := make(chan []byte)
 	send := make(chan *connector_pb.ReadResponse, 1)
 	go func() {
+		fmt.Println(now, "send waiting")
 		if err := stream.Send(<-send); err != nil {
 			ctx = context.WithValue(ctx, myerror{}, err)
 			cancel()
 			return
 		}
+		fmt.Println(now, "sended")
 	}()
 	for {
 		go func() {
