@@ -202,14 +202,14 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	select {
 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		fmt.Printf("%v %v: reting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 		c.readLock.Lock()
 		c.readLock.Unlock()
-		fmt.Printf("%v %v: exit reting\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	default: //若不通则进入阻塞队列
 	}
 	//
-	fmt.Printf("%v %v: rlock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	c.readLock.RLock()
 	defer c.readLock.RUnlock()
 	//检查是否为最后一个
@@ -219,14 +219,14 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 		}
 	}()
 	c.reting++
-	fmt.Printf("%v %v: block\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+	fmt.Printf("%v %v: Block\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 	select {
 	case <-c.closed:
 		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
 		defer func() { c.reting-- }()
-		fmt.Printf("%v %v: recv\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
+		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000"))
 		if buf := c.readLast(); buf == nil {
 			return nil, errors.New("异常错误")
 		} else {
