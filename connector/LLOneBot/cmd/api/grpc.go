@@ -21,6 +21,8 @@ type (
 	}
 )
 
+type myerror struct{}
+
 func GRPCServe() error {
 	portStr := os.Getenv("GRPC_LISTEN_PORT")
 	if portStr == "" {
@@ -75,16 +77,38 @@ func (cs *connectorService) Connect(ctx context.Context, req *connector_pb.Conne
 
 func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStreamingServer[connector_pb.ReadResponse]) error {
 	now := time.Now().UnixMilli()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ch := make(chan []byte)
 	for {
-		buf, err := cs.connectorH.Read(now)
-		if err != nil {
-			return err
-		}
-		if err := stream.Send(&connector_pb.ReadResponse{
-			IsClose: false,
-			Buf:     buf,
-		}); err != nil {
-			return err
+		go func() {
+			buf, err := cs.connectorH.Read(now)
+			if err != nil {
+				ctx = context.WithValue(ctx, myerror{}, err)
+				cancel()
+				return
+			}
+			ch <- buf
+		}()
+		select {
+		case <-ctx.Done(): //结束
+			switch x := ctx.Value(myerror{}).(type) {
+			case error:
+				return x
+			default:
+				return nil
+			}
+		case buf := <-ch: //新响应
+			go func(buf []byte) {
+				if err := stream.Send(&connector_pb.ReadResponse{
+					IsClose: false,
+					Buf:     buf,
+				}); err != nil {
+					ctx = context.WithValue(ctx, myerror{}, err)
+					cancel()
+					return
+				}
+			}(buf)
 		}
 	}
 }
