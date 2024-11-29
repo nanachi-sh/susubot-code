@@ -78,10 +78,12 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 		if err != nil {
 			return err
 		}
-		stream.Send(&connector_pb.ReadResponse{
+		if err := stream.Send(&connector_pb.ReadResponse{
 			IsClose: false,
 			Buf:     buf,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 }
 
