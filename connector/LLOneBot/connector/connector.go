@@ -227,6 +227,8 @@ func (c *Connector) readnew(a int64) ([]byte, error) {
 		if c.readBlock.TryLock() { //阻塞队列为空
 			//打开等待队列
 			c.readWait.Unlock()
+			//重置
+			c.readReset()
 			//等待Wait队列空
 			c.readWait.Lock()
 			c.readWait.Unlock()
