@@ -84,7 +84,9 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 	go func() {
 		for {
 			fmt.Println(now, "send waiting")
-			if err := stream.Send(<-send); err != nil {
+			resp := <-send
+			fmt.Println(now, "sending")
+			if err := stream.Send(resp); err != nil {
 				ctx = context.WithValue(ctx, myerror{}, err)
 				cancel()
 				return

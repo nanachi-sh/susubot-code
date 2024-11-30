@@ -160,7 +160,6 @@ func (c *Connector) readAndwrite() error {
 		c.readWait.RLock()
 		c.readWait.RUnlock()
 		fmt.Printf("%v: write wUnlock\n", time.Now().Format("2006-01-02 15:04:05.000000"))
-
 	default:
 	}
 	fmt.Printf("%v: write\n", time.Now().Format("2006-01-02 15:04:05.000000"))
