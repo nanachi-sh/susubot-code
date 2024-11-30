@@ -96,7 +96,7 @@ func (cs *connectorService) Read(_ *connector_pb.Empty, stream grpc.ServerStream
 	}()
 	for {
 		go func() {
-			buf, err := cs.connectorH.Read(now)
+			buf, err := cs.connectorH.Read(now, 0)
 			if err != nil {
 				ctx = context.WithValue(ctx, myerror{}, err)
 				cancel()
