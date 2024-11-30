@@ -222,8 +222,6 @@ func (c *Connector) readnew(a int64) ([]byte, error) {
 	}
 	//进入阻塞队列
 	c.readBlock.RLock()
-	defer c.readBlock.RUnlock()
-	fmt.Printf("%v %v: in block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	//检查阻塞队列是否为空
 	defer func() {
 		b := false
@@ -235,6 +233,8 @@ func (c *Connector) readnew(a int64) ([]byte, error) {
 		}
 		fmt.Printf("%v %v: %v\n", a, time.Now().Format("2006-01-02 15:04:05.000000"), b)
 	}()
+	defer c.readBlock.RUnlock()
+	fmt.Printf("%v %v: in block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	select {
 	case <-c.closed:
 		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
