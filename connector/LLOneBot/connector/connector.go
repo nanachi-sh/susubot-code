@@ -226,12 +226,14 @@ func (c *Connector) readnew(a int64) ([]byte, error) {
 	fmt.Printf("%v %v: in block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	//检查阻塞队列是否为空
 	defer func() {
-		if c.readBlock.TryLock() { //阻塞队列为空
+		b := false
+		if b = c.readBlock.TryLock(); b { //阻塞队列为空
 			//打开等待队列
 			c.readWait.Unlock()
 			//
 			c.readBlock.Unlock()
 		}
+		fmt.Printf("%v %v: %v\n", a, time.Now().Format("2006-01-02 15:04:05.000000"), b)
 	}()
 	select {
 	case <-c.closed:
