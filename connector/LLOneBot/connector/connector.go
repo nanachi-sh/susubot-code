@@ -249,58 +249,58 @@ func (c *Connector) readnew(a int64) ([]byte, error) {
 	}
 }
 
-func (c *Connector) readold() ([]byte, error) {
-	// if last := c.readLast(); last != nil {
-	// 	lastTSNano := last.createTime.UnixNano()
-	// 	if user_timestampNano < lastTSNano {
-	// 		return last.buf, nil
-	// 	}
-	// }
-	//检查是否在返回过程中
-	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-	select {
-	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-		//进入等待队列
-		c.readWait.RLock()
-		c.readWait.RUnlock()
-		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-	default: //若不通则进入阻塞队列
-	}
-	//
-	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-	//进入阻塞队列
-	c.readBlock.RLock()
-	defer c.readBlock.RUnlock()
-	//检查是否为最后一个
-	defer func() {
-		if c.reting == 0 {
-			c.readReset()
-			//重置后关闭等待队列，会话退出等待队列
-			c.readWait.Unlock()
-		}
-	}()
-	c.reting++
-	fmt.Printf("%v %v: Block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-	select {
-	case <-c.closed:
-		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-		return nil, errors.New("连接已断开或未连接")
-	case <-c.now.Done():
-		//第一个会话负责关闭等待队列
-		c.readWait.TryLock()
-		defer func() { c.reting-- }()
-		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-		if last := c.readLast(); last == nil {
-			return nil, errors.New("异常错误")
-		} else {
-			return last.buf, nil
-		}
-	}
-}
+// func (c *Connector) readold() ([]byte, error) {
+// 	// if last := c.readLast(); last != nil {
+// 	// 	lastTSNano := last.createTime.UnixNano()
+// 	// 	if user_timestampNano < lastTSNano {
+// 	// 		return last.buf, nil
+// 	// 	}
+// 	// }
+// 	//检查是否在返回过程中
+// 	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 	select {
+// 	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
+// 		fmt.Printf("%v %v: wLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 		//进入等待队列
+// 		c.readWait.RLock()
+// 		c.readWait.RUnlock()
+// 		fmt.Printf("%v %v: wUnlock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 	default: //若不通则进入阻塞队列
+// 	}
+// 	//
+// 	fmt.Printf("%v %v: rLock\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 	//进入阻塞队列
+// 	c.readBlock.RLock()
+// 	defer c.readBlock.RUnlock()
+// 	//检查是否为最后一个
+// 	defer func() {
+// 		if c.reting == 0 {
+// 			c.readReset()
+// 			//重置后关闭等待队列，会话退出等待队列
+// 			c.readWait.Unlock()
+// 		}
+// 	}()
+// 	c.reting++
+// 	fmt.Printf("%v %v: Block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 	select {
+// 	case <-c.closed:
+// 		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 		return nil, errors.New("连接已断开或未连接")
+// 	case <-c.now.Done():
+// 		//第一个会话负责关闭等待队列
+// 		c.readWait.TryLock()
+// 		defer func() { c.reting-- }()
+// 		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+// 		if last := c.readLast(); last == nil {
+// 			return nil, errors.New("异常错误")
+// 		} else {
+// 			return last.buf, nil
+// 		}
+// 	}
+// }
 
 func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
-	return c.readnew()
+	return c.readnew(a)
 }
 
 func (c *Connector) ReadLast() *merge {
