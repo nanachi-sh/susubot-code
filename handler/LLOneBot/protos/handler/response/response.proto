@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package basic.handler.response;
+
 import "handler/LLOneBot/protos/handler/define.proto";
 
 option go_package = "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/response";

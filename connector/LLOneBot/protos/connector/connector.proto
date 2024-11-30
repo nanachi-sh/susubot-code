@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package basic.connector;
+
 option go_package = "github.com/nanachi-sh/susubot-code/connector/LLOneBot/protos/connector";
 
 service Connector {
