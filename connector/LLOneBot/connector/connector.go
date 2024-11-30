@@ -30,7 +30,7 @@ type Connector struct {
 	reting     int
 }
 
-type responseBuf struct{}
+type responseMerge struct{}
 
 func New() *Connector {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -99,10 +99,10 @@ func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 		go c.close()
 		return nil, err
 	}
-	buf := c.readLast()
+	last := c.readLast()
 	c.readReset()
 	go c.readToEnd()
-	return buf, nil
+	return last.buf, nil
 }
 
 // 连接后调用，连接结束或发生错误自行退出
@@ -141,7 +141,10 @@ func (c *Connector) read() ([]byte, error) {
 }
 
 func (c *Connector) write(buf []byte) {
-	c.now = context.WithValue(c.now, responseBuf{}, buf)
+	c.now = context.WithValue(c.now, responseMerge{}, &merge{
+		buf:        buf,
+		createTime: time.Now(),
+	})
 	c.now_cancel()
 }
 
@@ -205,7 +208,54 @@ func (c *Connector) close() error {
 	return nil
 }
 
-func (c *Connector) Read(a int64) ([]byte, error) {
+func (c *Connector) readnew(a int64) ([]byte, error) {
+	// 检查等待队列是否关闭
+	fmt.Printf("%v %v: read start\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+	if !c.readWait.TryRLock() {
+		fmt.Printf("%v %v: in wait\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+		//关闭则加入等待
+		c.readWait.RLock()
+		c.readWait.RUnlock()
+		fmt.Printf("%v %v: out wait\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+	} else {
+		c.readWait.RUnlock()
+	}
+	//进入阻塞队列
+	c.readBlock.RLock()
+	defer c.readBlock.RUnlock()
+	fmt.Printf("%v %v: in block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+	//检查阻塞队列是否为空
+	defer func() {
+		if c.readBlock.TryLock() { //阻塞队列为空
+			//打开等待队列
+			c.readWait.Unlock()
+			//
+			c.readBlock.Unlock()
+		}
+	}()
+	select {
+	case <-c.closed:
+		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+		return nil, errors.New("连接已断开或未连接")
+	case <-c.now.Done():
+		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
+		//第一个会话负责关闭等待队列
+		c.readWait.TryLock()
+		if last := c.readLast(); last == nil {
+			return nil, errors.New("异常错误")
+		} else {
+			return last.buf, nil
+		}
+	}
+}
+
+func (c *Connector) readold() ([]byte, error) {
+	// if last := c.readLast(); last != nil {
+	// 	lastTSNano := last.createTime.UnixNano()
+	// 	if user_timestampNano < lastTSNano {
+	// 		return last.buf, nil
+	// 	}
+	// }
 	//检查是否在返回过程中
 	fmt.Printf("%v %v: check reting\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	select {
@@ -241,21 +291,30 @@ func (c *Connector) Read(a int64) ([]byte, error) {
 		c.readWait.TryLock()
 		defer func() { c.reting-- }()
 		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-		if buf := c.readLast(); buf == nil {
+		if last := c.readLast(); last == nil {
 			return nil, errors.New("异常错误")
 		} else {
-			return buf, nil
+			return last.buf, nil
 		}
 	}
 }
 
-func (c *Connector) ReadLast() []byte {
+func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
+	return c.readnew()
+}
+
+func (c *Connector) ReadLast() *merge {
 	return c.readLast()
 }
 
-func (c *Connector) readLast() []byte {
-	switch x := c.now.Value(responseBuf{}).(type) {
-	case []byte:
+type merge struct {
+	buf        []byte
+	createTime time.Time
+}
+
+func (c *Connector) readLast() *merge {
+	switch x := c.now.Value(responseMerge{}).(type) {
+	case *merge:
 		return x
 	default:
 		return nil
@@ -278,36 +337,4 @@ func (c *Connector) Write(buf []byte) error {
 
 func (c *Connector) Close() error {
 	return c.close()
-}
-
-func (c *Connector) Read1(a int64) ([]byte, error) {
-	//检查是否在返回过程中
-	select {
-	case <-c.now.Done(): //若通说明处于返回过程中，进入等待队列
-		//进入等待队列
-		c.readWait.RLock()
-		c.readWait.RUnlock()
-	default: //若不通则进入阻塞队列
-	}
-	//进入阻塞队列
-	c.readBlock.RLock()
-	defer c.readBlock.RUnlock()
-	//第一个会话负责关闭等待队列
-	c.readWait.TryLock()
-	//检查是否为最后一个
-	defer func() {
-		if c.reting == 0 {
-			c.readReset()
-			//重置后关闭等待队列，会话退出等待队列
-			c.readWait.Unlock()
-		}
-	}()
-	c.reting++
-	select {
-	case <-c.closed:
-		return nil, nil
-	case <-c.now.Done():
-		defer func() { c.reting-- }()
-		return nil, nil
-	}
 }
