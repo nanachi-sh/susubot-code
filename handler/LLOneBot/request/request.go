@@ -3,10 +3,8 @@ package request
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler"
-	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/request"
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/request/define"
 )
 
@@ -20,106 +18,55 @@ const (
 	getFriendList      = "get_friend_list"
 )
 
-type requestH struct {
-	req *request.BotRequestMarshalRequest
-}
-
-func New(req *request.BotRequestMarshalRequest) (*requestH, error) {
-	if req == nil {
-		return nil, errors.New("请求体不能为空")
-	}
-	return &requestH{req: req}, nil
-}
-
-func (rh *requestH) Marshal() ([]byte, error) {
-	switch rh.req.Type {
-	case request.RequestType_RequestType_GetFriendList:
-		return rh.getFriendList()
-	case request.RequestType_RequestType_GetGroupInfo:
-		return rh.getGroupInfo()
-	case request.RequestType_RequestType_GetGroupMemberInfo:
-		return rh.getGroupMemberInfo()
-	case request.RequestType_RequestType_GetMessage:
-		return rh.getMessage()
-	case request.RequestType_RequestType_MessageRecall:
-		return rh.messageRecall()
-	case request.RequestType_RequestType_SendFriendMessage:
-		return rh.sendFriendMessage()
-	case request.RequestType_RequestType_SendGroupMessage:
-		return rh.sendGroupMessage()
-	default:
-		return nil, fmt.Errorf("请求类型无匹配; RequestType: %v", rh.req.Type.String())
-	}
-}
-
-func (rh *requestH) getFriendList() ([]byte, error) {
-	if rh.req.GetFriendList == nil {
-		return nil, errors.New("GetFriendList结构体未定义")
-	}
+func GetFriendList(echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = getFriendList
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) getGroupInfo() ([]byte, error) {
-	if rh.req.GetGroupInfo == nil {
-		return nil, errors.New("GetGroupInfo结构体未定义")
-	}
-	ggi := rh.req.GetGroupInfo
+func GetGroupInfo(groupid string, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = getGroupInfo
 	req.Params = new(define.Request_Params)
-	req.Params.GroupId = ggi.GroupId
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	req.Params.GroupId = groupid
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) getGroupMemberInfo() ([]byte, error) {
-	if rh.req.GetGroupMemberInfo == nil {
-		return nil, errors.New("GetGroupMemberInfo结构体未定义")
-	}
-	ggmi := rh.req.GetGroupMemberInfo
+func GetGroupMemberInfo(groupid, memberid string, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = getGroupMemberInfo
 	req.Params = new(define.Request_Params)
-	req.Params.GroupId = ggmi.GroupId
-	req.Params.UserId = ggmi.UserId
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	req.Params.GroupId = groupid
+	req.Params.UserId = memberid
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) messageRecall() ([]byte, error) {
-	if rh.req.MessageRecall == nil {
-		return nil, errors.New("MessageRecall结构体未定义")
-	}
-	mr := rh.req.MessageRecall
+func MessageRecall(messageid string, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = recall
 	req.Params = new(define.Request_Params)
-	req.Params.MessageId = mr.MessageId
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	req.Params.MessageId = messageid
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) sendGroupMessage() ([]byte, error) {
-	if rh.req.SendGroupMessage == nil {
-		return nil, errors.New("SendGroupMessage结构体未定义")
-	}
-	sgm := rh.req.SendGroupMessage
+func SendGroupMessage(groupid string, inMcs []*handler.MessageChainObject, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = sendGroupMessage
 	req.Params = new(define.Request_Params)
-	req.Params.GroupId = sgm.GroupId
-	mcs, err := marshalMessageChain(sgm.MessageChain)
+	req.Params.GroupId = groupid
+	mcs, err := marshalMessageChain(inMcs)
 	if err != nil {
 		return nil, err
 	}
@@ -136,22 +83,18 @@ func (rh *requestH) sendGroupMessage() ([]byte, error) {
 		mcs_j = append(mcs_j, m)
 	}
 	req.Params.Message = mcs_j
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) sendFriendMessage() ([]byte, error) {
-	if rh.req.SendFriendMessage == nil {
-		return nil, errors.New("SendFriendMessage结构体未定义")
-	}
-	sfm := rh.req.SendFriendMessage
+func SendFriendMessage(friendid string, inMcs []*handler.MessageChainObject, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = sendFriendMessage
 	req.Params = new(define.Request_Params)
-	req.Params.UserId = sfm.FriendId
-	mcs, err := marshalMessageChain(sfm.MessageChain)
+	req.Params.UserId = friendid
+	mcs, err := marshalMessageChain(inMcs)
 	if err != nil {
 		return nil, err
 	}
@@ -168,23 +111,19 @@ func (rh *requestH) sendFriendMessage() ([]byte, error) {
 		mcs_j = append(mcs_j, m)
 	}
 	req.Params.Message = mcs_j
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }
 
-func (rh *requestH) getMessage() ([]byte, error) {
-	if rh.req.GetMessage == nil {
-		return nil, errors.New("GetMessage结构体为nil")
-	}
-	gm := rh.req.GetMessage
+func GetMessage(messageid string, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = getMessage
 	req.Params = new(define.Request_Params)
-	req.Params.MessageId = gm.MessageId
-	if rh.req.Echo != nil {
-		req.Echo = *rh.req.Echo
+	req.Params.MessageId = messageid
+	if echo != nil {
+		req.Echo = *echo
 	}
 	return json.Marshal(req)
 }

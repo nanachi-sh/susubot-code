@@ -79,26 +79,195 @@ func (*responseService) BotResponseUnmarshal(ctx context.Context, req *response_
 	}
 }
 
-func (*requestService) BotRequestMarshal(ctx context.Context, req *request_pb.BotRequestMarshalRequest) (*request_pb.BotRequestMarshalResponse, error) {
+func (*requestService) SendGroupMessage(ctx context.Context, req *request_pb.SendGroupMessageRequest) (*request_pb.BasicResponse, error) {
 	type d struct {
-		data *request_pb.BotRequestMarshalResponse
+		data *request_pb.BasicResponse
 		err  error
 	}
 	ch := make(chan *d, 1)
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		requestH, err := request.New(req)
+		buf, err := request.SendGroupMessage(req.GroupId, req.MessageChain, req.Echo)
 		if err != nil {
 			ret.err = err
 			return
 		}
-		buf, err := requestH.Marshal()
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) SendFriendMessage(ctx context.Context, req *request_pb.SendFriendMessageRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.SendFriendMessage(req.FriendId, req.MessageChain, req.Echo)
 		if err != nil {
 			ret.err = err
 			return
 		}
-		ret.data = &request_pb.BotRequestMarshalResponse{
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) MessageRecall(ctx context.Context, req *request_pb.MessageRecallRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.MessageRecall(req.MessageId, req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) GetMessage(ctx context.Context, req *request_pb.GetMessageRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.GetMessage(req.MessageId, req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) GetGroupInfo(ctx context.Context, req *request_pb.GetGroupInfoRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.GetGroupInfo(req.GroupId, req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) GetGroupMemberInfo(ctx context.Context, req *request_pb.GetGroupMemberInfoRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.GetGroupMemberInfo(req.GroupId, req.UserId, req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*requestService) GetFriendList(ctx context.Context, req *request_pb.BasicRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.GetFriendList(req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
 			Buf: buf,
 		}
 	}()

@@ -19,14 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RequestHandler_BotRequestMarshal_FullMethodName = "/RequestHandler/BotRequestMarshal"
+	RequestHandler_SendGroupMessage_FullMethodName   = "/RequestHandler/SendGroupMessage"
+	RequestHandler_SendFriendMessage_FullMethodName  = "/RequestHandler/SendFriendMessage"
+	RequestHandler_MessageRecall_FullMethodName      = "/RequestHandler/MessageRecall"
+	RequestHandler_GetMessage_FullMethodName         = "/RequestHandler/GetMessage"
+	RequestHandler_GetGroupInfo_FullMethodName       = "/RequestHandler/GetGroupInfo"
+	RequestHandler_GetGroupMemberInfo_FullMethodName = "/RequestHandler/GetGroupMemberInfo"
+	RequestHandler_GetFriendList_FullMethodName      = "/RequestHandler/GetFriendList"
 )
 
 // RequestHandlerClient is the client API for RequestHandler service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RequestHandlerClient interface {
-	BotRequestMarshal(ctx context.Context, in *BotRequestMarshalRequest, opts ...grpc.CallOption) (*BotRequestMarshalResponse, error)
+	SendGroupMessage(ctx context.Context, in *SendGroupMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	SendFriendMessage(ctx context.Context, in *SendFriendMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	MessageRecall(ctx context.Context, in *MessageRecallRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetMessage(ctx context.Context, in *GetMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetGroupInfo(ctx context.Context, in *GetGroupInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetGroupMemberInfo(ctx context.Context, in *GetGroupMemberInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetFriendList(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
 
 type requestHandlerClient struct {
@@ -37,10 +49,70 @@ func NewRequestHandlerClient(cc grpc.ClientConnInterface) RequestHandlerClient {
 	return &requestHandlerClient{cc}
 }
 
-func (c *requestHandlerClient) BotRequestMarshal(ctx context.Context, in *BotRequestMarshalRequest, opts ...grpc.CallOption) (*BotRequestMarshalResponse, error) {
+func (c *requestHandlerClient) SendGroupMessage(ctx context.Context, in *SendGroupMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(BotRequestMarshalResponse)
-	err := c.cc.Invoke(ctx, RequestHandler_BotRequestMarshal_FullMethodName, in, out, cOpts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_SendGroupMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) SendFriendMessage(ctx context.Context, in *SendFriendMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_SendFriendMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) MessageRecall(ctx context.Context, in *MessageRecallRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_MessageRecall_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) GetMessage(ctx context.Context, in *GetMessageRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_GetMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) GetGroupInfo(ctx context.Context, in *GetGroupInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_GetGroupInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) GetGroupMemberInfo(ctx context.Context, in *GetGroupMemberInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_GetGroupMemberInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *requestHandlerClient) GetFriendList(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_GetFriendList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +123,13 @@ func (c *requestHandlerClient) BotRequestMarshal(ctx context.Context, in *BotReq
 // All implementations must embed UnimplementedRequestHandlerServer
 // for forward compatibility.
 type RequestHandlerServer interface {
-	BotRequestMarshal(context.Context, *BotRequestMarshalRequest) (*BotRequestMarshalResponse, error)
+	SendGroupMessage(context.Context, *SendGroupMessageRequest) (*BasicResponse, error)
+	SendFriendMessage(context.Context, *SendFriendMessageRequest) (*BasicResponse, error)
+	MessageRecall(context.Context, *MessageRecallRequest) (*BasicResponse, error)
+	GetMessage(context.Context, *GetMessageRequest) (*BasicResponse, error)
+	GetGroupInfo(context.Context, *GetGroupInfoRequest) (*BasicResponse, error)
+	GetGroupMemberInfo(context.Context, *GetGroupMemberInfoRequest) (*BasicResponse, error)
+	GetFriendList(context.Context, *BasicRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedRequestHandlerServer()
 }
 
@@ -62,8 +140,26 @@ type RequestHandlerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRequestHandlerServer struct{}
 
-func (UnimplementedRequestHandlerServer) BotRequestMarshal(context.Context, *BotRequestMarshalRequest) (*BotRequestMarshalResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BotRequestMarshal not implemented")
+func (UnimplementedRequestHandlerServer) SendGroupMessage(context.Context, *SendGroupMessageRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendGroupMessage not implemented")
+}
+func (UnimplementedRequestHandlerServer) SendFriendMessage(context.Context, *SendFriendMessageRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendFriendMessage not implemented")
+}
+func (UnimplementedRequestHandlerServer) MessageRecall(context.Context, *MessageRecallRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MessageRecall not implemented")
+}
+func (UnimplementedRequestHandlerServer) GetMessage(context.Context, *GetMessageRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMessage not implemented")
+}
+func (UnimplementedRequestHandlerServer) GetGroupInfo(context.Context, *GetGroupInfoRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupInfo not implemented")
+}
+func (UnimplementedRequestHandlerServer) GetGroupMemberInfo(context.Context, *GetGroupMemberInfoRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupMemberInfo not implemented")
+}
+func (UnimplementedRequestHandlerServer) GetFriendList(context.Context, *BasicRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendList not implemented")
 }
 func (UnimplementedRequestHandlerServer) mustEmbedUnimplementedRequestHandlerServer() {}
 func (UnimplementedRequestHandlerServer) testEmbeddedByValue()                        {}
@@ -86,20 +182,128 @@ func RegisterRequestHandlerServer(s grpc.ServiceRegistrar, srv RequestHandlerSer
 	s.RegisterService(&RequestHandler_ServiceDesc, srv)
 }
 
-func _RequestHandler_BotRequestMarshal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BotRequestMarshalRequest)
+func _RequestHandler_SendGroupMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendGroupMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RequestHandlerServer).BotRequestMarshal(ctx, in)
+		return srv.(RequestHandlerServer).SendGroupMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RequestHandler_BotRequestMarshal_FullMethodName,
+		FullMethod: RequestHandler_SendGroupMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequestHandlerServer).BotRequestMarshal(ctx, req.(*BotRequestMarshalRequest))
+		return srv.(RequestHandlerServer).SendGroupMessage(ctx, req.(*SendGroupMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_SendFriendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendFriendMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).SendFriendMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_SendFriendMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).SendFriendMessage(ctx, req.(*SendFriendMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_MessageRecall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MessageRecallRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).MessageRecall(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_MessageRecall_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).MessageRecall(ctx, req.(*MessageRecallRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_GetMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).GetMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_GetMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).GetMessage(ctx, req.(*GetMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_GetGroupInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).GetGroupInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_GetGroupInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).GetGroupInfo(ctx, req.(*GetGroupInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_GetGroupMemberInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupMemberInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).GetGroupMemberInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_GetGroupMemberInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).GetGroupMemberInfo(ctx, req.(*GetGroupMemberInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RequestHandler_GetFriendList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BasicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).GetFriendList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_GetFriendList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).GetFriendList(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +316,32 @@ var RequestHandler_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RequestHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "BotRequestMarshal",
-			Handler:    _RequestHandler_BotRequestMarshal_Handler,
+			MethodName: "SendGroupMessage",
+			Handler:    _RequestHandler_SendGroupMessage_Handler,
+		},
+		{
+			MethodName: "SendFriendMessage",
+			Handler:    _RequestHandler_SendFriendMessage_Handler,
+		},
+		{
+			MethodName: "MessageRecall",
+			Handler:    _RequestHandler_MessageRecall_Handler,
+		},
+		{
+			MethodName: "GetMessage",
+			Handler:    _RequestHandler_GetMessage_Handler,
+		},
+		{
+			MethodName: "GetGroupInfo",
+			Handler:    _RequestHandler_GetGroupInfo_Handler,
+		},
+		{
+			MethodName: "GetGroupMemberInfo",
+			Handler:    _RequestHandler_GetGroupMemberInfo_Handler,
+		},
+		{
+			MethodName: "GetFriendList",
+			Handler:    _RequestHandler_GetFriendList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
