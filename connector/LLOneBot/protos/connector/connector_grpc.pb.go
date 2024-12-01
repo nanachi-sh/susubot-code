@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Connector_Connect_FullMethodName = "/basic.connector.Connector/Connect"
-	Connector_Read_FullMethodName    = "/basic.connector.Connector/Read"
-	Connector_Write_FullMethodName   = "/basic.connector.Connector/Write"
-	Connector_Close_FullMethodName   = "/basic.connector.Connector/Close"
+	Connector_Connect_FullMethodName = "/Connector/Connect"
+	Connector_Read_FullMethodName    = "/Connector/Read"
+	Connector_Write_FullMethodName   = "/Connector/Write"
+	Connector_Close_FullMethodName   = "/Connector/Close"
 )
 
 // ConnectorClient is the client API for Connector service.
@@ -212,7 +212,7 @@ func _Connector_Close_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Connector_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "basic.connector.Connector",
+	ServiceName: "Connector",
 	HandlerType: (*ConnectorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ResponseHandler_BotResponseUnmarshal_FullMethodName = "/basic.handler.response.ResponseHandler/BotResponseUnmarshal"
+	ResponseHandler_BotResponseUnmarshal_FullMethodName = "/ResponseHandler/BotResponseUnmarshal"
 )
 
 // ResponseHandlerClient is the client API for ResponseHandler service.
@@ -108,7 +108,7 @@ func _ResponseHandler_BotResponseUnmarshal_Handler(srv interface{}, ctx context.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ResponseHandler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "basic.handler.response.ResponseHandler",
+	ServiceName: "ResponseHandler",
 	HandlerType: (*ResponseHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

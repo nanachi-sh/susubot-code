@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RequestHandler_BotRequestMarshal_FullMethodName = "/basic.handler.request.RequestHandler/BotRequestMarshal"
+	RequestHandler_BotRequestMarshal_FullMethodName = "/RequestHandler/BotRequestMarshal"
 )
 
 // RequestHandlerClient is the client API for RequestHandler service.
@@ -108,7 +108,7 @@ func _RequestHandler_BotRequestMarshal_Handler(srv interface{}, ctx context.Cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RequestHandler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "basic.handler.request.RequestHandler",
+	ServiceName: "RequestHandler",
 	HandlerType: (*RequestHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
