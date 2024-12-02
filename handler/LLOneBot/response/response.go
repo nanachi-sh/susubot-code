@@ -1197,6 +1197,7 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
 		defer cancel()
 		var wg sync.WaitGroup
+		fmt.Println(j.UserId, j.OperatorId)
 		// 同一人
 		if j.UserId == j.OperatorId {
 			useridStr := strconv.FormatInt(j.UserId, 10)
