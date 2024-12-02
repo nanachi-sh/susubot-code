@@ -1,14 +1,5 @@
 package define
 
-import (
-	"net"
-	"os"
-)
-
-var (
-	GatewayIP = net.ParseIP(os.Getenv("GATEWAY_IP"))
-)
-
 type MessageChain struct {
 	Data map[string]any `json:"data"`
 	Type string         `json:"type"`
