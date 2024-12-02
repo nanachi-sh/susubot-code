@@ -1217,14 +1217,6 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 				return nil, err
 			}
 			go func() {
-				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-					Buf: buf,
-				}); err != nil {
-					writeCh <- err
-					return
-				}
-			}()
-			go func() {
 				for {
 					resp, err := stream.Recv()
 					if err != nil {
@@ -1251,6 +1243,15 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 						continue
 					}
 					readCh <- ceh
+					return
+				}
+			}()
+			go func() {
+				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+					Buf: buf,
+				}); err != nil {
+					writeCh <- err
+					return
 				}
 			}()
 			select {
@@ -1267,20 +1268,14 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 					}
 					targetName = &ggmi.UserName
 				}
+			case <-ctx.Done():
+				return nil, errors.New("获取额外用户信息超时")
 			}
 			// 获取操作者信息
 			buf, err = request.GetGroupMemberInfo(groupidStr, operatoridStr, &operatorinfo_echo)
 			if err != nil {
 				return nil, err
 			}
-			go func() {
-				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-					Buf: buf,
-				}); err != nil {
-					writeCh <- err
-					return
-				}
-			}()
 			go func() {
 				for {
 					resp, err := stream.Recv()
@@ -1308,6 +1303,15 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 						continue
 					}
 					readCh <- ceh
+					return
+				}
+			}()
+			go func() {
+				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+					Buf: buf,
+				}); err != nil {
+					writeCh <- err
+					return
 				}
 			}()
 			select {
@@ -1324,6 +1328,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 					}
 					operatorName = &ggmi.UserName
 				}
+			case <-ctx.Done():
+				return nil, errors.New("获取额外用户信息超时")
 			}
 		}
 	}
