@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"sync"
 	"time"
@@ -1201,7 +1202,7 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 		// 同一人
 		if j.UserId == j.OperatorId {
 			useridStr := strconv.FormatInt(j.UserId, 10)
-			userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+			userinfo_echo := strconv.FormatInt(rand.Int63(), 10)
 			writeCh := make(chan error, 1)
 			readCh := make(chan any, 1)
 			wg.Add(2)
@@ -1315,8 +1316,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 		} else { //不同人
 			useridStr := strconv.FormatInt(j.UserId, 10)
 			operatoridStr := strconv.FormatInt(j.OperatorId, 10)
-			userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
-			operatorinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+			userinfo_echo := strconv.FormatInt(rand.Int63(), 10)
+			operatorinfo_echo := strconv.FormatInt(rand.Int63(), 10)
 			writeCh := make(chan error, 2)
 			readCh := make(chan any, 2)
 			wg.Add(3)
