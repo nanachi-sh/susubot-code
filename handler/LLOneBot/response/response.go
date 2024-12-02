@@ -40,7 +40,8 @@ type responseH struct {
 	buf   []byte
 	rtype handler.ResponseType
 
-	cet *handler.CmdEventType
+	cet   *handler.CmdEventType
+	extra bool
 }
 
 type botEventH struct {
@@ -758,6 +759,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 	case handler.QQEventType_QQEventType_GroupAdd:
 		qegah := new(qqevent_groupAddH)
 		qegah.buf = rh.buf
+		qegah.extra = rh.extra
 		ga, err := qegah.GroupAdd()
 		if err != nil {
 			return nil, err
@@ -786,6 +788,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 	case handler.QQEventType_QQEventType_MessageRecall:
 		qemrh := new(qqevent_messageRecallH)
 		qemrh.buf = rh.buf
+		qemrh.extra = rh.extra
 		mr, err := qemrh.MessageRecall()
 		if err != nil {
 			return nil, err
