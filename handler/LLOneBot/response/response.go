@@ -1372,6 +1372,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 				return nil, err
 			}
 			go func(buf []byte) {
+				fmt.Println(string(buf))
+				defer fmt.Println("1 ok")
 				defer wg.Done()
 				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
 					Buf: buf,
@@ -1386,6 +1388,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 				return nil, err
 			}
 			go func(buf []byte) {
+				fmt.Println(string(buf))
+				defer fmt.Println("2 ok")
 				defer wg.Done()
 				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
 					Buf: buf,
