@@ -47,16 +47,16 @@ func GRPCServe() error {
 	return gs.Serve(l)
 }
 
-func (*responseService) BotResponseUnmarshal(ctx context.Context, req *response_pb.BotResponseUnmarshalRequest) (*response_pb.BotResponseUnmarshalResponse, error) {
+func (*responseService) Unmarshal(ctx context.Context, req *response_pb.UnmarshalRequest) (*response_pb.UnmarshalResponse, error) {
 	type d struct {
-		data *response_pb.BotResponseUnmarshalResponse
+		data *response_pb.UnmarshalResponse
 		err  error
 	}
 	ch := make(chan *d, 1)
 	go func() {
 		ret := &d{}
 		defer func() { ch <- ret }()
-		responseH, err := response.New(req.Buf, req.Type, req.CmdEventType)
+		responseH, err := response.New(req)
 		if err != nil {
 			ret.err = err
 			return

@@ -2,15 +2,39 @@
 package response
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
+	"time"
 
+	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/connector"
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler"
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/response"
+	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/request"
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/response/define"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
+
+var (
+	grpcClient   *grpc.ClientConn
+	connectorCtx context.Context
+)
+
+func init() {
+	c, err := grpc.NewClient(fmt.Sprintf("%v:2080", define.GatewayIP.String()), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	grpcClient = c
+	connectorCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
+		"service-target": "connector",
+	}))
+}
 
 type responseH struct {
 	buf   []byte
@@ -49,8 +73,9 @@ type (
 	}
 
 	qqevent_groupAddH struct {
-		d   response.Response_QQEvent_GroupAdd
-		buf []byte
+		d     response.Response_QQEvent_GroupAdd
+		buf   []byte
+		extra bool
 	}
 
 	qqevent_groupRemoveH struct {
@@ -59,23 +84,26 @@ type (
 	}
 
 	qqevent_messageRecallH struct {
-		d   response.Response_QQEvent_MessageRecall
-		buf []byte
+		d     response.Response_QQEvent_MessageRecall
+		buf   []byte
+		extra bool
 	}
 )
 
-func New(buf []byte, rt *handler.ResponseType, cet *handler.CmdEventType) (*responseH, error) {
-	if rt == nil {
-		ret, err := matchType(buf)
+func New(req *response.UnmarshalRequest) (*responseH, error) {
+	rh := &responseH{
+		buf: req.Buf,
+		cet: req.CmdEventType,
+	}
+	t := req.Type
+	if t == nil {
+		ret, err := rh.matchType()
 		if err != nil {
 			return nil, err
 		}
-		rt = &ret
-	}
-	rh := &responseH{
-		buf:   buf,
-		rtype: *rt,
-		cet:   cet,
+		rh.rtype = ret
+	} else {
+		rh.rtype = *t
 	}
 	return rh, nil
 }
@@ -186,13 +214,16 @@ func unmarshalMessageChain(mc []*define.MessageChain) ([]*handler.MessageChainOb
 	return ret, nil
 }
 
-func matchType(buf []byte) (handler.ResponseType, error) {
+func (rh *responseH) matchType() (handler.ResponseType, error) {
 	j := new(define.JSON_responseType)
-	if err := json.Unmarshal(buf, j); err != nil {
+	if err := json.Unmarshal(rh.buf, j); err != nil {
 		return -1, err
 	}
-	if j.PostType == nil {
+	if j.Echo != nil {
 		return handler.ResponseType_ResponseType_CmdEvent, nil
+	}
+	if j.PostType == nil {
+		return -1, errors.New("响应事件类型无匹配，PostType为nil")
 	} else {
 		switch pt := *j.PostType; pt {
 		case "message":
@@ -207,8 +238,8 @@ func matchType(buf []byte) (handler.ResponseType, error) {
 	}
 }
 
-func (rh *responseH) MarshalToResponse() (*response.BotResponseUnmarshalResponse, error) {
-	ret := new(response.BotResponseUnmarshalResponse)
+func (rh *responseH) MarshalToResponse() (*response.UnmarshalResponse, error) {
+	ret := new(response.UnmarshalResponse)
 	ret.Type = &rh.rtype
 	switch rh.rtype {
 	case handler.ResponseType_ResponseType_BotEvent:
@@ -872,14 +903,156 @@ func (qegah *qqevent_groupAddH) direct() (*response.Response_QQEvent_GroupAdd_Di
 	if err := json.Unmarshal(qegah.buf, j); err != nil {
 		return nil, err
 	}
+	var (
+		joinerName   *string
+		approverName *string
+	)
+	if qegah.extra {
+		connectorClient := connector.NewConnectorClient(grpcClient)
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		useridStr := strconv.FormatInt(j.UserId, 10)
+		operatoridStr := strconv.FormatInt(j.OperatorId, 10)
+		userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+		operatorinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+		writeCh := make(chan error, 2)
+		readCh := make(chan any, 2)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		var wg sync.WaitGroup
+		wg.Add(3)
+		// 接收信息
+		go func() {
+			defer wg.Done()
+			stream, err := connectorClient.Read(ctx, &connector.Empty{})
+			if err != nil {
+				readCh <- err
+				return
+			}
+			for {
+				resp, err := stream.Recv()
+				if err != nil {
+					readCh <- err
+					return
+				}
+				// 若Context结束，则主动结束
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+				respH := new(responseH)
+				respH.buf = resp.Buf
+				rt, err := respH.matchType()
+				if err != nil {
+					readCh <- err
+					return
+				}
+				if rt != handler.ResponseType_ResponseType_CmdEvent {
+					continue
+				}
+				ceh := new(cmdEventH)
+				ceh.buf = resp.Buf
+				echo, err := ceh.Echo()
+				if err != nil {
+					continue
+				}
+				switch echo {
+				case userinfo_echo, operatorinfo_echo:
+					select {
+					case readCh <- ceh:
+					default:
+						return
+					}
+				}
+			}
+		}()
+		// 获取成员信息
+		buf, err := request.GetGroupMemberInfo(groupidStr, useridStr, &userinfo_echo)
+		if err != nil {
+			return nil, err
+		}
+		go func(buf []byte) {
+			defer wg.Done()
+			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+				Buf: buf,
+			}); err != nil {
+				writeCh <- err
+				return
+			}
+		}(buf)
+		// 获取操作者信息
+		buf, err = request.GetGroupMemberInfo(groupidStr, operatoridStr, &operatorinfo_echo)
+		if err != nil {
+			return nil, err
+		}
+		go func(buf []byte) {
+			defer wg.Done()
+			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+				Buf: buf,
+			}); err != nil {
+				writeCh <- err
+				return
+			}
+		}(buf)
+		// 等待各个操作结束
+		go func() {
+			defer cancel()
+			wg.Wait()
+		}()
+		<-ctx.Done()
+		if ctx.Err() == context.DeadlineExceeded {
+			return nil, errors.New("获取额外用户信息失败")
+		}
+		//检查是否有错误
+		for {
+			select {
+			case err := <-writeCh:
+				if err != nil {
+					return nil, err
+				} else {
+					continue
+				}
+			default:
+			}
+			break
+		}
+		//回收响应
+		for {
+			select {
+			case resp := <-readCh:
+				switch resp := resp.(type) {
+				case error:
+					return nil, resp
+				case *cmdEventH:
+					ggmi, err := resp.GetGroupMemberInfo()
+					if err != nil {
+						return nil, err
+					}
+					echo, err := resp.Echo()
+					if err != nil {
+						return nil, err
+					}
+					switch echo {
+					case userinfo_echo:
+						joinerName = &ggmi.UserName
+					case operatorinfo_echo:
+						approverName = &ggmi.UserName
+					}
+				}
+				continue
+			default:
+			}
+			break
+		}
+	}
 	return &response.Response_QQEvent_GroupAdd_Direct{
 		JoinerId:     strconv.FormatInt(j.UserId, 10),
-		JoinerName:   nil,
+		JoinerName:   joinerName,
 		GroupId:      strconv.FormatInt(j.GroupId, 10),
 		Timestamp:    j.Timestamp,
 		BotId:        strconv.FormatInt(j.SelfId, 10),
 		ApproverId:   strconv.FormatInt(j.OperatorId, 10),
-		ApproverName: nil,
+		ApproverName: approverName,
 	}, nil
 }
 
@@ -1010,12 +1183,271 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 	if err := json.Unmarshal(qemrh.buf, j); err != nil {
 		return nil, err
 	}
+	var (
+		targetName   *string
+		operatorName *string
+	)
+	if qemrh.extra {
+		connectorClient := connector.NewConnectorClient(grpcClient)
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		var wg sync.WaitGroup
+		// 同一人
+		if j.UserId == j.OperatorId {
+			useridStr := strconv.FormatInt(j.UserId, 10)
+			userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+			writeCh := make(chan error, 1)
+			readCh := make(chan any, 1)
+			wg.Add(2)
+			// 接收信息
+			go func() {
+				defer wg.Done()
+				stream, err := connectorClient.Read(ctx, &connector.Empty{})
+				if err != nil {
+					readCh <- err
+					return
+				}
+				for {
+					resp, err := stream.Recv()
+					if err != nil {
+						readCh <- err
+						return
+					}
+					// 若Context结束，则主动结束
+					select {
+					case <-ctx.Done():
+						return
+					default:
+					}
+					respH := new(responseH)
+					respH.buf = resp.Buf
+					rt, err := respH.matchType()
+					if err != nil {
+						readCh <- err
+						return
+					}
+					if rt != handler.ResponseType_ResponseType_CmdEvent {
+						continue
+					}
+					ceh := new(cmdEventH)
+					ceh.buf = resp.Buf
+					echo, err := ceh.Echo()
+					if err != nil {
+						continue
+					}
+					switch echo {
+					case userinfo_echo:
+						select {
+						case readCh <- ceh:
+						default:
+							return
+						}
+					}
+				}
+			}()
+			// 获取成员信息
+			buf, err := request.GetGroupMemberInfo(groupidStr, useridStr, &userinfo_echo)
+			if err != nil {
+				return nil, err
+			}
+			go func(buf []byte) {
+				defer wg.Done()
+				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+					Buf: buf,
+				}); err != nil {
+					writeCh <- err
+					return
+				}
+			}(buf)
+			// 等待各个操作结束
+			go func() {
+				defer cancel()
+				wg.Wait()
+			}()
+			<-ctx.Done()
+			if ctx.Err() == context.DeadlineExceeded {
+				return nil, errors.New("获取额外用户信息失败")
+			}
+			//检查是否有错误
+			for {
+				select {
+				case err := <-writeCh:
+					if err != nil {
+						return nil, err
+					} else {
+						continue
+					}
+				default:
+				}
+				break
+			}
+			//回收响应
+			for {
+				select {
+				case resp := <-readCh:
+					switch resp := resp.(type) {
+					case error:
+						return nil, resp
+					case *cmdEventH:
+						ggmi, err := resp.GetGroupMemberInfo()
+						if err != nil {
+							return nil, err
+						}
+						echo, err := resp.Echo()
+						if err != nil {
+							return nil, err
+						}
+						switch echo {
+						case userinfo_echo:
+							targetName = &ggmi.UserName
+						}
+					}
+					continue
+				default:
+				}
+				break
+			}
+		} else { //不同人
+			useridStr := strconv.FormatInt(j.UserId, 10)
+			operatoridStr := strconv.FormatInt(j.OperatorId, 10)
+			userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+			operatorinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
+			writeCh := make(chan error, 2)
+			readCh := make(chan any, 2)
+			wg.Add(3)
+			// 接收信息
+			go func() {
+				defer wg.Done()
+				stream, err := connectorClient.Read(ctx, &connector.Empty{})
+				if err != nil {
+					readCh <- err
+					return
+				}
+				for {
+					resp, err := stream.Recv()
+					if err != nil {
+						readCh <- err
+						return
+					}
+					// 若Context结束，则主动结束
+					select {
+					case <-ctx.Done():
+						return
+					default:
+					}
+					respH := new(responseH)
+					respH.buf = resp.Buf
+					rt, err := respH.matchType()
+					if err != nil {
+						readCh <- err
+						return
+					}
+					if rt != handler.ResponseType_ResponseType_CmdEvent {
+						continue
+					}
+					ceh := new(cmdEventH)
+					ceh.buf = resp.Buf
+					echo, err := ceh.Echo()
+					if err != nil {
+						continue
+					}
+					switch echo {
+					case userinfo_echo, operatorinfo_echo:
+						select {
+						case readCh <- ceh:
+						default:
+							return
+						}
+					}
+				}
+			}()
+			// 获取成员信息
+			buf, err := request.GetGroupMemberInfo(groupidStr, useridStr, &userinfo_echo)
+			if err != nil {
+				return nil, err
+			}
+			go func(buf []byte) {
+				defer wg.Done()
+				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+					Buf: buf,
+				}); err != nil {
+					writeCh <- err
+					return
+				}
+			}(buf)
+			// 获取操作者信息
+			buf, err = request.GetGroupMemberInfo(groupidStr, operatoridStr, &operatorinfo_echo)
+			if err != nil {
+				return nil, err
+			}
+			go func(buf []byte) {
+				defer wg.Done()
+				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+					Buf: buf,
+				}); err != nil {
+					writeCh <- err
+					return
+				}
+			}(buf)
+			// 等待各个操作结束
+			go func() {
+				defer cancel()
+				wg.Wait()
+			}()
+			<-ctx.Done()
+			if ctx.Err() == context.DeadlineExceeded {
+				return nil, errors.New("获取额外用户信息失败")
+			}
+			//检查是否有错误
+			for {
+				select {
+				case err := <-writeCh:
+					if err != nil {
+						return nil, err
+					} else {
+						continue
+					}
+				default:
+				}
+				break
+			}
+			//回收响应
+			for {
+				select {
+				case resp := <-readCh:
+					switch resp := resp.(type) {
+					case error:
+						return nil, resp
+					case *cmdEventH:
+						ggmi, err := resp.GetGroupMemberInfo()
+						if err != nil {
+							return nil, err
+						}
+						echo, err := resp.Echo()
+						if err != nil {
+							return nil, err
+						}
+						switch echo {
+						case userinfo_echo:
+							targetName = &ggmi.UserName
+						case operatorinfo_echo:
+							operatorName = &ggmi.UserName
+						}
+					}
+					continue
+				default:
+				}
+				break
+			}
+		}
+	}
 	return &response.Response_QQEvent_MessageRecall_Group{
 		TargetId:     strconv.FormatInt(j.UserId, 10),
-		TargetName:   nil,
+		TargetName:   targetName,
 		Timestamp:    j.Timestamp,
 		OperatorId:   strconv.FormatInt(j.OperatorId, 10),
-		OperatorName: nil,
+		OperatorName: operatorName,
 		GroupId:      strconv.FormatInt(j.GroupId, 10),
 		BotId:        strconv.FormatInt(j.SelfId, 10),
 		MessageId:    strconv.FormatInt(j.MessageId, 10),

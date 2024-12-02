@@ -5,7 +5,7 @@ import "handler/LLOneBot/protos/handler/define.proto";
 option go_package = "github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/handler/response";
 
 service ResponseHandler {
-    rpc BotResponseUnmarshal (BotResponseUnmarshalRequest) returns (BotResponseUnmarshalResponse);
+    rpc Unmarshal (UnmarshalRequest) returns (UnmarshalResponse);
 }
 
 message Response_Message { //消息事件
@@ -223,13 +223,14 @@ message Response_BotEvent_Connected {
     string BotId = 2;
 }
 
-message BotResponseUnmarshalRequest {
+message UnmarshalRequest {
     bytes Buf = 1;
     optional define.ResponseType Type = 2;
     optional define.CmdEventType CmdEventType = 3; //ResponseType == CmdEvent need
+    bool ExtraInfo = 4;
 }
 
-message BotResponseUnmarshalResponse {
+message UnmarshalResponse {
     optional define.ResponseType Type = 1;
     optional Response_Message Message = 2;
     optional Response_QQEvent QQEvent = 3;

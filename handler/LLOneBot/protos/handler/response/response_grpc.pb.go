@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ResponseHandler_BotResponseUnmarshal_FullMethodName = "/ResponseHandler/BotResponseUnmarshal"
+	ResponseHandler_Unmarshal_FullMethodName = "/ResponseHandler/Unmarshal"
 )
 
 // ResponseHandlerClient is the client API for ResponseHandler service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ResponseHandlerClient interface {
-	BotResponseUnmarshal(ctx context.Context, in *BotResponseUnmarshalRequest, opts ...grpc.CallOption) (*BotResponseUnmarshalResponse, error)
+	Unmarshal(ctx context.Context, in *UnmarshalRequest, opts ...grpc.CallOption) (*UnmarshalResponse, error)
 }
 
 type responseHandlerClient struct {
@@ -37,10 +37,10 @@ func NewResponseHandlerClient(cc grpc.ClientConnInterface) ResponseHandlerClient
 	return &responseHandlerClient{cc}
 }
 
-func (c *responseHandlerClient) BotResponseUnmarshal(ctx context.Context, in *BotResponseUnmarshalRequest, opts ...grpc.CallOption) (*BotResponseUnmarshalResponse, error) {
+func (c *responseHandlerClient) Unmarshal(ctx context.Context, in *UnmarshalRequest, opts ...grpc.CallOption) (*UnmarshalResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(BotResponseUnmarshalResponse)
-	err := c.cc.Invoke(ctx, ResponseHandler_BotResponseUnmarshal_FullMethodName, in, out, cOpts...)
+	out := new(UnmarshalResponse)
+	err := c.cc.Invoke(ctx, ResponseHandler_Unmarshal_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *responseHandlerClient) BotResponseUnmarshal(ctx context.Context, in *Bo
 // All implementations must embed UnimplementedResponseHandlerServer
 // for forward compatibility.
 type ResponseHandlerServer interface {
-	BotResponseUnmarshal(context.Context, *BotResponseUnmarshalRequest) (*BotResponseUnmarshalResponse, error)
+	Unmarshal(context.Context, *UnmarshalRequest) (*UnmarshalResponse, error)
 	mustEmbedUnimplementedResponseHandlerServer()
 }
 
@@ -62,8 +62,8 @@ type ResponseHandlerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedResponseHandlerServer struct{}
 
-func (UnimplementedResponseHandlerServer) BotResponseUnmarshal(context.Context, *BotResponseUnmarshalRequest) (*BotResponseUnmarshalResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BotResponseUnmarshal not implemented")
+func (UnimplementedResponseHandlerServer) Unmarshal(context.Context, *UnmarshalRequest) (*UnmarshalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unmarshal not implemented")
 }
 func (UnimplementedResponseHandlerServer) mustEmbedUnimplementedResponseHandlerServer() {}
 func (UnimplementedResponseHandlerServer) testEmbeddedByValue()                         {}
@@ -86,20 +86,20 @@ func RegisterResponseHandlerServer(s grpc.ServiceRegistrar, srv ResponseHandlerS
 	s.RegisterService(&ResponseHandler_ServiceDesc, srv)
 }
 
-func _ResponseHandler_BotResponseUnmarshal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BotResponseUnmarshalRequest)
+func _ResponseHandler_Unmarshal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnmarshalRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResponseHandlerServer).BotResponseUnmarshal(ctx, in)
+		return srv.(ResponseHandlerServer).Unmarshal(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResponseHandler_BotResponseUnmarshal_FullMethodName,
+		FullMethod: ResponseHandler_Unmarshal_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResponseHandlerServer).BotResponseUnmarshal(ctx, req.(*BotResponseUnmarshalRequest))
+		return srv.(ResponseHandlerServer).Unmarshal(ctx, req.(*UnmarshalRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +112,8 @@ var ResponseHandler_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ResponseHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "BotResponseUnmarshal",
-			Handler:    _ResponseHandler_BotResponseUnmarshal_Handler,
+			MethodName: "Unmarshal",
+			Handler:    _ResponseHandler_Unmarshal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
