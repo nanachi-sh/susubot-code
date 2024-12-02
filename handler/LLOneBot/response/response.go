@@ -93,8 +93,9 @@ type (
 
 func New(req *response.UnmarshalRequest) (*responseH, error) {
 	rh := &responseH{
-		buf: req.Buf,
-		cet: req.CmdEventType,
+		buf:   req.Buf,
+		cet:   req.CmdEventType,
+		extra: req.ExtraInfo,
 	}
 	t := req.Type
 	if t == nil {
@@ -1138,7 +1139,6 @@ func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemov
 }
 
 func (qemrh *qqevent_messageRecallH) MessageRecall() (*response.Response_QQEvent_MessageRecall, error) {
-	fmt.Println("is messagerecall")
 	t, err := qemrh.matchType()
 	if err != nil {
 		return nil, err
