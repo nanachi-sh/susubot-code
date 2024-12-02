@@ -1242,9 +1242,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 					}
 					switch echo {
 					case userinfo_echo:
-						select {
-						case readCh <- ceh:
-						default:
+						readCh <- ceh
+						if cap(readCh) == len(readCh) {
 							return
 						}
 					}
@@ -1358,9 +1357,8 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 					}
 					switch echo {
 					case userinfo_echo, operatorinfo_echo:
-						select {
-						case readCh <- ceh:
-						default:
+						readCh <- ceh
+						if cap(readCh) == len(readCh) {
 							return
 						}
 					}
