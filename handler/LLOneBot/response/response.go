@@ -1320,7 +1320,7 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 			operatorinfo_echo := strconv.FormatInt(rand.Int63(), 10)
 			writeCh := make(chan error, 2)
 			readCh := make(chan any, 2)
-			wg.Add(3)
+			wg.Add(1)
 			// 接收信息
 			go func() {
 				defer wg.Done()
@@ -1371,33 +1371,21 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 			if err != nil {
 				return nil, err
 			}
-			go func(buf []byte) {
-				fmt.Println(string(buf))
-				defer fmt.Println("1 ok")
-				defer wg.Done()
-				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-					Buf: buf,
-				}); err != nil {
-					writeCh <- err
-					return
-				}
-			}(buf)
+			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+				Buf: buf,
+			}); err != nil {
+				panic(err)
+			}
 			// 获取操作者信息
 			buf, err = request.GetGroupMemberInfo(groupidStr, operatoridStr, &operatorinfo_echo)
 			if err != nil {
 				return nil, err
 			}
-			go func(buf []byte) {
-				fmt.Println(string(buf))
-				defer fmt.Println("2 ok")
-				defer wg.Done()
-				if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-					Buf: buf,
-				}); err != nil {
-					writeCh <- err
-					return
-				}
-			}(buf)
+			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+				Buf: buf,
+			}); err != nil {
+				panic(err)
+			}
 			// 等待各个操作结束
 			go func() {
 				defer cancel()
