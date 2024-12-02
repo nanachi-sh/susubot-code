@@ -1138,6 +1138,7 @@ func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemov
 }
 
 func (qemrh *qqevent_messageRecallH) MessageRecall() (*response.Response_QQEvent_MessageRecall, error) {
+	fmt.Println("is messagerecall")
 	t, err := qemrh.matchType()
 	if err != nil {
 		return nil, err
