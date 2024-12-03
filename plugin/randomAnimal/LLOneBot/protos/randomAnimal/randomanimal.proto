@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/nanachi-sh/susubot-code/plugin/randomAnimal/LLOneBot/protos/randomAnimal";
+
+service randomAnimal {
+    rpc GetDog (Empty) returns (BasicResponse);
+    rpc GetFox (Empty) returns (BasicResponse);
+    rpc GetDuck (Empty) returns (BasicResponse);
+    rpc GetCat (Empty) returns (BasicResponse);
+    rpc GetChiken_CXK (Empty) returns (BasicResponse);
+}
+
+enum Type {
+    Image = 0;
+    Video = 1;
+}
+
+message Empty{}
+
+message BasicResponse {
+    Type Type = 1;
+    bytes Buf = 2;
+}
