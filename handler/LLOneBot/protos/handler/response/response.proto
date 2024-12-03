@@ -140,6 +140,7 @@ message Response_CmdEvent {
     optional Response_CmdEvent_GetGroupMemberInfo GetGroupMemberInfo = 4;
     optional Response_CmdEvent_GetMessage GetMessage = 5;
     optional Response_CmdEvent_GetFriendList GetFriendList = 6;
+    optional Response_CmdEvent_GetFriendInfo GetFriendInfo = 7;
 }
 message Response_CmdEvent_GetGroupInfo {
     bool OK = 1;
@@ -200,6 +201,14 @@ message Response_CmdEvent_GetFriendList {
     bool OK = 1;
     optional string Retcode = 2;
     repeated FriendInfo Friends = 3;
+}
+
+message Response_CmdEvent_GetFriendInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string UserName = 3;
+    string UserId = 4;
+    optional string Remark = 5;
 }
 
 message Response_BotEvent {

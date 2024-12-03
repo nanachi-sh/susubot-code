@@ -281,3 +281,32 @@ func (*requestService) GetFriendList(ctx context.Context, req *request_pb.BasicR
 		return x.data, nil
 	}
 }
+
+func (*requestService) GetFriendInfo(ctx context.Context, req *request_pb.GetFriendInfoRequest) (*request_pb.BasicResponse, error) {
+	type d struct {
+		data *request_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		buf, err := request.GetFriendInfo(req.FriendId, req.Echo)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = &request_pb.BasicResponse{
+			Buf: buf,
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}

@@ -26,6 +26,7 @@ const (
 	RequestHandler_GetGroupInfo_FullMethodName       = "/RequestHandler/GetGroupInfo"
 	RequestHandler_GetGroupMemberInfo_FullMethodName = "/RequestHandler/GetGroupMemberInfo"
 	RequestHandler_GetFriendList_FullMethodName      = "/RequestHandler/GetFriendList"
+	RequestHandler_GetFriendInfo_FullMethodName      = "/RequestHandler/GetFriendInfo"
 )
 
 // RequestHandlerClient is the client API for RequestHandler service.
@@ -39,6 +40,7 @@ type RequestHandlerClient interface {
 	GetGroupInfo(ctx context.Context, in *GetGroupInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 	GetGroupMemberInfo(ctx context.Context, in *GetGroupMemberInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 	GetFriendList(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetFriendInfo(ctx context.Context, in *GetFriendInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
 
 type requestHandlerClient struct {
@@ -119,6 +121,16 @@ func (c *requestHandlerClient) GetFriendList(ctx context.Context, in *BasicReque
 	return out, nil
 }
 
+func (c *requestHandlerClient) GetFriendInfo(ctx context.Context, in *GetFriendInfoRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, RequestHandler_GetFriendInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RequestHandlerServer is the server API for RequestHandler service.
 // All implementations must embed UnimplementedRequestHandlerServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type RequestHandlerServer interface {
 	GetGroupInfo(context.Context, *GetGroupInfoRequest) (*BasicResponse, error)
 	GetGroupMemberInfo(context.Context, *GetGroupMemberInfoRequest) (*BasicResponse, error)
 	GetFriendList(context.Context, *BasicRequest) (*BasicResponse, error)
+	GetFriendInfo(context.Context, *GetFriendInfoRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedRequestHandlerServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedRequestHandlerServer) GetGroupMemberInfo(context.Context, *Ge
 }
 func (UnimplementedRequestHandlerServer) GetFriendList(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendList not implemented")
+}
+func (UnimplementedRequestHandlerServer) GetFriendInfo(context.Context, *GetFriendInfoRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendInfo not implemented")
 }
 func (UnimplementedRequestHandlerServer) mustEmbedUnimplementedRequestHandlerServer() {}
 func (UnimplementedRequestHandlerServer) testEmbeddedByValue()                        {}
@@ -308,6 +324,24 @@ func _RequestHandler_GetFriendList_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RequestHandler_GetFriendInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RequestHandlerServer).GetFriendInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RequestHandler_GetFriendInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RequestHandlerServer).GetFriendInfo(ctx, req.(*GetFriendInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RequestHandler_ServiceDesc is the grpc.ServiceDesc for RequestHandler service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var RequestHandler_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFriendList",
 			Handler:    _RequestHandler_GetFriendList_Handler,
+		},
+		{
+			MethodName: "GetFriendInfo",
+			Handler:    _RequestHandler_GetFriendInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/handler/LLOneBot/protos/connector"
@@ -70,8 +69,9 @@ type messageH struct {
 
 type (
 	qqeventH struct {
-		d   response.Response_QQEvent
-		buf []byte
+		d     response.Response_QQEvent
+		buf   []byte
+		extra bool
 	}
 
 	qqevent_groupAddH struct {
@@ -81,8 +81,9 @@ type (
 	}
 
 	qqevent_groupRemoveH struct {
-		d   response.Response_QQEvent_GroupRemove
-		buf []byte
+		d     response.Response_QQEvent_GroupRemove
+		buf   []byte
+		extra bool
 	}
 
 	qqevent_messageRecallH struct {
@@ -380,6 +381,8 @@ func (rh *responseH) CmdEvent() (*response.Response_CmdEvent, error) {
 			return nil, err
 		}
 		ceh.d.GetMessage = gm
+	case handler.CmdEventType_CmdEventType_GetFriendInfo:
+
 	}
 	return &ceh.d, nil
 }
@@ -390,6 +393,31 @@ func (ceh *cmdEventH) Echo() (string, error) {
 		return "", err
 	}
 	return j.Echo, nil
+}
+
+func (ceh *cmdEventH) GetFriendInfo() (*response.Response_CmdEvent_GetFriendInfo, error) {
+	j := new(define.JSON_cmdEvent_GetFriendInfo)
+	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		return nil, err
+	}
+	ok := false
+	if j.Status == define.JSON_cmdEvent_Status_OK {
+		ok = true
+	}
+	ret := new(response.Response_CmdEvent_GetFriendInfo)
+	if ok {
+		ret = &response.Response_CmdEvent_GetFriendInfo{
+			OK:       true,
+			UserName: j.NickName,
+			UserId:   strconv.FormatInt(j.UserId, 10),
+			Remark:   &j.Remark,
+		}
+	} else {
+		ret.OK = false
+		rc := strconv.FormatInt(int64(j.Retcode), 10)
+		ret.Retcode = &rc
+	}
+	return ret, nil
 }
 
 func (ceh *cmdEventH) GetFriendList() (*response.Response_CmdEvent_GetFriendList, error) {
@@ -756,6 +784,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 	if err != nil {
 		return nil, err
 	}
+	qeh.extra = rh.extra
 	qeh.d.Type = &t
 	switch t {
 	case handler.QQEventType_QQEventType_GroupAdd:
@@ -770,6 +799,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 	case handler.QQEventType_QQEventType_GroupRemove:
 		qegrh := new(qqevent_groupRemoveH)
 		qegrh.buf = rh.buf
+		qegrh.extra = rh.extra
 		gr, err := qegrh.GroupRemove()
 		if err != nil {
 			return nil, err
@@ -832,12 +862,38 @@ func (qeh *qqeventH) groupMute() (*response.Response_QQEvent_GroupMute, error) {
 	if err := json.Unmarshal(qeh.buf, j); err != nil {
 		return nil, err
 	}
+	var (
+		targetName   *string
+		operatorName *string
+	)
+	if qeh.extra {
+		connectorClient := connector.NewConnectorClient(grpcClient)
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		useridStr := strconv.FormatInt(j.UserId, 10)
+		operatoridStr := strconv.FormatInt(j.OperatorId, 10)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		stream, err := connectorClient.Read(ctx, &connector.Empty{})
+		if err != nil {
+			return nil, err
+		}
+		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		targetName = &user_ggmi.UserName
+		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		operatorName = &operator_ggmi.UserName
+	}
 	return &response.Response_QQEvent_GroupMute{
 		TargetId:     strconv.FormatInt(j.UserId, 10),
-		TargetName:   nil,
+		TargetName:   targetName,
 		Timestamp:    j.Timestamp,
 		OperatorId:   strconv.FormatInt(j.OperatorId, 10),
-		OperatorName: nil,
+		OperatorName: operatorName,
 		Duration:     int32(j.Duration),
 		GroupId:      strconv.FormatInt(j.GroupId, 10),
 		BotId:        strconv.FormatInt(j.SelfId, 10),
@@ -849,12 +905,38 @@ func (qeh *qqeventH) groupUnmute() (*response.Response_QQEvent_GroupUnmute, erro
 	if err := json.Unmarshal(qeh.buf, j); err != nil {
 		return nil, err
 	}
+	var (
+		targetName   *string
+		operatorName *string
+	)
+	if qeh.extra {
+		connectorClient := connector.NewConnectorClient(grpcClient)
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		useridStr := strconv.FormatInt(j.UserId, 10)
+		operatoridStr := strconv.FormatInt(j.OperatorId, 10)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		stream, err := connectorClient.Read(ctx, &connector.Empty{})
+		if err != nil {
+			return nil, err
+		}
+		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		targetName = &user_ggmi.UserName
+		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		operatorName = &operator_ggmi.UserName
+	}
 	return &response.Response_QQEvent_GroupUnmute{
 		TargetId:     strconv.FormatInt(j.UserId, 10),
-		TargetName:   nil,
+		TargetName:   targetName,
 		Timestamp:    j.Timestamp,
 		OperatorId:   strconv.FormatInt(j.OperatorId, 10),
-		OperatorName: nil,
+		OperatorName: operatorName,
 		GroupId:      strconv.FormatInt(j.GroupId, 10),
 		BotId:        strconv.FormatInt(j.SelfId, 10),
 	}, nil
@@ -917,138 +999,22 @@ func (qegah *qqevent_groupAddH) direct() (*response.Response_QQEvent_GroupAdd_Di
 		groupidStr := strconv.FormatInt(j.GroupId, 10)
 		useridStr := strconv.FormatInt(j.UserId, 10)
 		operatoridStr := strconv.FormatInt(j.OperatorId, 10)
-		userinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
-		operatorinfo_echo := strconv.FormatInt(time.Now().UnixNano(), 10)
-		writeCh := make(chan error, 2)
-		readCh := make(chan any, 2)
 		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
 		defer cancel()
-		var wg sync.WaitGroup
-		wg.Add(3)
-		// 接收信息
-		go func() {
-			defer wg.Done()
-			stream, err := connectorClient.Read(ctx, &connector.Empty{})
-			if err != nil {
-				readCh <- err
-				return
-			}
-			for {
-				resp, err := stream.Recv()
-				if err != nil {
-					readCh <- err
-					return
-				}
-				// 若Context结束，则主动结束
-				select {
-				case <-ctx.Done():
-					return
-				default:
-				}
-				respH := new(responseH)
-				respH.buf = resp.Buf
-				rt, err := respH.matchType()
-				if err != nil {
-					readCh <- err
-					return
-				}
-				if rt != handler.ResponseType_ResponseType_CmdEvent {
-					continue
-				}
-				ceh := new(cmdEventH)
-				ceh.buf = resp.Buf
-				echo, err := ceh.Echo()
-				if err != nil {
-					continue
-				}
-				switch echo {
-				case userinfo_echo, operatorinfo_echo:
-					select {
-					case readCh <- ceh:
-					default:
-						return
-					}
-				}
-			}
-		}()
-		// 获取成员信息
-		buf, err := request.GetGroupMemberInfo(groupidStr, useridStr, &userinfo_echo)
+		stream, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
 			return nil, err
 		}
-		go func(buf []byte) {
-			defer wg.Done()
-			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-				Buf: buf,
-			}); err != nil {
-				writeCh <- err
-				return
-			}
-		}(buf)
-		// 获取操作者信息
-		buf, err = request.GetGroupMemberInfo(groupidStr, operatoridStr, &operatorinfo_echo)
+		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
 		if err != nil {
 			return nil, err
 		}
-		go func(buf []byte) {
-			defer wg.Done()
-			if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
-				Buf: buf,
-			}); err != nil {
-				writeCh <- err
-				return
-			}
-		}(buf)
-		// 等待各个操作结束
-		go func() {
-			defer cancel()
-			wg.Wait()
-		}()
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
-			return nil, errors.New("获取额外用户信息失败")
+		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
+		if err != nil {
+			return nil, err
 		}
-		//检查是否有错误
-		for {
-			select {
-			case err := <-writeCh:
-				if err != nil {
-					return nil, err
-				} else {
-					continue
-				}
-			default:
-			}
-			break
-		}
-		//回收响应
-		for {
-			select {
-			case resp := <-readCh:
-				switch resp := resp.(type) {
-				case error:
-					return nil, resp
-				case *cmdEventH:
-					ggmi, err := resp.GetGroupMemberInfo()
-					if err != nil {
-						return nil, err
-					}
-					echo, err := resp.Echo()
-					if err != nil {
-						return nil, err
-					}
-					switch echo {
-					case userinfo_echo:
-						joinerName = &ggmi.UserName
-					case operatorinfo_echo:
-						approverName = &ggmi.UserName
-					}
-				}
-				continue
-			default:
-			}
-			break
-		}
+		joinerName = &user_ggmi.UserName
+		approverName = &operator_ggmi.UserName
 	}
 	return &response.Response_QQEvent_GroupAdd_Direct{
 		JoinerId:     strconv.FormatInt(j.UserId, 10),
@@ -1114,9 +1080,21 @@ func (qegrh *qqevent_groupRemoveH) manual() (*response.Response_QQEvent_GroupRem
 	if err := json.Unmarshal(qegrh.buf, j); err != nil {
 		return nil, err
 	}
+	var quiterName *string
+	if qegrh.extra {
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		useridStr := strconv.FormatInt(j.UserId, 10)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, nil)
+		if err != nil {
+			return nil, err
+		}
+		quiterName = &ggmi.UserName
+	}
 	return &response.Response_QQEvent_GroupRemove_Manual{
 		QuiterId:   strconv.FormatInt(j.UserId, 10),
-		QuiterName: nil,
+		QuiterName: quiterName,
 		GroupId:    strconv.FormatInt(j.GroupId, 10),
 		Timestamp:  j.Timestamp,
 		BotId:      strconv.FormatInt(j.SelfId, 10),
@@ -1128,14 +1106,40 @@ func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemov
 	if err := json.Unmarshal(qegrh.buf, j); err != nil {
 		return nil, err
 	}
+	var (
+		quiterName   *string
+		operatorName *string
+	)
+	if qegrh.extra {
+		connectorClient := connector.NewConnectorClient(grpcClient)
+		groupidStr := strconv.FormatInt(j.GroupId, 10)
+		quiteridStr := strconv.FormatInt(j.UserId, 10)
+		operatoridStr := strconv.FormatInt(j.OperatorId, 10)
+		ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+		defer cancel()
+		stream, err := connectorClient.Read(ctx, &connector.Empty{})
+		if err != nil {
+			return nil, err
+		}
+		quiter_ggmi, err := getGroupMemberInfo(ctx, groupidStr, quiteridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
+		if err != nil {
+			return nil, err
+		}
+		quiterName = &quiter_ggmi.UserName
+		operatorName = &operator_ggmi.UserName
+	}
 	return &response.Response_QQEvent_GroupRemove_Kick{
 		TargetId:     strconv.FormatInt(j.UserId, 10),
-		TargetName:   nil,
+		TargetName:   quiterName,
 		GroupId:      strconv.FormatInt(j.GroupId, 10),
 		Timestamp:    j.Timestamp,
 		BotId:        strconv.FormatInt(j.SelfId, 10),
 		OperatorId:   strconv.FormatInt(j.OperatorId, 10),
-		OperatorName: nil,
+		OperatorName: operatorName,
 	}, nil
 }
 
@@ -1241,16 +1245,109 @@ func (qemrh *qqevent_messageRecallH) private() (*response.Response_QQEvent_Messa
 	if err := json.Unmarshal(qemrh.buf, j); err != nil {
 		return nil, err
 	}
+	var recallerName *string
+	ctx, cancel := context.WithTimeout(connectorCtx, time.Second*15)
+	defer cancel()
+	if qemrh.extra {
+		useridStr := strconv.FormatInt(j.UserId, 10)
+		gfi, err := getFriendInfo(ctx, useridStr, nil)
+		if err != nil {
+			return nil, err
+		}
+		recallerName = &gfi.UserName
+	}
 	return &response.Response_QQEvent_MessageRecall_Private{
 		RecallerId:   strconv.FormatInt(j.UserId, 10),
-		RecallerName: nil,
+		RecallerName: recallerName,
 		Timestamp:    j.Timestamp,
 		BotId:        strconv.FormatInt(j.SelfId, 10),
 		MessageId:    strconv.FormatInt(j.MessageId, 10),
 	}, nil
 }
 
+func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grpc.ServerStreamingClient[connector.ReadResponse]) (*cmdEventH, error) {
+	connectorClient := connector.NewConnectorClient(grpcClient)
+	if stream == nil {
+		x, err := connectorClient.Read(ctx, &connector.Empty{})
+		if err != nil {
+			return nil, err
+		}
+		stream = x
+	}
+	writeCh := make(chan error, 1)
+	readCh := make(chan any, 1)
+	//写入
+	go func() {
+		if _, err := connectorClient.Write(ctx, &connector.WriteRequest{
+			Buf: buf,
+		}); err != nil {
+			writeCh <- err
+			return
+		}
+	}()
+	//读取
+	go func() {
+		for {
+			resp, err := stream.Recv()
+			if err != nil {
+				readCh <- err
+				return
+			}
+			respH := new(responseH)
+			respH.buf = resp.Buf
+			rt, err := respH.matchType()
+			if err != nil {
+				readCh <- err
+				return
+			}
+			if rt != handler.ResponseType_ResponseType_CmdEvent {
+				continue
+			}
+			ceh := new(cmdEventH)
+			ceh.buf = resp.Buf
+			echo, err := ceh.Echo()
+			if err != nil {
+				continue
+			}
+			if echo != requestEcho {
+				continue
+			}
+			readCh <- ceh
+			return
+		}
+	}()
+	select {
+	case err := <-writeCh:
+		return nil, err
+	case x := <-readCh:
+		switch x := x.(type) {
+		case error:
+			return nil, x
+		case *cmdEventH:
+			return x, nil
+		default:
+			return nil, errors.New("异常错误")
+		}
+	case <-ctx.Done():
+		return nil, errors.New("获取额外用户信息超时")
+	}
+}
+
 func getGroupMemberInfo(ctx context.Context, groupid, memberid string, stream grpc.ServerStreamingClient[connector.ReadResponse]) (*response.Response_CmdEvent_GetGroupMemberInfo, error) {
+	requestEcho := strconv.FormatInt(rand.Int63(), 10)
+	//获取写入内容
+	buf, err := request.GetGroupMemberInfo(groupid, memberid, &requestEcho)
+	if err != nil {
+		return nil, err
+	}
+	ceh, err := sendCommand(ctx, buf, requestEcho, stream)
+	if err != nil {
+		return nil, err
+	}
+	return ceh.GetGroupMemberInfo()
+}
+
+func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStreamingClient[connector.ReadResponse]) (*response.Response_CmdEvent_GetFriendInfo, error) {
 	connectorClient := connector.NewConnectorClient(grpcClient)
 	if stream == nil {
 		x, err := connectorClient.Read(ctx, &connector.Empty{})
@@ -1263,7 +1360,7 @@ func getGroupMemberInfo(ctx context.Context, groupid, memberid string, stream gr
 	readCh := make(chan any, 1)
 	requestEcho := strconv.FormatInt(rand.Int63(), 10)
 	//获取写入内容
-	buf, err := request.GetGroupMemberInfo(groupid, memberid, &requestEcho)
+	buf, err := request.GetFriendInfo(friendid, &requestEcho)
 	if err != nil {
 		return nil, err
 	}
@@ -1315,7 +1412,7 @@ func getGroupMemberInfo(ctx context.Context, groupid, memberid string, stream gr
 		case error:
 			return nil, err
 		case *cmdEventH:
-			return x.GetGroupMemberInfo()
+			return x.GetFriendInfo()
 		default:
 			return nil, errors.New("异常错误")
 		}

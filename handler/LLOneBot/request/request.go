@@ -16,7 +16,19 @@ const (
 	getGroupMemberInfo = "get_group_member_info"
 	getGroupInfo       = "get_group_info"
 	getFriendList      = "get_friend_list"
+	getFriendInfo      = "get_stranger_info"
 )
+
+func GetFriendInfo(friendid string, echo *string) ([]byte, error) {
+	req := new(define.Request)
+	req.Action = getFriendInfo
+	if echo != nil {
+		req.Echo = *echo
+	}
+	req.Params = new(define.Request_Params)
+	req.Params.UserId = friendid
+	return json.Marshal(req)
+}
 
 func GetFriendList(echo *string) ([]byte, error) {
 	req := new(define.Request)

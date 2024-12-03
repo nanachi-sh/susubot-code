@@ -43,6 +43,14 @@ type (
 		Echo string `json:"echo"`
 	}
 
+	JSON_cmdEvent_GetFriendInfo struct {
+		Status   string `json:"status"`
+		Retcode  int    `json:"retcode"`
+		UserId   int64  `json:"user_id"`
+		NickName string `json:"nickname"`
+		Remark   string `json:"remark"`
+	}
+
 	JSON_cmdEvent_GetFriendList struct {
 		Status  string                              `json:"status"`
 		Retcode int                                 `json:"retcode"`

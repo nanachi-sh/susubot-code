@@ -77,6 +77,7 @@ enum CmdEventType {   //命令响应类型
     CmdEventType_GetGroupMemberInfo = 1; //获取指定群聊指定成员信息
     CmdEventType_GetMessage = 2; //获取消息事件(通过MessageId)
     CmdEventType_GetFriendList = 3;  //获取所有好友信息
+    CmdEventType_GetFriendInfo = 4;  //
 }
 
 enum BotEventType {     //机器人事件类型
