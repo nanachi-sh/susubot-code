@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/log"
 	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/protos/connector"
 	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/protos/handler"
 	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/protos/handler/response"
@@ -23,6 +24,8 @@ import (
 var (
 	grpcClient   *grpc.ClientConn
 	connectorCtx context.Context
+
+	logger = log.Get()
 )
 
 func init() {
@@ -103,6 +106,7 @@ func New(req *response.UnmarshalRequest) (*responseH, error) {
 	if t == nil {
 		ret, err := rh.matchType()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		rh.rtype = ret
@@ -249,24 +253,28 @@ func (rh *responseH) MarshalToResponse() (*response.UnmarshalResponse, error) {
 	case handler.ResponseType_ResponseType_BotEvent:
 		be, err := rh.BotEvent()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ret.BotEvent = be
 	case handler.ResponseType_ResponseType_CmdEvent:
 		ce, err := rh.CmdEvent()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ret.CmdEvent = ce
 	case handler.ResponseType_ResponseType_Message:
 		m, err := rh.Message()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ret.Message = m
 	case handler.ResponseType_ResponseType_QQEvent:
 		qqe, err := rh.QQEvent()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ret.QQEvent = qqe
@@ -279,6 +287,7 @@ func (rh *responseH) BotEvent() (*response.Response_BotEvent, error) {
 	beh.buf = rh.buf
 	t, err := beh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	beh.d.Type = &t
@@ -286,12 +295,14 @@ func (rh *responseH) BotEvent() (*response.Response_BotEvent, error) {
 	case handler.BotEventType_BotEventType_Connected:
 		ret, err := beh.Connected()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		beh.d.Connected = ret
 	case handler.BotEventType_BotEventType_HeartPacket:
 		ret, err := beh.HeartPacket()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		beh.d.HeartPacket = ret
@@ -320,6 +331,7 @@ func (beh *botEventH) matchType() (handler.BotEventType, error) {
 func (beh *botEventH) Connected() (*response.Response_BotEvent_Connected, error) {
 	j := new(define.JSON_botEvent_Connected)
 	if err := json.Unmarshal(beh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return &response.Response_BotEvent_Connected{
@@ -331,6 +343,7 @@ func (beh *botEventH) Connected() (*response.Response_BotEvent_Connected, error)
 func (beh *botEventH) HeartPacket() (*response.Response_BotEvent_HeartPacket, error) {
 	j := new(define.JSON_botEvent_HeartPacket)
 	if err := json.Unmarshal(beh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return &response.Response_BotEvent_HeartPacket{
@@ -353,6 +366,7 @@ func (rh *responseH) CmdEvent() (*response.Response_CmdEvent, error) {
 	ceh.d.Type = rh.cet
 	e, err := ceh.Echo()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ceh.d.Echo = e
@@ -360,24 +374,28 @@ func (rh *responseH) CmdEvent() (*response.Response_CmdEvent, error) {
 	case handler.CmdEventType_CmdEventType_GetFriendList:
 		gfl, err := ceh.GetFriendList()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ceh.d.GetFriendList = gfl
 	case handler.CmdEventType_CmdEventType_GetGroupInfo:
 		ggi, err := ceh.GetGroupInfo()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ceh.d.GetGroupInfo = ggi
 	case handler.CmdEventType_CmdEventType_GetGroupMemberInfo:
 		ggmi, err := ceh.GetGroupMemberInfo()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ceh.d.GetGroupMemberInfo = ggmi
 	case handler.CmdEventType_CmdEventType_GetMessage:
 		gm, err := ceh.GetMessage()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ceh.d.GetMessage = gm
@@ -390,6 +408,7 @@ func (rh *responseH) CmdEvent() (*response.Response_CmdEvent, error) {
 func (ceh *cmdEventH) Echo() (string, error) {
 	j := new(define.JSON_cmdEvent_Echo)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return "", err
 	}
 	return j.Echo, nil
@@ -398,6 +417,7 @@ func (ceh *cmdEventH) Echo() (string, error) {
 func (ceh *cmdEventH) GetFriendInfo() (*response.Response_CmdEvent_GetFriendInfo, error) {
 	j := new(define.JSON_cmdEvent_GetFriendInfo)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ok := false
@@ -423,6 +443,7 @@ func (ceh *cmdEventH) GetFriendInfo() (*response.Response_CmdEvent_GetFriendInfo
 func (ceh *cmdEventH) GetFriendList() (*response.Response_CmdEvent_GetFriendList, error) {
 	j := new(define.JSON_cmdEvent_GetFriendList)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ok := false
@@ -460,6 +481,7 @@ func (ceh *cmdEventH) GetFriendList() (*response.Response_CmdEvent_GetFriendList
 func (ceh *cmdEventH) GetGroupInfo() (*response.Response_CmdEvent_GetGroupInfo, error) {
 	j := new(define.JSON_cmdEvent_GetGroupInfo)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ok := false
@@ -487,6 +509,7 @@ func (ceh *cmdEventH) GetGroupInfo() (*response.Response_CmdEvent_GetGroupInfo, 
 func (ceh *cmdEventH) GetGroupMemberInfo() (*response.Response_CmdEvent_GetGroupMemberInfo, error) {
 	j := new(define.JSON_cmdEvent_GetGroupMemberInfo)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ok := false
@@ -551,6 +574,7 @@ func (ceh *cmdEventH) GetGroupMemberInfo() (*response.Response_CmdEvent_GetGroup
 func (ceh *cmdEventH) GetMessage() (*response.Response_CmdEvent_GetMessage, error) {
 	j := new(define.JSON_cmdEvent_GetMessage)
 	if err := json.Unmarshal(ceh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ok := false
@@ -566,6 +590,7 @@ func (ceh *cmdEventH) GetMessage() (*response.Response_CmdEvent_GetMessage, erro
 		}
 		m, err := cegmh.Message()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		ret = &response.Response_CmdEvent_GetMessage{
@@ -597,6 +622,7 @@ func (cegmh *cmdEvent_GetMessageH) Message() (*response.Response_CmdEvent_Messag
 	if cegmh.j == nil {
 		j := new(define.JSON_cmdEvent_GetMessage)
 		if err := json.Unmarshal(cegmh.buf, j); err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		cegmh.j = j
@@ -604,6 +630,7 @@ func (cegmh *cmdEvent_GetMessageH) Message() (*response.Response_CmdEvent_Messag
 	m := new(response.Response_CmdEvent_Message)
 	t, err := cegmh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	m.Type = &t
@@ -611,12 +638,14 @@ func (cegmh *cmdEvent_GetMessageH) Message() (*response.Response_CmdEvent_Messag
 	case handler.MessageType_MessageType_Group:
 		g, err := cegmh.group()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		m.Group = g
 	case handler.MessageType_MessageType_Private:
 		p, err := cegmh.private()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		m.Private = p
@@ -647,6 +676,7 @@ func (cegmh *cmdEvent_GetMessageH) group() (*response.Response_CmdEvent_Message_
 	}
 	mc, err := unmarshalMessageChain(jmc)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return &response.Response_CmdEvent_Message_Group{
@@ -671,6 +701,7 @@ func (rh *responseH) Message() (*response.Response_Message, error) {
 	mh.buf = rh.buf
 	t, err := mh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	mh.d.Type = &t
@@ -678,12 +709,14 @@ func (rh *responseH) Message() (*response.Response_Message, error) {
 	case handler.MessageType_MessageType_Group:
 		g, err := mh.group()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		mh.d.Group = g
 	case handler.MessageType_MessageType_Private:
 		p, err := mh.private()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		mh.d.Private = p
@@ -694,6 +727,7 @@ func (rh *responseH) Message() (*response.Response_Message, error) {
 func (mh *messageH) matchType() (handler.MessageType, error) {
 	j := new(define.JSON_messageType)
 	if err := json.Unmarshal(mh.buf, j); err != nil {
+		logger.Println(err)
 		return -1, err
 	}
 	if j.MessageType == nil || j.SubType == nil {
@@ -712,6 +746,7 @@ func (mh *messageH) matchType() (handler.MessageType, error) {
 func (mh *messageH) group() (*response.Response_Message_Group, error) {
 	j := new(define.JSON_message_Group)
 	if err := json.Unmarshal(mh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	sname := &j.Sender.Nickname
@@ -735,6 +770,7 @@ func (mh *messageH) group() (*response.Response_Message_Group, error) {
 	}
 	mc, err := unmarshalMessageChain(jmc)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return &response.Response_Message_Group{
@@ -753,6 +789,7 @@ func (mh *messageH) group() (*response.Response_Message_Group, error) {
 func (mh *messageH) private() (*response.Response_Message_Private, error) {
 	j := new(define.JSON_message_Private)
 	if err := json.Unmarshal(mh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	sname := &j.Sender.Nickname
@@ -765,6 +802,7 @@ func (mh *messageH) private() (*response.Response_Message_Private, error) {
 	}
 	mc, err := unmarshalMessageChain(jmc)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return &response.Response_Message_Private{
@@ -782,6 +820,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 	qeh.buf = rh.buf
 	t, err := qeh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	qeh.extra = rh.extra
@@ -793,6 +832,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 		qegah.extra = rh.extra
 		ga, err := qegah.GroupAdd()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qeh.d.GroupAdd = ga
@@ -802,18 +842,21 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 		qegrh.extra = rh.extra
 		gr, err := qegrh.GroupRemove()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qeh.d.GroupRemove = gr
 	case handler.QQEventType_QQEventType_GroupMute:
 		gm, err := qeh.groupMute()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qeh.d.GroupMute = gm
 	case handler.QQEventType_QQEventType_GroupUnmute:
 		gum, err := qeh.groupUnmute()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qeh.d.GroupUnmute = gum
@@ -823,6 +866,7 @@ func (rh *responseH) QQEvent() (*response.Response_QQEvent, error) {
 		qemrh.extra = rh.extra
 		mr, err := qemrh.MessageRecall()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qeh.d.MessageRecall = mr
@@ -860,6 +904,7 @@ func (qeh *qqeventH) matchType() (handler.QQEventType, error) {
 func (qeh *qqeventH) groupMute() (*response.Response_QQEvent_GroupMute, error) {
 	j := new(define.JSON_qqEvent_groupMute)
 	if err := json.Unmarshal(qeh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var (
@@ -875,15 +920,18 @@ func (qeh *qqeventH) groupMute() (*response.Response_QQEvent_GroupMute, error) {
 		defer cancel()
 		stream, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		targetName = &user_ggmi.UserName
 		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		operatorName = &operator_ggmi.UserName
@@ -918,15 +966,18 @@ func (qeh *qqeventH) groupUnmute() (*response.Response_QQEvent_GroupUnmute, erro
 		defer cancel()
 		stream, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		targetName = &user_ggmi.UserName
 		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		operatorName = &operator_ggmi.UserName
@@ -965,6 +1016,7 @@ func (qegah *qqevent_groupAddH) matchType() (handler.QQEventType_GroupAddType, e
 func (qegah *qqevent_groupAddH) GroupAdd() (*response.Response_QQEvent_GroupAdd, error) {
 	t, err := qegah.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	qegah.d.Type = &t
@@ -972,12 +1024,14 @@ func (qegah *qqevent_groupAddH) GroupAdd() (*response.Response_QQEvent_GroupAdd,
 	case handler.QQEventType_GroupAddType_QQEventType_GroupAddType_Direct:
 		d, err := qegah.direct()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qegah.d.Direct = d
 	case handler.QQEventType_GroupAddType_QQEventType_GroupAddType_Invite:
 		i, err := qegah.invite()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qegah.d.Invite = i
@@ -988,6 +1042,7 @@ func (qegah *qqevent_groupAddH) GroupAdd() (*response.Response_QQEvent_GroupAdd,
 func (qegah *qqevent_groupAddH) direct() (*response.Response_QQEvent_GroupAdd_Direct, error) {
 	j := new(define.JSON_qqEvent_groupAdd_direct)
 	if err := json.Unmarshal(qegah.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var (
@@ -1003,14 +1058,17 @@ func (qegah *qqevent_groupAddH) direct() (*response.Response_QQEvent_GroupAdd_Di
 		defer cancel()
 		stream, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		joinerName = &user_ggmi.UserName
@@ -1034,6 +1092,7 @@ func (qegah *qqevent_groupAddH) invite() (*response.Response_QQEvent_GroupAdd_In
 func (qegrh *qqevent_groupRemoveH) GroupRemove() (*response.Response_QQEvent_GroupRemove, error) {
 	t, err := qegrh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	qegrh.d.Type = &t
@@ -1041,12 +1100,14 @@ func (qegrh *qqevent_groupRemoveH) GroupRemove() (*response.Response_QQEvent_Gro
 	case handler.QQEventType_GroupRemoveType_QQEventType_GroupRemoveType_Kick:
 		k, err := qegrh.kick()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qegrh.d.Kick = k
 	case handler.QQEventType_GroupRemoveType_QQEventType_GroupRemoveType_Manual:
 		m, err := qegrh.manual()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qegrh.d.Manual = m
@@ -1057,6 +1118,7 @@ func (qegrh *qqevent_groupRemoveH) GroupRemove() (*response.Response_QQEvent_Gro
 func (qegrh *qqevent_groupRemoveH) matchType() (handler.QQEventType_GroupRemoveType, error) {
 	j := new(define.JSON_qqEventType)
 	if err := json.Unmarshal(qegrh.buf, j); err != nil {
+		logger.Println(err)
 		return -1, err
 	}
 	if j.NoticeType == nil {
@@ -1078,6 +1140,7 @@ func (qegrh *qqevent_groupRemoveH) matchType() (handler.QQEventType_GroupRemoveT
 func (qegrh *qqevent_groupRemoveH) manual() (*response.Response_QQEvent_GroupRemove_Manual, error) {
 	j := new(define.JSON_qqEvent_groupRemove_manual)
 	if err := json.Unmarshal(qegrh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var quiterName *string
@@ -1088,6 +1151,7 @@ func (qegrh *qqevent_groupRemoveH) manual() (*response.Response_QQEvent_GroupRem
 		defer cancel()
 		ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, nil)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		quiterName = &ggmi.UserName
@@ -1104,6 +1168,7 @@ func (qegrh *qqevent_groupRemoveH) manual() (*response.Response_QQEvent_GroupRem
 func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemove_Kick, error) {
 	j := new(define.JSON_qqEvent_groupRemove_kick)
 	if err := json.Unmarshal(qegrh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var (
@@ -1119,14 +1184,17 @@ func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemov
 		defer cancel()
 		stream, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		quiter_ggmi, err := getGroupMemberInfo(ctx, groupidStr, quiteridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		quiterName = &quiter_ggmi.UserName
@@ -1146,6 +1214,7 @@ func (qegrh *qqevent_groupRemoveH) kick() (*response.Response_QQEvent_GroupRemov
 func (qemrh *qqevent_messageRecallH) MessageRecall() (*response.Response_QQEvent_MessageRecall, error) {
 	t, err := qemrh.matchType()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	qemrh.d.Type = &t
@@ -1153,12 +1222,14 @@ func (qemrh *qqevent_messageRecallH) MessageRecall() (*response.Response_QQEvent
 	case handler.QQEventType_MessageRecallType_QQEventType_MessageRecallType_Group:
 		g, err := qemrh.group()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qemrh.d.Group = g
 	case handler.QQEventType_MessageRecallType_QQEventType_MessageRecallType_Private:
 		p, err := qemrh.private()
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		qemrh.d.Private = p
@@ -1169,6 +1240,7 @@ func (qemrh *qqevent_messageRecallH) MessageRecall() (*response.Response_QQEvent
 func (qemrh *qqevent_messageRecallH) matchType() (handler.QQEventType_MessageRecallType, error) {
 	j := new(define.JSON_qqEventType)
 	if err := json.Unmarshal(qemrh.buf, j); err != nil {
+		logger.Println(err)
 		return -1, err
 	}
 	if j.NoticeType == nil {
@@ -1190,6 +1262,7 @@ func (qemrh *qqevent_messageRecallH) matchType() (handler.QQEventType_MessageRec
 func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_MessageRecall_Group, error) {
 	j := new(define.JSON_qqEvent_messageRecall_group)
 	if err := json.Unmarshal(qemrh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var (
@@ -1206,6 +1279,7 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 			useridStr := strconv.FormatInt(j.UserId, 10)
 			ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, nil)
 			if err != nil {
+				logger.Println(err)
 				return nil, err
 			}
 			targetName = &ggmi.UserName
@@ -1214,15 +1288,18 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 			operatoridStr := strconv.FormatInt(j.OperatorId, 10)
 			stream, err := connectorClient.Read(ctx, &connector.Empty{})
 			if err != nil {
+				logger.Println(err)
 				return nil, err
 			}
 			user_ggmi, err := getGroupMemberInfo(ctx, groupidStr, useridStr, stream)
 			if err != nil {
+				logger.Println(err)
 				return nil, err
 			}
 			targetName = &user_ggmi.UserName
 			operator_ggmi, err := getGroupMemberInfo(ctx, groupidStr, operatoridStr, stream)
 			if err != nil {
+				logger.Println(err)
 				return nil, err
 			}
 			operatorName = &operator_ggmi.UserName
@@ -1243,6 +1320,7 @@ func (qemrh *qqevent_messageRecallH) group() (*response.Response_QQEvent_Message
 func (qemrh *qqevent_messageRecallH) private() (*response.Response_QQEvent_MessageRecall_Private, error) {
 	j := new(define.JSON_qqEvent_messageRecall_private)
 	if err := json.Unmarshal(qemrh.buf, j); err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var recallerName *string
@@ -1252,6 +1330,7 @@ func (qemrh *qqevent_messageRecallH) private() (*response.Response_QQEvent_Messa
 		useridStr := strconv.FormatInt(j.UserId, 10)
 		gfi, err := getFriendInfo(ctx, useridStr, nil)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		recallerName = &gfi.UserName
@@ -1270,6 +1349,7 @@ func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grp
 	if stream == nil {
 		x, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		stream = x
@@ -1282,6 +1362,7 @@ func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grp
 			Buf: buf,
 		}); err != nil {
 			writeCh <- err
+			logger.Println(err)
 			return
 		}
 	}()
@@ -1291,6 +1372,7 @@ func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grp
 			resp, err := stream.Recv()
 			if err != nil {
 				readCh <- err
+				logger.Println(err)
 				return
 			}
 			respH := new(responseH)
@@ -1298,6 +1380,7 @@ func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grp
 			rt, err := respH.matchType()
 			if err != nil {
 				readCh <- err
+				logger.Println(err)
 				return
 			}
 			if rt != handler.ResponseType_ResponseType_CmdEvent {
@@ -1322,6 +1405,7 @@ func sendCommand(ctx context.Context, buf []byte, requestEcho string, stream grp
 	case x := <-readCh:
 		switch x := x.(type) {
 		case error:
+			logger.Println(x)
 			return nil, x
 		case *cmdEventH:
 			return x, nil
@@ -1338,10 +1422,12 @@ func getGroupMemberInfo(ctx context.Context, groupid, memberid string, stream gr
 	//获取写入内容
 	buf, err := request.GetGroupMemberInfo(groupid, memberid, &requestEcho)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	ceh, err := sendCommand(ctx, buf, requestEcho, stream)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return ceh.GetGroupMemberInfo()
@@ -1352,6 +1438,7 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 	if stream == nil {
 		x, err := connectorClient.Read(ctx, &connector.Empty{})
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		stream = x
@@ -1362,6 +1449,7 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 	//获取写入内容
 	buf, err := request.GetFriendInfo(friendid, &requestEcho)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	//写入
@@ -1370,6 +1458,7 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 			Buf: buf,
 		}); err != nil {
 			writeCh <- err
+			logger.Println(err)
 			return
 		}
 	}()
@@ -1379,6 +1468,7 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 			resp, err := stream.Recv()
 			if err != nil {
 				readCh <- err
+				logger.Println(err)
 				return
 			}
 			respH := new(responseH)
@@ -1386,6 +1476,7 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 			rt, err := respH.matchType()
 			if err != nil {
 				readCh <- err
+				logger.Println(err)
 				return
 			}
 			if rt != handler.ResponseType_ResponseType_CmdEvent {
@@ -1406,11 +1497,13 @@ func getFriendInfo(ctx context.Context, friendid string, stream grpc.ServerStrea
 	}()
 	select {
 	case err := <-writeCh:
+		logger.Println(err)
 		return nil, err
 	case x := <-readCh:
 		switch x := x.(type) {
 		case error:
-			return nil, err
+			logger.Println(x)
+			return nil, x
 		case *cmdEventH:
 			return x.GetFriendInfo()
 		default:

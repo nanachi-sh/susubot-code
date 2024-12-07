@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/log"
 	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/protos/handler"
 	"github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/request/define"
 )
@@ -19,6 +20,8 @@ const (
 	getFriendInfo      = "get_stranger_info"
 )
 
+var logger = log.Get()
+
 func GetFriendInfo(friendid string, echo *string) ([]byte, error) {
 	req := new(define.Request)
 	req.Action = getFriendInfo
@@ -27,7 +30,12 @@ func GetFriendInfo(friendid string, echo *string) ([]byte, error) {
 	}
 	req.Params = new(define.Request_Params)
 	req.Params.UserId = friendid
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func GetFriendList(echo *string) ([]byte, error) {
@@ -36,7 +44,12 @@ func GetFriendList(echo *string) ([]byte, error) {
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func GetGroupInfo(groupid string, echo *string) ([]byte, error) {
@@ -47,7 +60,12 @@ func GetGroupInfo(groupid string, echo *string) ([]byte, error) {
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func GetGroupMemberInfo(groupid, memberid string, echo *string) ([]byte, error) {
@@ -59,7 +77,12 @@ func GetGroupMemberInfo(groupid, memberid string, echo *string) ([]byte, error) 
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func MessageRecall(messageid string, echo *string) ([]byte, error) {
@@ -70,7 +93,12 @@ func MessageRecall(messageid string, echo *string) ([]byte, error) {
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func SendGroupMessage(groupid string, inMcs []*handler.MessageChainObject, echo *string) ([]byte, error) {
@@ -80,16 +108,19 @@ func SendGroupMessage(groupid string, inMcs []*handler.MessageChainObject, echo 
 	req.Params.GroupId = groupid
 	mcs, err := marshalMessageChain(inMcs)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	var mcs_j []map[string]any
 	for _, v := range mcs {
 		d, err := json.Marshal(v)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		var m map[string]any
 		if err := json.Unmarshal(d, &m); err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		mcs_j = append(mcs_j, m)
@@ -98,7 +129,12 @@ func SendGroupMessage(groupid string, inMcs []*handler.MessageChainObject, echo 
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func SendFriendMessage(friendid string, inMcs []*handler.MessageChainObject, echo *string) ([]byte, error) {
@@ -114,10 +150,12 @@ func SendFriendMessage(friendid string, inMcs []*handler.MessageChainObject, ech
 	for _, v := range mcs {
 		d, err := json.Marshal(v)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		var m map[string]any
 		if err := json.Unmarshal(d, &m); err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		mcs_j = append(mcs_j, m)
@@ -126,7 +164,12 @@ func SendFriendMessage(friendid string, inMcs []*handler.MessageChainObject, ech
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func GetMessage(messageid string, echo *string) ([]byte, error) {
@@ -137,7 +180,12 @@ func GetMessage(messageid string, echo *string) ([]byte, error) {
 	if echo != nil {
 		req.Echo = *echo
 	}
-	return json.Marshal(req)
+	buf, err := json.Marshal(req)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+	return buf, nil
 }
 
 func marshalMessageChain(mc []*handler.MessageChainObject) ([]*define.MessageChain, error) {
