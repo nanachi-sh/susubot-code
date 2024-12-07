@@ -156,20 +156,14 @@ func (c *Connector) write(buf []byte) {
 }
 
 func (c *Connector) readAndwrite() error {
-	fmt.Printf("%v: reading\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	buf, err := c.read()
 	if err != nil {
 		logger.Println(err)
 		return err
 	}
-	fmt.Printf("%v: readed\n", time.Now().Format("2006-01-02 15:04:05.000000"))
-	fmt.Printf("%v: Response: %v\n", time.Now().Format("2006-01-02 15:04:05.000000"), string(buf))
 	//等待读取返回结束
-	fmt.Printf("%v: write in wait\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	c.readWait.RLock()
 	c.readWait.RUnlock()
-	fmt.Printf("%v: write out wait\n", time.Now().Format("2006-01-02 15:04:05.000000"))
-	fmt.Printf("%v: write\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	c.write(buf)
 	return nil
 }
@@ -201,12 +195,9 @@ func (c *Connector) close() error {
 }
 
 func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
-	fmt.Printf("%v %v: read start\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
-	fmt.Printf("%v %v: in wait\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	//若等待队列关闭，则加入并阻塞
 	c.readWait.RLock()
 	c.readWait.RUnlock()
-	fmt.Printf("%v %v: out wait\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	//进入阻塞队列
 	c.readBlock.RLock()
 	//检查阻塞队列是否为空
@@ -224,13 +215,10 @@ func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
 		}
 	}()
 	defer c.readBlock.RUnlock()
-	fmt.Printf("%v %v: in block\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 	select {
 	case <-c.closed:
-		fmt.Printf("%v %v: closed\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		return nil, errors.New("连接已断开或未连接")
 	case <-c.now.Done():
-		fmt.Printf("%v %v: response return\n", a, time.Now().Format("2006-01-02 15:04:05.000000"))
 		//第一个会话负责关闭等待队列
 		c.readWait.TryLock()
 		if last := c.readLast(); last == nil {
