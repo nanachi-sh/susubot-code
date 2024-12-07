@@ -194,7 +194,12 @@ func (c *Connector) close() error {
 	return nil
 }
 
-func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
+func (c *Connector) Read() ([]byte, error) {
+	select {
+	case <-c.closed:
+		return nil, errors.New("连接已断开或未连接")
+	default:
+	}
 	//若等待队列关闭，则加入并阻塞
 	c.readWait.RLock()
 	c.readWait.RUnlock()
@@ -202,6 +207,11 @@ func (c *Connector) Read(a, user_timestampNano int64) ([]byte, error) {
 	c.readBlock.RLock()
 	//检查阻塞队列是否为空
 	defer func() {
+		select {
+		case <-c.closed:
+			return
+		default:
+		}
 		if c.readBlock.TryLock() { //阻塞队列为空
 			//打开等待队列
 			c.readWait.Unlock()
