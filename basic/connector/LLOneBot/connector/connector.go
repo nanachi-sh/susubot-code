@@ -8,14 +8,16 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
-	"os"
 	"regexp"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/nanachi-sh/susubot-code/basic/connector/LLOneBot/log"
 	"github.com/nanachi-sh/susubot-code/basic/connector/LLOneBot/protos/connector"
 )
+
+var logger = log.Get()
 
 type Connector struct {
 	addr       net.Addr
@@ -27,7 +29,6 @@ type Connector struct {
 	writeLock  sync.Mutex
 	closeLock  sync.Mutex
 	closed     chan struct{}
-	reting     int
 }
 
 type responseMerge struct{}
@@ -41,7 +42,6 @@ func New() *Connector {
 		now_cancel: cancel,
 		closed:     ch,
 	}
-	// go c.test()
 	return c
 }
 
@@ -67,6 +67,7 @@ func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 		defer cancel()
 		ips, err := net.DefaultResolver.LookupIP(ctx, "ip", addr)
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		}
 		if len(ips) == 0 {
@@ -75,6 +76,7 @@ func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 		addr = ips[0].String()
 	} else { //若无错误，为未知
 		if err != nil {
+			logger.Println(err)
 			return nil, err
 		} else {
 			return nil, errors.New("服务器地址设置有误")
@@ -82,6 +84,7 @@ func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 	}
 	netipaddr, err := netip.ParseAddr(addr)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	c.addr = net.TCPAddrFromAddrPort(netip.AddrPortFrom(netipaddr, uint16(port)))
@@ -91,12 +94,14 @@ func (c *Connector) Connect(req *connector.ConnectRequest) ([]byte, error) {
 	}
 	conn, _, err := dialer.DialContext(context.Background(), fmt.Sprintf("ws://%v", c.addr.String()), headers)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	c.conn = conn
 	c.closed = make(chan struct{})
 	if err := c.readAndwrite(); err != nil {
 		go c.close()
+		logger.Println(err)
 		return nil, err
 	}
 	last := c.readLast()
@@ -114,9 +119,9 @@ func (c *Connector) readToEnd() {
 		default:
 		}
 		if err := c.readAndwrite(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			logger.Println(err)
 			if err := c.close(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				logger.Println(err)
 			}
 			return
 		}
@@ -131,10 +136,12 @@ func (c *Connector) read() ([]byte, error) {
 	}
 	_, r, err := c.conn.NextReader()
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	buf, err := io.ReadAll(r)
 	if err != nil {
+		logger.Println(err)
 		return nil, err
 	}
 	return buf, nil
@@ -152,6 +159,7 @@ func (c *Connector) readAndwrite() error {
 	fmt.Printf("%v: reading\n", time.Now().Format("2006-01-02 15:04:05.000000"))
 	buf, err := c.read()
 	if err != nil {
+		logger.Println(err)
 		return err
 	}
 	fmt.Printf("%v: readed\n", time.Now().Format("2006-01-02 15:04:05.000000"))
@@ -186,6 +194,7 @@ func (c *Connector) close() error {
 		c.addr = nil
 	}()
 	if err := c.conn.Close(); err != nil {
+		logger.Println(err)
 		return err
 	}
 	return nil
@@ -259,6 +268,7 @@ func (c *Connector) Write(buf []byte) error {
 	default:
 	}
 	if err := c.conn.WriteMessage(websocket.TextMessage, buf); err != nil {
+		logger.Println(err)
 		return err
 	}
 	return nil
