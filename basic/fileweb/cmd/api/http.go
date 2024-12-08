@@ -9,6 +9,8 @@ import (
 	"strconv"
 )
 
+const workDir = "/var/www/html"
+
 func HTTPServe() error {
 	portStr := os.Getenv("HTTP_LISTEN_PORT")
 	if portStr == "" {
@@ -28,14 +30,14 @@ func HTTPServe() error {
 	if err := mkdir(); err != nil {
 		return err
 	}
-	http.Handle("/", http.FileServer(http.Dir("/tmp")))
+	http.Handle("/", http.FileServer(http.Dir(workDir)))
 	return http.Serve(l, nil)
 }
 
 func mkdir() error {
-	if _, err := os.Lstat("/var/www/html"); err != nil {
+	if _, err := os.Lstat(workDir); err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll("/var/www/html", 0755); err != nil {
+			if err := os.MkdirAll(workDir, 0755); err != nil {
 				return err
 			}
 		} else {
