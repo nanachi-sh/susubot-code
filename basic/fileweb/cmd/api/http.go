@@ -30,7 +30,7 @@ func HTTPServe() error {
 	if err := mkdir(); err != nil {
 		return err
 	}
-	http.Handle("/", http.FileServer(http.Dir(workDir)))
+	http.Handle("/assets", http.FileServer(http.Dir(workDir)))
 	return http.Serve(l, nil)
 }
 
