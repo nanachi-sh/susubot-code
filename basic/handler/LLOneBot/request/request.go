@@ -231,7 +231,7 @@ func marshalMessageChain(mc []*handler.MessageChainObject) ([]*define.MessageCha
 			}
 			ret = append(ret, &define.MessageChain{
 				Data: map[string]any{
-					"url": v.Image.URL,
+					"file": v.Image.URL,
 				},
 				Type: "image",
 			})
@@ -241,7 +241,7 @@ func marshalMessageChain(mc []*handler.MessageChainObject) ([]*define.MessageCha
 			}
 			ret = append(ret, &define.MessageChain{
 				Data: map[string]any{
-					"url": v.Voice.URL,
+					"file": v.Voice.URL,
 				},
 				Type: "record",
 			})
@@ -251,7 +251,7 @@ func marshalMessageChain(mc []*handler.MessageChainObject) ([]*define.MessageCha
 			}
 			ret = append(ret, &define.MessageChain{
 				Data: map[string]any{
-					"url": v.Video.URL,
+					"file": v.Video.URL,
 				},
 				Type: "video",
 			})
