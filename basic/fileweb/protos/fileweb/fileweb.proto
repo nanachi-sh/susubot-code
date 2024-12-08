@@ -8,9 +8,8 @@ service FileWeb {
 
 message UploadRequest {
     bytes Buf = 1;
-    optional string Hash = 2; //murmurhash3
-    optional uint32 ValidTime = 3; //过期时间(ms)
-    bool AutoRefresh = 4; //资源被请求后自动重置过期时间
+    optional uint32 ValidTime = 2; //过期时间(ms)
+    bool AutoRefresh = 3; //资源被请求后自动重置过期时间
 }
 
 message UploadResponse {

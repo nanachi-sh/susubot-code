@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-)
 
-const workDir = "/var/www/html"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/fileweb/define"
+)
 
 func HTTPServe() error {
 	portStr := os.Getenv("HTTP_LISTEN_PORT")
@@ -30,14 +30,14 @@ func HTTPServe() error {
 	if err := mkdir(); err != nil {
 		return err
 	}
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(workDir))))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(define.WorkDir))))
 	return http.Serve(l, nil)
 }
 
 func mkdir() error {
-	if _, err := os.Lstat(workDir); err != nil {
+	if _, err := os.Lstat(define.WorkDir); err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll(workDir, 0755); err != nil {
+			if err := os.MkdirAll(define.WorkDir, 0755); err != nil {
 				return err
 			}
 		} else {

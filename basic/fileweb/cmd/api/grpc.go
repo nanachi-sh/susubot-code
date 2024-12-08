@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/fileweb"
 	fileweb_pb "github.com/nanachi-sh/susubot-code/basic/fileweb/protos/fileweb"
 	"google.golang.org/grpc"
 )
@@ -46,7 +47,12 @@ func (*filewebService) Upload(ctx context.Context, req *fileweb_pb.UploadRequest
 	go func() {
 		ret := &ret{}
 		defer func() { ch <- ret }()
-
+		resp, err := fileweb.Upload(req)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		ret.data = resp
 	}()
 	select {
 	case <-ctx.Done():
