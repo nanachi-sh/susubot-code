@@ -23,7 +23,6 @@ var (
 )
 
 func init() {
-	logger.Println("init run")
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")
@@ -52,12 +51,10 @@ func init() {
 			}
 		}
 	}
-	fmt.Println(GatewayIP.String())
 	c, err := grpc.NewClient(fmt.Sprintf("%v:2080", GatewayIP.String()), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln(err)
 	}
-	fmt.Println(c == nil)
 	GRPCClient = c
 	FilewebCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "fileweb",
