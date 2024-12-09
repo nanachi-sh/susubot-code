@@ -23,6 +23,7 @@ var (
 )
 
 func init() {
+	logger.Println("init run")
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")
