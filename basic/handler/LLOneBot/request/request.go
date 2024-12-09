@@ -246,7 +246,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 				if err != nil {
 					return nil, err
 				}
-				u = fmt.Sprintf("http://play6.unturned.fun:1080%v", resp.URLPath)
+				u = fmt.Sprintf("http://play6.unturned.fun:60001%v", resp.URLPath)
 			}
 			ret = append(ret, &request_d.MessageChain{
 				Data: map[string]any{
@@ -270,7 +270,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 				if err != nil {
 					return nil, err
 				}
-				u = fmt.Sprintf("http://play6.unturned.fun:1080%v", resp.URLPath)
+				u = fmt.Sprintf("http://play6.unturned.fun:60001%v", resp.URLPath)
 			}
 			ret = append(ret, &request_d.MessageChain{
 				Data: map[string]any{
@@ -294,7 +294,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 				if err != nil {
 					return nil, err
 				}
-				u = fmt.Sprintf("http://play6.unturned.fun:1080%v", resp.URLPath)
+				u = fmt.Sprintf("http://play6.unturned.fun:60001%v", resp.URLPath)
 			}
 			ret = append(ret, &request_d.MessageChain{
 				Data: map[string]any{
