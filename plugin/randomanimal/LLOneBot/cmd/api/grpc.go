@@ -57,6 +57,8 @@ func (*randomanimalService) GetCat(ctx context.Context, req *randomanimal_pb.Bas
 			return
 		}
 		if req.AutoUpload {
+			fmt.Println(define.GRPCClient == nil)
+			fmt.Println(define.FilewebCtx == nil)
 			filewebc := fileweb.NewFileWebClient(define.GRPCClient)
 			resp, err := filewebc.Upload(define.FilewebCtx, &fileweb.UploadRequest{
 				Buf: cat.Buf,
