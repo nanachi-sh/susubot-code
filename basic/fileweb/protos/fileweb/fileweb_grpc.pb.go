@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FileWeb_Upload_FullMethodName = "/FileWeb/Upload"
+	FileWeb_Upload_FullMethodName = "/susubot.basic.fileweb.FileWeb/Upload"
 )
 
 // FileWebClient is the client API for FileWeb service.
@@ -108,7 +108,7 @@ func _FileWeb_Upload_Handler(srv interface{}, ctx context.Context, dec func(inte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FileWeb_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "FileWeb",
+	ServiceName: "susubot.basic.fileweb.FileWeb",
 	HandlerType: (*FileWebServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
