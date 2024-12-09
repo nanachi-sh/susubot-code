@@ -53,7 +53,7 @@ func init() {
 	}
 	c, err := grpc.NewClient(fmt.Sprintf("%v:2080", GatewayIP.String()), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		panic(err)
+		logger.Fatalln(err)
 	}
 	GRPCClient = c
 	FilewebCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
