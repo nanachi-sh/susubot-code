@@ -3,13 +3,12 @@ package randomanimal
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
-	"github.com/nanachi-sh/susubot-code/plugin/randomAnimal/LLOneBot/protos/randomAnimal"
-	"github.com/nanachi-sh/susubot-code/plugin/randomAnimal/LLOneBot/randomAnimal/define"
+	randomanimal_pb "github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot/protos/randomanimal"
+	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot/randomanimal/define"
 )
 
 func GetCat() (*define.BasicReturn, error) {
@@ -39,11 +38,11 @@ func GetCat() (*define.BasicReturn, error) {
 	if err != nil {
 		return nil, err
 	}
-	var Type *randomAnimal.Type
+	var Type *randomanimal_pb.Type
 	// 通过响应头判断类型
 	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
-		Type = randomAnimal.Type_Image.Enum()
+		Type = randomanimal_pb.Type_Image.Enum()
 	default:
 		// 暂时懒得写
 		return nil, errors.New("判断响应类型失败")
@@ -80,13 +79,12 @@ func GetDog() (*define.BasicReturn, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(j.URL)
-	var Type *randomAnimal.Type
+	var Type *randomanimal_pb.Type
 	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
-		Type = randomAnimal.Type_Image.Enum()
+		Type = randomanimal_pb.Type_Image.Enum()
 	case "video/mpeg4":
-		Type = randomAnimal.Type_Video.Enum()
+		Type = randomanimal_pb.Type_Video.Enum()
 	default:
 		return nil, errors.New("判断响应类型失败")
 	}
@@ -118,10 +116,10 @@ func GetFox() (*define.BasicReturn, error) {
 		return nil, err
 	}
 	defer assetResp.Body.Close()
-	var Type *randomAnimal.Type
+	var Type *randomanimal_pb.Type
 	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
-		Type = randomAnimal.Type_Image.Enum()
+		Type = randomanimal_pb.Type_Image.Enum()
 	default:
 		return nil, errors.New("判断响应类型失败")
 	}
@@ -144,10 +142,10 @@ func GetDuck() (*define.BasicReturn, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var Type *randomAnimal.Type
+	var Type *randomanimal_pb.Type
 	switch strings.ToUpper(resp.Header.Get("Content-Type")) {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
-		Type = randomAnimal.Type_Image.Enum()
+		Type = randomanimal_pb.Type_Image.Enum()
 	default:
 		// 暂时懒得写
 		return nil, errors.New("判断响应类型失败")

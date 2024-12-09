@@ -1,4 +1,4 @@
-module github.com/nanachi-sh/susubot-code/plugin/randomAnimal/LLOneBot
+module github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot
 
 go 1.23.0
 

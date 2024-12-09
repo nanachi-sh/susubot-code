@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: handler/LLOneBot/protos/connector/connector.proto
+// source: basic/handler/LLOneBot/protos/connector/connector.proto
 
 package connector
 
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Connector_Connect_FullMethodName = "/Connector/Connect"
-	Connector_Read_FullMethodName    = "/Connector/Read"
-	Connector_Write_FullMethodName   = "/Connector/Write"
-	Connector_Close_FullMethodName   = "/Connector/Close"
+	Connector_Connect_FullMethodName = "/susubot.basic.connector.Connector/Connect"
+	Connector_Read_FullMethodName    = "/susubot.basic.connector.Connector/Read"
+	Connector_Write_FullMethodName   = "/susubot.basic.connector.Connector/Write"
+	Connector_Close_FullMethodName   = "/susubot.basic.connector.Connector/Close"
 )
 
 // ConnectorClient is the client API for Connector service.
@@ -212,7 +212,7 @@ func _Connector_Close_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Connector_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Connector",
+	ServiceName: "susubot.basic.connector.Connector",
 	HandlerType: (*ConnectorServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -235,5 +235,5 @@ var Connector_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "handler/LLOneBot/protos/connector/connector.proto",
+	Metadata: "basic/handler/LLOneBot/protos/connector/connector.proto",
 }

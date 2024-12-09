@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: handler/LLOneBot/protos/handler/response/response.proto
+// source: basic/handler/LLOneBot/protos/handler/response/response.proto
 
 package response
 
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ResponseHandler_Unmarshal_FullMethodName = "/ResponseHandler/Unmarshal"
+	ResponseHandler_Unmarshal_FullMethodName = "/susubot.basic.handler.response.ResponseHandler/Unmarshal"
 )
 
 // ResponseHandlerClient is the client API for ResponseHandler service.
@@ -108,7 +108,7 @@ func _ResponseHandler_Unmarshal_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ResponseHandler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ResponseHandler",
+	ServiceName: "susubot.basic.handler.response.ResponseHandler",
 	HandlerType: (*ResponseHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -117,5 +117,5 @@ var ResponseHandler_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "handler/LLOneBot/protos/handler/response/response.proto",
+	Metadata: "basic/handler/LLOneBot/protos/handler/response/response.proto",
 }

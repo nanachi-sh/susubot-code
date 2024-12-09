@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/nanachi-sh/susubot-code/basic/connector/LLOneBot/protos/connector";
+package susubot.basic.connector;
+
+option go_package = "protos/connector";
 
 service Connector {
     rpc Connect (ConnectRequest) returns (ConnectResponse);

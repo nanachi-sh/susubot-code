@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: handler/LLOneBot/protos/handler/request/request.proto
+// source: basic/handler/LLOneBot/protos/handler/request/request.proto
 
 package request
 
@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RequestHandler_SendGroupMessage_FullMethodName   = "/RequestHandler/SendGroupMessage"
-	RequestHandler_SendFriendMessage_FullMethodName  = "/RequestHandler/SendFriendMessage"
-	RequestHandler_MessageRecall_FullMethodName      = "/RequestHandler/MessageRecall"
-	RequestHandler_GetMessage_FullMethodName         = "/RequestHandler/GetMessage"
-	RequestHandler_GetGroupInfo_FullMethodName       = "/RequestHandler/GetGroupInfo"
-	RequestHandler_GetGroupMemberInfo_FullMethodName = "/RequestHandler/GetGroupMemberInfo"
-	RequestHandler_GetFriendList_FullMethodName      = "/RequestHandler/GetFriendList"
-	RequestHandler_GetFriendInfo_FullMethodName      = "/RequestHandler/GetFriendInfo"
+	RequestHandler_SendGroupMessage_FullMethodName   = "/susubot.basic.handler.request.RequestHandler/SendGroupMessage"
+	RequestHandler_SendFriendMessage_FullMethodName  = "/susubot.basic.handler.request.RequestHandler/SendFriendMessage"
+	RequestHandler_MessageRecall_FullMethodName      = "/susubot.basic.handler.request.RequestHandler/MessageRecall"
+	RequestHandler_GetMessage_FullMethodName         = "/susubot.basic.handler.request.RequestHandler/GetMessage"
+	RequestHandler_GetGroupInfo_FullMethodName       = "/susubot.basic.handler.request.RequestHandler/GetGroupInfo"
+	RequestHandler_GetGroupMemberInfo_FullMethodName = "/susubot.basic.handler.request.RequestHandler/GetGroupMemberInfo"
+	RequestHandler_GetFriendList_FullMethodName      = "/susubot.basic.handler.request.RequestHandler/GetFriendList"
+	RequestHandler_GetFriendInfo_FullMethodName      = "/susubot.basic.handler.request.RequestHandler/GetFriendInfo"
 )
 
 // RequestHandlerClient is the client API for RequestHandler service.
@@ -346,7 +346,7 @@ func _RequestHandler_GetFriendInfo_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RequestHandler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "RequestHandler",
+	ServiceName: "susubot.basic.handler.request.RequestHandler",
 	HandlerType: (*RequestHandlerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -383,5 +383,5 @@ var RequestHandler_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "handler/LLOneBot/protos/handler/request/request.proto",
+	Metadata: "basic/handler/LLOneBot/protos/handler/request/request.proto",
 }

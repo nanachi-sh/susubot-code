@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: plugin/randomAnimal/LLOneBot/protos/randomAnimal/randomanimal.proto
+// source: plugin/randomanimal/LLOneBot/protos/randomanimal/randomanimal.proto
 
-package randomAnimal
+package randomanimal
 
 import (
 	context "context"
@@ -19,22 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RandomAnimal_GetDog_FullMethodName        = "/randomAnimal/GetDog"
-	RandomAnimal_GetFox_FullMethodName        = "/randomAnimal/GetFox"
-	RandomAnimal_GetDuck_FullMethodName       = "/randomAnimal/GetDuck"
-	RandomAnimal_GetCat_FullMethodName        = "/randomAnimal/GetCat"
-	RandomAnimal_GetChiken_CXK_FullMethodName = "/randomAnimal/GetChiken_CXK"
+	RandomAnimal_GetDog_FullMethodName        = "/susubot.plugin.randomanimal.randomAnimal/GetDog"
+	RandomAnimal_GetFox_FullMethodName        = "/susubot.plugin.randomanimal.randomAnimal/GetFox"
+	RandomAnimal_GetDuck_FullMethodName       = "/susubot.plugin.randomanimal.randomAnimal/GetDuck"
+	RandomAnimal_GetCat_FullMethodName        = "/susubot.plugin.randomanimal.randomAnimal/GetCat"
+	RandomAnimal_GetChiken_CXK_FullMethodName = "/susubot.plugin.randomanimal.randomAnimal/GetChiken_CXK"
 )
 
 // RandomAnimalClient is the client API for RandomAnimal service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RandomAnimalClient interface {
-	GetDog(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error)
-	GetFox(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error)
-	GetDuck(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error)
-	GetCat(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error)
-	GetChiken_CXK(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetDog(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetFox(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetDuck(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetCat(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetChiken_CXK(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
 
 type randomAnimalClient struct {
@@ -45,7 +45,7 @@ func NewRandomAnimalClient(cc grpc.ClientConnInterface) RandomAnimalClient {
 	return &randomAnimalClient{cc}
 }
 
-func (c *randomAnimalClient) GetDog(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error) {
+func (c *randomAnimalClient) GetDog(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
 	err := c.cc.Invoke(ctx, RandomAnimal_GetDog_FullMethodName, in, out, cOpts...)
@@ -55,7 +55,7 @@ func (c *randomAnimalClient) GetDog(ctx context.Context, in *Empty, opts ...grpc
 	return out, nil
 }
 
-func (c *randomAnimalClient) GetFox(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error) {
+func (c *randomAnimalClient) GetFox(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
 	err := c.cc.Invoke(ctx, RandomAnimal_GetFox_FullMethodName, in, out, cOpts...)
@@ -65,7 +65,7 @@ func (c *randomAnimalClient) GetFox(ctx context.Context, in *Empty, opts ...grpc
 	return out, nil
 }
 
-func (c *randomAnimalClient) GetDuck(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error) {
+func (c *randomAnimalClient) GetDuck(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
 	err := c.cc.Invoke(ctx, RandomAnimal_GetDuck_FullMethodName, in, out, cOpts...)
@@ -75,7 +75,7 @@ func (c *randomAnimalClient) GetDuck(ctx context.Context, in *Empty, opts ...grp
 	return out, nil
 }
 
-func (c *randomAnimalClient) GetCat(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error) {
+func (c *randomAnimalClient) GetCat(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
 	err := c.cc.Invoke(ctx, RandomAnimal_GetCat_FullMethodName, in, out, cOpts...)
@@ -85,7 +85,7 @@ func (c *randomAnimalClient) GetCat(ctx context.Context, in *Empty, opts ...grpc
 	return out, nil
 }
 
-func (c *randomAnimalClient) GetChiken_CXK(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*BasicResponse, error) {
+func (c *randomAnimalClient) GetChiken_CXK(ctx context.Context, in *BasicRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
 	err := c.cc.Invoke(ctx, RandomAnimal_GetChiken_CXK_FullMethodName, in, out, cOpts...)
@@ -99,11 +99,11 @@ func (c *randomAnimalClient) GetChiken_CXK(ctx context.Context, in *Empty, opts 
 // All implementations must embed UnimplementedRandomAnimalServer
 // for forward compatibility.
 type RandomAnimalServer interface {
-	GetDog(context.Context, *Empty) (*BasicResponse, error)
-	GetFox(context.Context, *Empty) (*BasicResponse, error)
-	GetDuck(context.Context, *Empty) (*BasicResponse, error)
-	GetCat(context.Context, *Empty) (*BasicResponse, error)
-	GetChiken_CXK(context.Context, *Empty) (*BasicResponse, error)
+	GetDog(context.Context, *BasicRequest) (*BasicResponse, error)
+	GetFox(context.Context, *BasicRequest) (*BasicResponse, error)
+	GetDuck(context.Context, *BasicRequest) (*BasicResponse, error)
+	GetCat(context.Context, *BasicRequest) (*BasicResponse, error)
+	GetChiken_CXK(context.Context, *BasicRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedRandomAnimalServer()
 }
 
@@ -114,19 +114,19 @@ type RandomAnimalServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRandomAnimalServer struct{}
 
-func (UnimplementedRandomAnimalServer) GetDog(context.Context, *Empty) (*BasicResponse, error) {
+func (UnimplementedRandomAnimalServer) GetDog(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDog not implemented")
 }
-func (UnimplementedRandomAnimalServer) GetFox(context.Context, *Empty) (*BasicResponse, error) {
+func (UnimplementedRandomAnimalServer) GetFox(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFox not implemented")
 }
-func (UnimplementedRandomAnimalServer) GetDuck(context.Context, *Empty) (*BasicResponse, error) {
+func (UnimplementedRandomAnimalServer) GetDuck(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDuck not implemented")
 }
-func (UnimplementedRandomAnimalServer) GetCat(context.Context, *Empty) (*BasicResponse, error) {
+func (UnimplementedRandomAnimalServer) GetCat(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCat not implemented")
 }
-func (UnimplementedRandomAnimalServer) GetChiken_CXK(context.Context, *Empty) (*BasicResponse, error) {
+func (UnimplementedRandomAnimalServer) GetChiken_CXK(context.Context, *BasicRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChiken_CXK not implemented")
 }
 func (UnimplementedRandomAnimalServer) mustEmbedUnimplementedRandomAnimalServer() {}
@@ -151,7 +151,7 @@ func RegisterRandomAnimalServer(s grpc.ServiceRegistrar, srv RandomAnimalServer)
 }
 
 func _RandomAnimal_GetDog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BasicRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -163,13 +163,13 @@ func _RandomAnimal_GetDog_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: RandomAnimal_GetDog_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RandomAnimalServer).GetDog(ctx, req.(*Empty))
+		return srv.(RandomAnimalServer).GetDog(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RandomAnimal_GetFox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BasicRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -181,13 +181,13 @@ func _RandomAnimal_GetFox_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: RandomAnimal_GetFox_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RandomAnimalServer).GetFox(ctx, req.(*Empty))
+		return srv.(RandomAnimalServer).GetFox(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RandomAnimal_GetDuck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BasicRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -199,13 +199,13 @@ func _RandomAnimal_GetDuck_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: RandomAnimal_GetDuck_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RandomAnimalServer).GetDuck(ctx, req.(*Empty))
+		return srv.(RandomAnimalServer).GetDuck(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RandomAnimal_GetCat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BasicRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -217,13 +217,13 @@ func _RandomAnimal_GetCat_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: RandomAnimal_GetCat_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RandomAnimalServer).GetCat(ctx, req.(*Empty))
+		return srv.(RandomAnimalServer).GetCat(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RandomAnimal_GetChiken_CXK_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(BasicRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func _RandomAnimal_GetChiken_CXK_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: RandomAnimal_GetChiken_CXK_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RandomAnimalServer).GetChiken_CXK(ctx, req.(*Empty))
+		return srv.(RandomAnimalServer).GetChiken_CXK(ctx, req.(*BasicRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -244,7 +244,7 @@ func _RandomAnimal_GetChiken_CXK_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RandomAnimal_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "randomAnimal",
+	ServiceName: "susubot.plugin.randomanimal.randomAnimal",
 	HandlerType: (*RandomAnimalServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -269,5 +269,5 @@ var RandomAnimal_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "plugin/randomAnimal/LLOneBot/protos/randomAnimal/randomanimal.proto",
+	Metadata: "plugin/randomanimal/LLOneBot/protos/randomanimal/randomanimal.proto",
 }

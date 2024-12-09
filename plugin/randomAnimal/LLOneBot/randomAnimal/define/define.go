@@ -1,6 +1,6 @@
 package define
 
-import randomanimal_pb "github.com/nanachi-sh/susubot-code/plugin/randomAnimal/LLOneBot/protos/randomAnimal"
+import randomanimal_pb "github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot/protos/randomanimal"
 
 type BasicReturn struct {
 	Buf  []byte

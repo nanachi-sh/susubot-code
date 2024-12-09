@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "basic/handler/LLOneBot/protos/handler/define.proto";
+package susubot.basic.handler.request;
 
-option go_package = "github.com/nanachi-sh/susubot-code/basic/handler/LLOneBot/protos/handler/request";
+option go_package = "protos/handler/request";
 
 service RequestHandler {
     rpc SendGroupMessage (SendGroupMessageRequest) returns (BasicResponse);
@@ -15,6 +15,45 @@ service RequestHandler {
     rpc GetFriendInfo (GetFriendInfoRequest) returns (BasicResponse);
 }
 
+enum MessageChainType {
+    MessageChainType_Text = 0;   //纯文本
+    MessageChainType_Image = 1;  //图片 or 动图
+    MessageChainType_Voice = 2;  //语音
+    MessageChainType_Video = 3;  //视频
+    MessageChainType_At = 4;     //At
+    MessageChainType_Reply = 5;  //回复
+}
+message MessageChainObject {
+    optional MessageChainType Type = 1;
+    optional MessageChain_Text Text = 2;
+    optional MessageChain_Image Image = 3;
+    optional MessageChain_Voice Voice = 4;
+    optional MessageChain_Video Video = 5;
+    optional MessageChain_At At = 6;
+    optional MessageChain_Reply Reply = 7;
+}
+message MessageChain_Text {
+    string Text = 1;
+}
+message MessageChain_Image {
+    optional string URL = 1;
+    optional bytes Buf = 2;
+}
+message MessageChain_Voice {
+    optional string URL = 1;
+    optional bytes Buf = 2;
+}
+message MessageChain_Video {
+    optional string URL = 1;
+    optional bytes Buf = 2;
+}
+message MessageChain_At {
+    string TargetId = 1;
+}
+message MessageChain_Reply {
+    string MessageId = 1;
+}
+
 message BasicRequest {
     optional string Echo = 1;
 }
@@ -22,13 +61,13 @@ message BasicRequest {
 message SendGroupMessageRequest {
     optional string Echo = 1;
     string GroupId = 2;
-    repeated define.MessageChainObject MessageChain = 3;
+    repeated MessageChainObject MessageChain = 3;
 }
 
 message SendFriendMessageRequest {
     optional string Echo = 1;
     string FriendId = 2;
-    repeated define.MessageChainObject MessageChain = 3;
+    repeated MessageChainObject MessageChain = 3;
 }
 
 message MessageRecallRequest {
