@@ -1,10 +1,11 @@
 package randomanimal
 
 import (
+	crand "crypto/rand"
 	"encoding/json"
 	"errors"
 	"io"
-	"math/rand/v2"
+	"math/big"
 	"net/http"
 	"os"
 	"strings"
@@ -175,5 +176,9 @@ func GetChicken_CXK() (string, error) {
 	if len(j) == 0 {
 		return "", errors.New("Chicken_CXK Hash表为空")
 	}
-	return j[rand.IntN(len(j))], nil
+	i, err := crand.Int(crand.Reader, big.NewInt(int64(len(j))))
+	if err != nil {
+		return "", err
+	}
+	return j[i.Int64()], nil
 }
