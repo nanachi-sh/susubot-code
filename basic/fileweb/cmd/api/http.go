@@ -27,22 +27,6 @@ func HTTPServe() error {
 	if err != nil {
 		return errors.New("HTTP服务监听端口已被占用")
 	}
-	if err := mkdir(); err != nil {
-		return err
-	}
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(define.WorkDir))))
 	return http.Serve(l, nil)
-}
-
-func mkdir() error {
-	if _, err := os.Lstat(define.WorkDir); err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(define.WorkDir, 0755); err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-	return nil
 }
