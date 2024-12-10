@@ -252,7 +252,7 @@ func (*randomanimalService) GetChiken_CXK(ctx context.Context, req *randomanimal
 				Type: randomanimal_pb.Type_Image,
 				Response: &randomanimal_pb.BasicResponse_UploadResponse{
 					Hash:    chickenHash,
-					URLPath: fmt.Sprintf("http://%v/assets/%v", fmt.Sprintf("%v:%v", define.ExternalHost, define.ExternalHTTPPort), chickenHash),
+					URLPath: fmt.Sprintf("/%v", chickenHash),
 				},
 			}
 			return
