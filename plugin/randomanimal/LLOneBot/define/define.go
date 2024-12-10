@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot/log"
@@ -18,6 +19,9 @@ var (
 	GatewayIP  net.IP
 	GRPCClient *grpc.ClientConn
 	FilewebCtx context.Context
+
+	ExternalHost     string
+	ExternalHTTPPort int
 
 	logger = log.Get()
 )
@@ -59,4 +63,20 @@ func init() {
 	FilewebCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "fileweb",
 	}))
+	ExternalHost = os.Getenv("EXTERNAL_HOST")
+	if ExternalHost == "" {
+		logger.Fatalln("External Host未设置")
+	}
+	ExternalHTTPPort_str := os.Getenv("EXTERNAL_HTTP_PORT")
+	if ExternalHTTPPort_str == "" {
+		logger.Fatalln("External HTTPPort未设置")
+	}
+	httpport, err := strconv.ParseInt(ExternalHTTPPort_str, 10, 0)
+	if err != nil {
+		logger.Fatalln("External HTTPPort不为纯整数")
+	}
+	if httpport <= 0 || httpport > 65535 {
+		logger.Fatalln("External HTTPPort范围不正确")
+	}
+	ExternalHTTPPort = int(httpport)
 }

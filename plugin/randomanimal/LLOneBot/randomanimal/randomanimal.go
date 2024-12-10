@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"math/rand/v2"
 	"net/http"
+	"os"
 	"strings"
 
 	randomanimal_pb "github.com/nanachi-sh/susubot-code/plugin/randomanimal/LLOneBot/protos/randomanimal"
@@ -158,4 +160,20 @@ func GetDuck() (*define.BasicReturn, error) {
 		Buf:  resp_body,
 		Type: *Type,
 	}, nil
+}
+
+// return Hash
+func GetChicken_CXK() (string, error) {
+	d, err := os.ReadFile("/config/chickenCXK_HashList.json")
+	if err != nil {
+		return "", err
+	}
+	j := []string{}
+	if err := json.Unmarshal(d, &j); err != nil {
+		return "", err
+	}
+	if len(j) == 0 {
+		return "", errors.New("Chicken_CXK Hash表为空")
+	}
+	return j[rand.IntN(len(j))], nil
 }
