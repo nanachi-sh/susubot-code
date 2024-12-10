@@ -15,7 +15,7 @@ import (
 )
 
 func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResponse, error) {
-	d, err := os.ReadFile("/config/fortune_hashlist.json")
+	d, err := os.ReadFile("/config/fortune_HashList.json")
 	if err != nil {
 		return nil, err
 	}
