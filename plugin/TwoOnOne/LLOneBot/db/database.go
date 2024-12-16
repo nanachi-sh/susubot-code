@@ -34,7 +34,7 @@ func initDB() error {
 		Name TEXT NOT NULL,
 		WinCount INT NOT NULL DEFAULT 0,
 		LoseCount INT NOT NULL DEFAULT 0,
-		Coin DOUBLE NOT NULL DEFAULT 0
+		Coin DOUBLE NOT NULL DEFAULT 0.0,
 		LastGetDailyTimestamp BIGINT
 	);`); err != nil {
 		return err
