@@ -34,7 +34,7 @@ func initDB() error {
 		LoseCount INT NOT NULL DEFAULT 0,
 		Coin DOUBLE NOT NULL DEFAULT 0.0,
 		LastGetDailyTimestamp BIGINT
-	);`); err != nil {
+	) DEFAULT charset = utf8;`); err != nil {
 		return err
 	}
 	return nil
@@ -45,7 +45,6 @@ func init() {
 	if err != nil {
 		logger.Fatalln(err)
 	}
-	defer db.Close()
 	if err := db.Ping(); err != nil {
 		logger.Fatalln(err)
 	}
