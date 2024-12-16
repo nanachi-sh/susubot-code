@@ -14,8 +14,6 @@ var (
 	database *sql.DB
 	logger   = log.Get()
 
-	dbpassword string
-
 	ignore any
 )
 
