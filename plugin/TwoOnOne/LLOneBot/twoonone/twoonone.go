@@ -69,9 +69,15 @@ func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, 
 	if err := db.CreateAccount(req.PlayerId, req.PlayerName, 0); err != nil {
 		return nil, err
 	}
-	GetDailyCoin(&twoonone_pb.GetDailyCoinRequest{
+	serr, err := GetDailyCoin(&twoonone_pb.GetDailyCoinRequest{
 		PlayerId: req.PlayerId,
 	})
+	if err != nil {
+		return nil, err
+	}
+	if serr.Err != nil {
+		return serr.Err, nil
+	}
 	return nil, nil
 }
 

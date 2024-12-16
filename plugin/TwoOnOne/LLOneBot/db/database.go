@@ -58,9 +58,14 @@ func init() {
 			logger.Fatalln(err)
 		}
 	}
-	if _, err := database.Exec("USE twoonone;"); err != nil {
+	db, err = sql.Open("mysql", "root:@unix(/run/mysqld/mysqld.sock)/twoonone")
+	if err != nil {
 		logger.Fatalln(err)
 	}
+	if err := db.Ping(); err != nil {
+		logger.Fatalln(err)
+	}
+	database = db
 }
 
 func CreateAccount(id, name string, initialCoin float64) error {
