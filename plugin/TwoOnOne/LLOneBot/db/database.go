@@ -34,7 +34,7 @@ func initDB() error {
 		LoseCount INT NOT NULL DEFAULT 0,
 		Coin DOUBLE NOT NULL DEFAULT 0.0,
 		LastGetDailyTimestamp BIGINT
-	) DEFAULT charset = utf8;`); err != nil {
+	);`); err != nil {
 		return err
 	}
 	return nil
