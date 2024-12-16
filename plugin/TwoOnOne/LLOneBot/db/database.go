@@ -24,6 +24,10 @@ func initDB() error {
 	if _, err := database.Exec("CREATE DATABASE twoonone"); err != nil {
 		return err
 	}
+	//切换数据库
+	if _, err := database.Exec("USE twoonone;"); err != nil {
+		logger.Fatalln(err)
+	}
 	// 创建表
 	if _, err := database.Exec(`CREATE TABLE Players (
 		Id TEXT NOT NULL,
