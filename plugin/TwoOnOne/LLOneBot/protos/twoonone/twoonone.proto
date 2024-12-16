@@ -1,0 +1,257 @@
+syntax = "proto3";
+
+package susubot.plugin.twoonone;
+
+option go_package = "protos/twoonone";
+
+service TwoOnOne {
+    //其他
+    rpc GetRooms (Empty) returns (GetRoomsResponse);
+    //账号相关
+    rpc CreateAccount (CreateAccountRequest) returns (BasicResponse);
+    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+    rpc GetDailyCoin (GetDailyCoinRequest) returns (BasicResponse);
+    //房间相关
+    rpc GetRoomInfo (GetRoomInfoRequest) returns (GetRoomInfoResponse);
+    rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse);
+    rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
+    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
+    rpc StartRoom (StartRoomRequest) returns (StartRoomResponse);
+    rpc RobLandownerAction (RobLandownerActionRequest) returns (RobLandownerActionResponse);
+    rpc SendCardAction (SendCardRequest) returns (SendCardResponse);
+}
+
+enum RoomStage {
+    WaitingStart = 0;
+    RobLandownering = 1;
+    SendingCards = 2;
+}
+
+enum RobLandownerActions {
+    Rob = 0;
+    NoRob = 1;
+}
+
+enum SendCardActions {
+    Send = 0;
+    NoSend = 1;
+}
+
+enum Card {
+    Three = 0;
+    Four = 1;
+    Five = 2;
+    Six = 3;
+    Seven = 4;
+    Eight = 5;
+    Nine = 6;
+    Ten = 7;
+    J = 8;
+    Q = 9;
+    K = 10;
+    A = 11;
+    Two = 12;
+    Joker = 13;
+    King = 14;
+}
+
+enum CardType {
+    KingBomb = 0; //王炸
+    Single = 1; //单牌
+    Double = 2; //双牌
+    ThreeCard = 3; //三牌
+    ThreeWithSingle = 4; //三带一
+    ThreeWithDouble = 5; //三带一对
+    Bomb = 6; //炸弹
+    FourWithTwoSingle = 7; //四带两
+    FourWithTwoDouble = 8; //四带两对
+    SingleSequence = 9; //顺子
+    DoubleSequence = 10; //连对
+    AirSequence = 11; //纯飞机
+    AirSequenceWithTwoSingle = 12; //飞机带两
+    AirSequenceWithTwoDouble = 13; //飞机带两对
+    Unknown = 100; //未知牌型
+}
+
+enum Errors {
+    Unexpected = 0; //意外错误
+    RoomFull = 1; //房间已满
+    RoomNoExist = 2; //房间不存在
+    RoomExistPlayer = 3; //玩家已存在房间内
+    RoomNoExistPlayer = 4; //
+    RoomNoRobLandownering = 5; //房间不在抢地主阶段
+    RoomNoSendingCards = 6; //房间不在出牌阶段
+    PlayerCardNoExist = 7; //玩家卡牌不足
+    PlayerNoOperatorNow = 8; //玩家不是当前操作者
+    PlayerNoExist = 9; //玩家不存在
+    PlayerAlreadyGetDailyCoin = 10; //玩家已获取过每日豆子
+    RoomPlayerNoFull = 11; //房间玩家未满
+    RoomStarted = 12; //房间已开始
+    RobLandownerNoExistRob = 13; //无人抢地主
+    SendCardUnknown = 14; //出的牌类型未知
+    SendCardTypeNELastCard = 15; //出的牌类型与上一副牌不同
+    SendCardContinousNELastCard = 16; //出的牌连续数与上一副牌不同
+    SendCardSizeLELastCard = 17; //出的牌小于或等于上一副牌
+    PlayerAccountExist = 18; //玩家信息已存在
+    PlayerNoExistAnyRoom = 19; //玩家不在任意一个房间内
+}
+
+enum Role {
+    Landowner = 0; //地主
+    Farmer = 1; //农民
+}
+
+message SendCard {
+    PlayerInfo SenderInfo = 1;
+    repeated Card SendCards = 2;
+    CardType SendCardType = 3;
+    int32 SendCardSize = 4;
+    int32 SendCardContinous = 5;
+}
+
+message PlayerInfo {
+    PlayerAccountInfo AccountInfo = 2;
+    optional PlayerTableInfo TableInfo = 3;
+}
+
+message PlayerTableInfo {
+    string RoomHash = 1;
+    repeated Card Cards = 2;
+    optional RobLandownerActions RobLandownerAction = 3;
+}
+
+message PlayerAccountInfo {
+    string Id = 1;
+    string Name = 2;
+    int32 WinCount = 3;
+    int32 LoseCount = 4;
+    double Coin = 5;
+    int64 LastGetDailyTimestamp = 6;
+}
+
+message RoomInfo {
+    string Hash = 1;
+    repeated PlayerInfo Players = 2;
+    double BasicCoin = 3;
+    int32 Multiple = 4;
+    RoomStage Stage = 5;
+    repeated SendCard CardPool = 6;
+    optional PlayerInfo OperatorNow = 7;
+    repeated Card LandownerCards = 8;
+    optional PlayerInfo Landowner = 9;
+    repeated PlayerInfo Farmers = 10;
+}
+
+message Empty{}
+message BasicResponse {
+    optional Errors err = 1;
+}
+
+message GetRoomInfoRequest {
+    optional string RoomHash = 1;
+    optional string PlayerId = 2;
+}
+
+message GetRoomInfoResponse {
+    optional Errors err = 1;
+    optional RoomInfo Info = 2;
+}
+
+
+message CreateRoomRequest {
+    double BasicCoin = 1;
+    int32 InitialMultiple = 2;
+}
+
+message CreateRoomResponse {
+    string RoomHash = 1;
+}
+
+message JoinRoomRequest {
+    string RoomHash = 1;
+    string PlayerId = 2;
+}
+
+message JoinRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerInfo RoomPlayers = 2;
+}
+
+message ExitRoomRequest {
+    string PlayerId = 1;
+}
+
+message ExitRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerInfo RoomPlayers = 2;
+}
+
+message RobLandownerActionRequest {
+    string PlayerId = 1;
+    RobLandownerActions Action = 2;
+}
+
+message RobLandownerActionResponse {
+    optional Errors err = 1;
+    PlayerInfo LastOperator = 2;
+    bool IntoSendingCard = 3;
+}
+
+message SendCardRequest {
+    string PlayerId = 1;
+    SendCardActions Action = 2;
+    repeated Card SendCards = 3;
+}
+
+message SendCardResponse {
+    message GameFinishEvent {
+        repeated Card LandownerCards = 1;
+        repeated Card Farmer1Cards = 2;
+        repeated Card Farmer2Cards = 3;
+        Role Winner = 4;
+        bool Spring = 5;
+    }
+
+    optional Errors err = 1;
+    repeated Card SenderCard = 2;
+    optional PlayerInfo NextPlayer = 9;
+    
+    bool SenderCardNumberNotice = 3;
+    bool GameFinish = 4;
+    bool SenderCardTypeNotice = 5;
+
+    optional int32 SenderCardNumber = 6;
+    optional GameFinishEvent GameFinishE = 7;
+    optional CardType SenderCardType = 8;
+}
+
+message CreateAccountRequest {
+    string PlayerId = 1;
+    string PlayerName = 2;
+}
+
+message GetAccountRequest {
+    string PlayerId = 1;
+}
+
+message GetAccountResponse {
+    optional Errors err = 1;
+    PlayerInfo Info = 2;
+}
+
+message GetDailyCoinRequest {
+    string PlayerId = 1;
+}
+
+message StartRoomRequest {
+    string PlayerId = 1;
+}
+
+message StartRoomResponse {
+    optional Errors err = 1;
+    PlayerInfo LastOperator = 2;
+}
+
+message GetRoomsResponse {
+    repeated RoomInfo Rooms = 1;
+}
