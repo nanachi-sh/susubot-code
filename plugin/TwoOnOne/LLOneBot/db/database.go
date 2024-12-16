@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -39,9 +40,12 @@ func initDB() error {
 }
 
 func init() {
+	dbpassword = os.Getenv("DATABASE_PASSWORD")
+	if dbpassword == "" {
+		logger.Fatalln("数据库密码未设置")
+	}
 	dbs := fmt.Sprintf("root:%v@unix(/run/mysqld/mysqld.sock)/", dbpassword)
-	_ = dbs
-	db, err := sql.Open("mysql", "root@unix(/run/mysqld/mysqld.sock)/")
+	db, err := sql.Open("mysql", dbs)
 	if err != nil {
 		logger.Fatalln(err)
 	}
