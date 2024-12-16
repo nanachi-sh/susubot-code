@@ -28,7 +28,7 @@ func initDB() error {
 	}
 	// 创建表
 	if _, err := database.Exec(`CREATE TABLE Players (
-		Id TEXT NOT NULL,
+		Id TEXT NOT NULL UNIQUE,
 		Name TEXT NOT NULL,
 		WinCount INT NOT NULL DEFAULT 0,
 		LoseCount INT NOT NULL DEFAULT 0,
