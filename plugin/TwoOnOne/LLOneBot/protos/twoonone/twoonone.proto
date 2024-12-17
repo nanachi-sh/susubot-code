@@ -94,6 +94,7 @@ enum Errors {
     SendCardSizeLELastCard = 17; //出的牌小于或等于上一副牌
     PlayerAccountExist = 18; //玩家信息已存在
     PlayerNoExistAnyRoom = 19; //玩家不在任意一个房间内
+    PlayerCoinLTRoomBasicCoin = 20; //玩家豆子小于房间底分
 }
 
 enum Role {

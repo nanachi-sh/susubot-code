@@ -63,6 +63,9 @@ func (r *Room) Join(ai *twoonone_pb.PlayerAccountInfo) *twoonone_pb.Errors {
 	if _, ok := r.GetPlayer(ai.Id); ok {
 		return twoonone_pb.Errors_RoomExistPlayer.Enum()
 	}
+	if ai.Coin < r.basicCoin {
+		return twoonone_pb.Errors_PlayerCoinLTRoomBasicCoin.Enum()
+	}
 	p := player.New(&twoonone_pb.PlayerInfo{
 		AccountInfo: ai,
 		TableInfo: &twoonone_pb.PlayerTableInfo{
