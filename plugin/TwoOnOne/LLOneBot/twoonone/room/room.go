@@ -967,6 +967,8 @@ func (r *Room) startSendCard() {
 			}
 		}
 	}
+	// 设置阶段
+	r.stage = twoonone_pb.RoomStage_SendingCards
 	// 重排玩家
 	r.resequence(&r.players)
 	r.operatorNow = lo
