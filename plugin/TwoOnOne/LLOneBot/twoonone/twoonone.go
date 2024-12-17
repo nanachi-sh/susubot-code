@@ -76,17 +76,23 @@ func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, 
 	return serr, nil
 }
 
-func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountInfo, error) {
+func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountInfo, *twoonone_pb.Errors, error) {
 	ai, err := db.GetPlayer(req.PlayerId)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, twoonone_pb.Errors_PlayerNoExist.Enum(), nil
+		}
+		return nil, nil, err
 	}
-	return ai, nil
+	return ai, nil, nil
 }
 
 func getDailyCoin(id string) (*twoonone_pb.Errors, error) {
 	ai, err := db.GetPlayer(id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return twoonone_pb.Errors_PlayerNoExist.Enum(), nil
+		}
 		return nil, err
 	}
 	if ai.LastGetDailyTimestamp == 0 { //第一次领取

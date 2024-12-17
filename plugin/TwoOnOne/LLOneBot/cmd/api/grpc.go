@@ -103,9 +103,15 @@ func (*twononeService) GetAccount(ctx context.Context, req *twoonone_pb.GetAccou
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		ai, err := twoonone.GetAccount(req)
+		ai, serr, err := twoonone.GetAccount(req)
 		if err != nil {
 			ret.err = err
+			return
+		}
+		if serr != nil {
+			ret.data = &twoonone_pb.GetAccountResponse{
+				Err: serr,
+			}
 			return
 		}
 		ret.data = &twoonone_pb.GetAccountResponse{
