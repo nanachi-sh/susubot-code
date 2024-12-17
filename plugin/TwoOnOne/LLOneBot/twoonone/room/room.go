@@ -63,14 +63,18 @@ func (r *Room) Join(ai *twoonone_pb.PlayerAccountInfo) *twoonone_pb.Errors {
 	if _, ok := r.GetPlayer(ai.Id); ok {
 		return twoonone_pb.Errors_RoomExistPlayer.Enum()
 	}
-	r.players = append(r.players, player.New(&twoonone_pb.PlayerInfo{
+	p := player.New(&twoonone_pb.PlayerInfo{
 		AccountInfo: ai,
 		TableInfo: &twoonone_pb.PlayerTableInfo{
 			RoomHash:           r.GetHash(),
 			Cards:              []twoonone_pb.Card{},
 			RobLandownerAction: nil,
 		},
-	}))
+	})
+	if p == nil {
+		return twoonone_pb.Errors_Unexpected.Enum()
+	}
+	r.players = append(r.players, p)
 	return nil
 }
 
