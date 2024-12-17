@@ -205,7 +205,7 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 			*event = *y
 		}
 	case twoonone_pb.SendCardActions_NoSend:
-		x, err := r.unSendCard()
+		x, err := r.unSendCard(p)
 		if err != nil {
 			return nil, SendCardEvents{}, err, nil
 		}
@@ -303,7 +303,14 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 	return next, nil, nil
 }
 
-func (r *Room) unSendCard() (*player.Player, *twoonone_pb.Errors) {
+func (r *Room) unSendCard(p *player.Player) (*player.Player, *twoonone_pb.Errors) {
+	lastcard := r.GetLastCard()
+	// 特殊情况判断
+	if lastcard == nil { //第一次出牌
+		return nil, twoonone_pb.Errors_PlayerIsOnlySendCarder.Enum()
+	} else if lastcard.SenderInfo.GetId() == p.GetId() { //上一次出牌为同一人
+		return nil, twoonone_pb.Errors_PlayerIsOnlySendCarder.Enum()
+	}
 	next := r.nextSendCardOperator()
 	r.operatorNow = next
 	return next, nil
