@@ -23,15 +23,12 @@ func getRoom(hash string) *room.Room {
 	return nil
 }
 
-func getAccount(id string) (*twoonone_pb.PlayerInfo, error) {
+func getAccount(id string) (*twoonone_pb.PlayerAccountInfo, error) {
 	pi, err := db.GetPlayer(id)
 	if err != nil {
 		return nil, err
 	}
-	return &twoonone_pb.PlayerInfo{
-		AccountInfo: pi,
-		TableInfo:   nil,
-	}, nil
+	return pi, nil
 }
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {
@@ -77,7 +74,7 @@ func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, 
 }
 
 func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountInfo, *twoonone_pb.Errors, error) {
-	ai, err := db.GetPlayer(req.PlayerId)
+	ai, err := getAccount(req.PlayerId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, twoonone_pb.Errors_PlayerNoExist.Enum(), nil
@@ -270,7 +267,7 @@ func JoinRoom(req *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, 
 		}
 		return nil, err
 	}
-	if err := r.Join(pi.AccountInfo); err != nil {
+	if err := r.Join(pi); err != nil {
 		return &twoonone_pb.JoinRoomResponse{
 			Err: err,
 		}, nil
