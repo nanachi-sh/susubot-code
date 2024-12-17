@@ -1003,7 +1003,11 @@ func (r *Room) delete(id string) bool {
 			continue
 		}
 		if p.GetId() == id {
-			r.players[n] = &player.Player{}
+			if len(r.players) == 1 {
+				r.players = r.players[:0]
+			} else {
+				r.players = append(r.players[:n], r.players[n+1:]...)
+			}
 			return true
 		}
 	}
@@ -1019,29 +1023,6 @@ func (r *Room) resequence(x any) {
 			x[0] = lo
 			x[1] = r.farmers[0]
 			x[2] = r.farmers[1]
-		}
-		for n, m := 0, len(x)-1; ; {
-			if n > len(x)-1 || m < 0 || n >= m {
-				break
-			}
-			if !x[n].IsEmpty() {
-				n += 1
-				continue
-			}
-			for i := m; i != -1; i-- {
-				if i <= n {
-					m = -1
-					break
-				}
-				if !x[i].IsEmpty() {
-					x[n] = x[i]
-					*xPoint = x[:i]
-					x = *xPoint
-					m -= m - i + 1
-					n += 1
-					break
-				}
-			}
 		}
 	case *[]twoonone_pb.Card: //重排牌
 		x := *xPoint
