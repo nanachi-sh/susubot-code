@@ -254,6 +254,20 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 			}, nil
 		}
 		return next, nil, nil
+	} else if lastcard.SenderInfo.GetId() == p.GetId() { //同一人操作
+		if err := r.playerSendCard(p, sendcards, cardtype, cardsize, cardcontious); err != nil {
+			return nil, nil, err
+		}
+		next := r.nextSendCardOperator()
+		r.operatorNow = next
+		switch cardtype {
+		case twoonone_pb.CardType_KingBomb, twoonone_pb.CardType_Bomb:
+			return next, &SendCardEvents{
+				SenderCardTypeNotice: true,
+				CardType:             &cardtype,
+			}, nil
+		}
+		return next, nil, nil
 	} else if cardtype == twoonone_pb.CardType_KingBomb { // 王炸
 		if err := r.playerSendCard(p, sendcards, cardtype, cardsize, cardcontious); err != nil {
 			return nil, nil, err
