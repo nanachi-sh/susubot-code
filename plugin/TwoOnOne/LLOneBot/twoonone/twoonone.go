@@ -75,8 +75,8 @@ func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, 
 	if err != nil {
 		return nil, err
 	}
-	if serr.Err != nil {
-		return serr.Err, nil
+	if serr != nil && serr.Err != nil {
+		return twoonone_pb.BasicResponse
 	}
 	return nil, nil
 }
@@ -89,8 +89,8 @@ func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountI
 	return ai, nil
 }
 
-func GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.BasicResponse, error) {
-	ai, err := db.GetPlayer(req.PlayerId)
+func getDailyCoin(id string) (*twoonone_pb.Errors, error) {
+	ai, err := db.GetPlayer(id)
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +110,19 @@ func GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.BasicRespo
 		}
 		return nil, nil
 	} else { //不符合
-		return &twoonone_pb.BasicResponse{
-			Err: twoonone_pb.Errors_PlayerAlreadyGetDailyCoin.Enum(),
-		}, nil
+		return twoonone_pb.Errors_PlayerAlreadyGetDailyCoin.Enum(), nil
 	}
 	return nil, nil
+}
+
+func GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.BasicResponse, error) {
+	serr, err := getDailyCoin()
+	if err != nil {
+		return nil, err
+	}
+	return &twoonone_pb.BasicResponse{
+		Err: serr,
+	}, nil
 }
 
 func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
