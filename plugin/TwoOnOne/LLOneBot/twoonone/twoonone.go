@@ -116,7 +116,7 @@ func getDailyCoin(id string) (*twoonone_pb.Errors, error) {
 }
 
 func GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.BasicResponse, error) {
-	serr, err := getDailyCoin()
+	serr, err := getDailyCoin(req.PlayerId)
 	if err != nil {
 		return nil, err
 	}
