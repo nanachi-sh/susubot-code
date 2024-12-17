@@ -127,6 +127,9 @@ func GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.BasicRespo
 }
 
 func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
+	if r == nil {
+		return nil
+	}
 	ps := []*twoonone_pb.PlayerInfo{}
 	for _, v := range r.GetPlayers() {
 		ps = append(ps, insidePlayerToPlayerInfo(v))
@@ -141,18 +144,13 @@ func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
 			SendCardContinous: int32(v.SendCardContinous),
 		})
 	}
-	var operatorNow *twoonone_pb.PlayerInfo
-	for operator := r.GetOperatorNow(); ; {
-		operatorNow = insidePlayerToPlayerInfo(operator)
-		break
-	}
-	var landowner *twoonone_pb.PlayerInfo
-	for lo := r.GetLandowner(); ; {
-		landowner = insidePlayerToPlayerInfo(lo)
-		break
-	}
+	operatorNow := insidePlayerToPlayerInfo(r.GetOperatorNow())
+	landowner := insidePlayerToPlayerInfo(r.GetLandowner())
 	var farmers []*twoonone_pb.PlayerInfo
 	for _, v := range r.GetFarmers() {
+		if v == nil {
+			continue
+		}
 		farmers = append(farmers, insidePlayerToPlayerInfo(v))
 	}
 	return &twoonone_pb.RoomInfo{
@@ -170,6 +168,9 @@ func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
 }
 
 func insidePlayerToPlayerInfo(p *player.Player) *twoonone_pb.PlayerInfo {
+	if p == nil {
+		return nil
+	}
 	pi := &twoonone_pb.PlayerInfo{
 		AccountInfo: &twoonone_pb.PlayerAccountInfo{
 			Id:                    p.GetId(),
