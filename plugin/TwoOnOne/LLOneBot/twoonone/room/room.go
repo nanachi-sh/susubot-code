@@ -183,9 +183,6 @@ type SendCardEvents struct {
 }
 
 func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, action twoonone_pb.SendCardActions) (*player.Player, SendCardEvents, *twoonone_pb.Errors, error) {
-	if len(sendcards) == 0 {
-		return nil, SendCardEvents{}, twoonone_pb.Errors_Unexpected.Enum(), nil
-	}
 	if p.GetRoomHash() != r.GetHash() {
 		return nil, SendCardEvents{}, twoonone_pb.Errors_Unexpected.Enum(), nil
 	}
@@ -199,6 +196,9 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 	event := new(SendCardEvents)
 	switch action {
 	case twoonone_pb.SendCardActions_Send:
+		if len(sendcards) == 0 {
+			return nil, SendCardEvents{}, twoonone_pb.Errors_Unexpected.Enum(), nil
+		}
 		x, y, err := r.sendCard(p, sendcards)
 		if err != nil {
 			return nil, SendCardEvents{}, err, nil
