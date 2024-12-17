@@ -42,6 +42,12 @@ func hash() string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 func New(basicCoin float64, multiple int) *Room {
+	if basicCoin <= 0 {
+		basicCoin = 200
+	}
+	if multiple <= 0 {
+		multiple = 1
+	}
 	return &Room{
 		hash:           hash(),
 		players:        []*player.Player{},
@@ -1096,6 +1102,6 @@ func (r *Room) GetBasicCoin() float64 {
 	return r.basicCoin
 }
 
-func (r *Room) GetMultiple() float64 {
-	return r.basicCoin
+func (r *Room) GetMultiple() int {
+	return r.multiple
 }
