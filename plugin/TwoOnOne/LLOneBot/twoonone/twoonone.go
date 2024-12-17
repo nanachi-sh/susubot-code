@@ -2,6 +2,7 @@ package twoonone
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/TwoOnOne/LLOneBot/db"
@@ -33,6 +34,8 @@ func getAccount(id string) (*twoonone_pb.PlayerAccountInfo, error) {
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {
 	for _, v := range rooms {
+		fmt.Println(id)
+		fmt.Println(v.GetPlayer(id))
 		pi, ok := v.GetPlayer(id)
 		if ok {
 			return pi, ok
