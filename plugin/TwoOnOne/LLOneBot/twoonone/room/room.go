@@ -182,15 +182,15 @@ type SendCardEvents struct {
 	CardNumber  *int
 }
 
-func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, action twoonone_pb.SendCardActions) (*player.Player, *SendCardEvents, *twoonone_pb.Errors, error) {
+func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, action twoonone_pb.SendCardActions) (*player.Player, SendCardEvents, *twoonone_pb.Errors, error) {
 	if p.GetRoomHash() != r.GetHash() {
-		return nil, nil, twoonone_pb.Errors_Unexpected.Enum(), nil
+		return nil, SendCardEvents{}, twoonone_pb.Errors_Unexpected.Enum(), nil
 	}
 	if r.GetStage() != twoonone_pb.RoomStage_SendingCards {
-		return nil, nil, twoonone_pb.Errors_RoomNoSendingCards.Enum(), nil
+		return nil, SendCardEvents{}, twoonone_pb.Errors_RoomNoSendingCards.Enum(), nil
 	}
 	if r.GetOperatorNow().GetId() != p.GetId() {
-		return nil, nil, twoonone_pb.Errors_PlayerNoOperatorNow.Enum(), nil
+		return nil, SendCardEvents{}, twoonone_pb.Errors_PlayerNoOperatorNow.Enum(), nil
 	}
 	var next *player.Player
 	event := new(SendCardEvents)
@@ -198,7 +198,7 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 	case twoonone_pb.SendCardActions_Send:
 		x, y, err := r.sendCard(p, sendcards)
 		if err != nil {
-			return nil, nil, err, nil
+			return nil, SendCardEvents{}, err, nil
 		}
 		next = x
 		if y != nil {
@@ -207,11 +207,11 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 	case twoonone_pb.SendCardActions_NoSend:
 		x, err := r.unSendCard()
 		if err != nil {
-			return nil, nil, err, nil
+			return nil, SendCardEvents{}, err, nil
 		}
 		next = x
 	default:
-		return nil, nil, twoonone_pb.Errors_Unexpected.Enum(), nil
+		return nil, SendCardEvents{}, twoonone_pb.Errors_Unexpected.Enum(), nil
 	}
 	// 判断出牌玩家手牌剩余数
 	switch l := len(p.GetCards()); l {
@@ -219,13 +219,13 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 		event.GameFinish = true
 		event.GameFinishE = r.gameFinish()
 		if err := r.playerUpdateToDatabase(); err != nil {
-			return nil, nil, nil, err
+			return nil, SendCardEvents{}, nil, err
 		}
 	case 1, 2:
 		event.SenderCardNumberNotice = true
 		event.CardNumber = &l
 	}
-	return next, event, nil, nil
+	return next, *event, nil, nil
 }
 
 func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player.Player, *SendCardEvents, *twoonone_pb.Errors) {
