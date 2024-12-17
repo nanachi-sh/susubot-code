@@ -162,9 +162,9 @@ func (*twononeService) GetDailyCoin(ctx context.Context, req *twoonone_pb.GetDai
 	}
 }
 
-func (*twononeService) GetRoomInfo(ctx context.Context, req *twoonone_pb.GetRoomInfoRequest) (*twoonone_pb.GetRoomInfoResponse, error) {
+func (*twononeService) GetRoomInfo(ctx context.Context, req *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
 	type d struct {
-		data *twoonone_pb.GetRoomInfoResponse
+		data *twoonone_pb.GetRoomResponse
 		err  error
 	}
 	ch := make(chan *d, 1)

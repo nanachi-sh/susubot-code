@@ -2,6 +2,7 @@ package twoonone
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/TwoOnOne/LLOneBot/db"
@@ -60,7 +61,7 @@ func GetRooms() []*twoonone_pb.RoomInfo {
 
 func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, error) {
 	if req.PlayerId == "" || req.PlayerName == "" {
-		return twoonone_pb.Errors_Unexpected.Enum(), nil
+		return nil, errors.New("玩家Id或名字为空")
 	}
 	ai, _ := db.GetPlayer(req.PlayerId)
 	if ai != nil {
@@ -77,6 +78,9 @@ func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, 
 }
 
 func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountInfo, *twoonone_pb.Errors, error) {
+	if req.PlayerId == "" {
+		return nil, nil, errors.New("玩家Id不能为空")
+	}
 	ai, err := getAccount(req.PlayerId)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -88,7 +92,7 @@ func GetAccount(req *twoonone_pb.GetAccountRequest) (*twoonone_pb.PlayerAccountI
 }
 
 func getDailyCoin(id string) (*twoonone_pb.Errors, error) {
-	ai, err := db.GetPlayer(id)
+	ai, err := getAccount(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return twoonone_pb.Errors_PlayerNoExist.Enum(), nil
@@ -196,39 +200,39 @@ func insidePlayerToPlayerInfo(p *player.Player) *twoonone_pb.PlayerInfo {
 	return pi
 }
 
-func GetRoom(req *twoonone_pb.GetRoomInfoRequest) *twoonone_pb.GetRoomInfoResponse {
+func GetRoom(req *twoonone_pb.GetRoomRequest) *twoonone_pb.GetRoomResponse {
 	switch {
 	case req.RoomHash != nil:
 		if r := getRoom(*req.RoomHash); r == nil {
-			return &twoonone_pb.GetRoomInfoResponse{
+			return &twoonone_pb.GetRoomResponse{
 				Err:  twoonone_pb.Errors_RoomNoExist.Enum(),
 				Info: nil,
 			}
 		} else {
-			return &twoonone_pb.GetRoomInfoResponse{
+			return &twoonone_pb.GetRoomResponse{
 				Info: insideRoomToRoom(r),
 			}
 		}
 	case req.PlayerId != nil:
 		p, ok := getPlayerFromRooms(*req.PlayerId)
 		if !ok {
-			return &twoonone_pb.GetRoomInfoResponse{
+			return &twoonone_pb.GetRoomResponse{
 				Err:  twoonone_pb.Errors_PlayerNoExistAnyRoom.Enum(),
 				Info: nil,
 			}
 		}
 		if r := getRoom(p.GetRoomHash()); r == nil {
-			return &twoonone_pb.GetRoomInfoResponse{
+			return &twoonone_pb.GetRoomResponse{
 				Err:  twoonone_pb.Errors_RoomNoExist.Enum(),
 				Info: nil,
 			}
 		} else {
-			return &twoonone_pb.GetRoomInfoResponse{
+			return &twoonone_pb.GetRoomResponse{
 				Info: insideRoomToRoom(r),
 			}
 		}
 	default:
-		return &twoonone_pb.GetRoomInfoResponse{
+		return &twoonone_pb.GetRoomResponse{
 			Err:  twoonone_pb.Errors_Unexpected.Enum(),
 			Info: nil,
 		}

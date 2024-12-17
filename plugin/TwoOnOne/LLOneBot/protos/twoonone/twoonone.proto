@@ -12,7 +12,7 @@ service TwoOnOne {
     rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
     rpc GetDailyCoin (GetDailyCoinRequest) returns (BasicResponse);
     //房间相关
-    rpc GetRoomInfo (GetRoomInfoRequest) returns (GetRoomInfoResponse);
+    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
     rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse);
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
     rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
@@ -149,12 +149,12 @@ message BasicResponse {
     optional Errors err = 1;
 }
 
-message GetRoomInfoRequest {
+message GetRoomRequest {
     optional string RoomHash = 1;
     optional string PlayerId = 2;
 }
 
-message GetRoomInfoResponse {
+message GetRoomResponse {
     optional Errors err = 1;
     optional RoomInfo Info = 2;
 }

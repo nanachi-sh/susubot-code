@@ -23,7 +23,7 @@ const (
 	TwoOnOne_CreateAccount_FullMethodName      = "/susubot.plugin.twoonone.TwoOnOne/CreateAccount"
 	TwoOnOne_GetAccount_FullMethodName         = "/susubot.plugin.twoonone.TwoOnOne/GetAccount"
 	TwoOnOne_GetDailyCoin_FullMethodName       = "/susubot.plugin.twoonone.TwoOnOne/GetDailyCoin"
-	TwoOnOne_GetRoomInfo_FullMethodName        = "/susubot.plugin.twoonone.TwoOnOne/GetRoomInfo"
+	TwoOnOne_GetRoom_FullMethodName            = "/susubot.plugin.twoonone.TwoOnOne/GetRoom"
 	TwoOnOne_CreateRoom_FullMethodName         = "/susubot.plugin.twoonone.TwoOnOne/CreateRoom"
 	TwoOnOne_JoinRoom_FullMethodName           = "/susubot.plugin.twoonone.TwoOnOne/JoinRoom"
 	TwoOnOne_ExitRoom_FullMethodName           = "/susubot.plugin.twoonone.TwoOnOne/ExitRoom"
@@ -43,7 +43,7 @@ type TwoOnOneClient interface {
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 	GetDailyCoin(ctx context.Context, in *GetDailyCoinRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 	// 房间相关
-	GetRoomInfo(ctx context.Context, in *GetRoomInfoRequest, opts ...grpc.CallOption) (*GetRoomInfoResponse, error)
+	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*GetRoomResponse, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error)
 	JoinRoom(ctx context.Context, in *JoinRoomRequest, opts ...grpc.CallOption) (*JoinRoomResponse, error)
 	ExitRoom(ctx context.Context, in *ExitRoomRequest, opts ...grpc.CallOption) (*ExitRoomResponse, error)
@@ -100,10 +100,10 @@ func (c *twoOnOneClient) GetDailyCoin(ctx context.Context, in *GetDailyCoinReque
 	return out, nil
 }
 
-func (c *twoOnOneClient) GetRoomInfo(ctx context.Context, in *GetRoomInfoRequest, opts ...grpc.CallOption) (*GetRoomInfoResponse, error) {
+func (c *twoOnOneClient) GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*GetRoomResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRoomInfoResponse)
-	err := c.cc.Invoke(ctx, TwoOnOne_GetRoomInfo_FullMethodName, in, out, cOpts...)
+	out := new(GetRoomResponse)
+	err := c.cc.Invoke(ctx, TwoOnOne_GetRoom_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ type TwoOnOneServer interface {
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
 	GetDailyCoin(context.Context, *GetDailyCoinRequest) (*BasicResponse, error)
 	// 房间相关
-	GetRoomInfo(context.Context, *GetRoomInfoRequest) (*GetRoomInfoResponse, error)
+	GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error)
 	JoinRoom(context.Context, *JoinRoomRequest) (*JoinRoomResponse, error)
 	ExitRoom(context.Context, *ExitRoomRequest) (*ExitRoomResponse, error)
@@ -210,8 +210,8 @@ func (UnimplementedTwoOnOneServer) GetAccount(context.Context, *GetAccountReques
 func (UnimplementedTwoOnOneServer) GetDailyCoin(context.Context, *GetDailyCoinRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDailyCoin not implemented")
 }
-func (UnimplementedTwoOnOneServer) GetRoomInfo(context.Context, *GetRoomInfoRequest) (*GetRoomInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRoomInfo not implemented")
+func (UnimplementedTwoOnOneServer) GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoom not implemented")
 }
 func (UnimplementedTwoOnOneServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
@@ -324,20 +324,20 @@ func _TwoOnOne_GetDailyCoin_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TwoOnOne_GetRoomInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRoomInfoRequest)
+func _TwoOnOne_GetRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoomRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TwoOnOneServer).GetRoomInfo(ctx, in)
+		return srv.(TwoOnOneServer).GetRoom(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TwoOnOne_GetRoomInfo_FullMethodName,
+		FullMethod: TwoOnOne_GetRoom_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TwoOnOneServer).GetRoomInfo(ctx, req.(*GetRoomInfoRequest))
+		return srv.(TwoOnOneServer).GetRoom(ctx, req.(*GetRoomRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -474,8 +474,8 @@ var TwoOnOne_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TwoOnOne_GetDailyCoin_Handler,
 		},
 		{
-			MethodName: "GetRoomInfo",
-			Handler:    _TwoOnOne_GetRoomInfo_Handler,
+			MethodName: "GetRoom",
+			Handler:    _TwoOnOne_GetRoom_Handler,
 		},
 		{
 			MethodName: "CreateRoom",
