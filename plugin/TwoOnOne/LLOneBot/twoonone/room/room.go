@@ -1032,7 +1032,8 @@ func (r *Room) resequence(x any) {
 }
 
 func (r *Room) GetPlayer(playerId string) (*player.Player, bool) {
-	for _, v := range r.players {
+	fmt.Println(r.GetPlayers())
+	for _, v := range r.GetPlayers() {
 		if v.IsEmpty() {
 			continue
 		}
