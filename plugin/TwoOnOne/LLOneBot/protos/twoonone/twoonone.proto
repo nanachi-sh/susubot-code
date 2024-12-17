@@ -95,6 +95,7 @@ enum Errors {
     PlayerAccountExist = 18; //玩家信息已存在
     PlayerNoExistAnyRoom = 19; //玩家不在任意一个房间内
     PlayerCoinLTRoomBasicCoin = 20; //玩家豆子小于房间底分
+    PlayerIsOnlySendCarder = 21; //玩家为唯一可出牌者
 }
 
 enum Role {
