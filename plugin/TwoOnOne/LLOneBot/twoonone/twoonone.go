@@ -327,8 +327,10 @@ func StartRoom(req *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomRespons
 	if err != nil {
 		return &twoonone_pb.StartRoomResponse{Err: err}, nil
 	}
+	loCards := r.GetLandownerCard()
 	return &twoonone_pb.StartRoomResponse{
-		LastOperator: insidePlayerToPlayerInfo(lastPi),
+		LastOperator:   insidePlayerToPlayerInfo(lastPi),
+		LandownerCards: loCards[:],
 	}, nil
 }
 

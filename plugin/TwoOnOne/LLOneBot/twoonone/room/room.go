@@ -1122,3 +1122,7 @@ func (r *Room) GetBasicCoin() float64 {
 func (r *Room) GetMultiple() int {
 	return r.multiple
 }
+
+func (r *Room) GetLandownerCard() [3]twoonone_pb.Card {
+	return r.landownerCards
+}
