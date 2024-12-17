@@ -956,6 +956,17 @@ func (r *Room) startSendCard() {
 	// 为地主发牌
 	lo := r.GetLandowner()
 	lo.AddCards(r.landownerCards[:])
+	// 设置农民
+	for _, v := range r.GetPlayers() {
+		if v.GetId() != lo.GetId() {
+			switch {
+			case r.farmers[0] == nil:
+				r.farmers[0] = v
+			case r.farmers[1] == nil:
+				r.farmers[1] = v
+			}
+		}
+	}
 	// 重排玩家
 	r.resequence(&r.players)
 	r.operatorNow = lo
