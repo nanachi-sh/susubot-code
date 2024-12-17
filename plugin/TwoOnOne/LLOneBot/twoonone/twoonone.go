@@ -298,7 +298,7 @@ func ExitRoom(req *twoonone_pb.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, 
 	pi, ok := getPlayerFromRooms(req.PlayerId)
 	if !ok {
 		return &twoonone_pb.ExitRoomResponse{
-			Err: twoonone_pb.Errors_PlayerNoExist.Enum(),
+			Err: twoonone_pb.Errors_PlayerNoExistAnyRoom.Enum(),
 		}, nil
 	}
 	r := getRoom(pi.GetRoomHash())
@@ -319,7 +319,7 @@ func StartRoom(req *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomRespons
 	pi, ok := getPlayerFromRooms(req.PlayerId)
 	if !ok {
 		return &twoonone_pb.StartRoomResponse{
-			Err: twoonone_pb.Errors_PlayerNoExist.Enum(),
+			Err: twoonone_pb.Errors_PlayerNoExistAnyRoom.Enum(),
 		}, nil
 	}
 	r := getRoom(pi.GetRoomHash())
@@ -336,7 +336,7 @@ func RobLandownerAction(req *twoonone_pb.RobLandownerActionRequest) (*twoonone_p
 	p, ok := getPlayerFromRooms(req.PlayerId)
 	if !ok {
 		return &twoonone_pb.RobLandownerActionResponse{
-			Err: twoonone_pb.Errors_PlayerNoExist.Enum(),
+			Err: twoonone_pb.Errors_PlayerNoExistAnyRoom.Enum(),
 		}, nil
 	}
 	r := getRoom(p.GetRoomHash())
@@ -358,7 +358,7 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 	p, ok := getPlayerFromRooms(req.PlayerId)
 	if !ok {
 		return &twoonone_pb.SendCardResponse{
-			Err: twoonone_pb.Errors_PlayerNoExist.Enum(),
+			Err: twoonone_pb.Errors_PlayerNoExistAnyRoom.Enum(),
 		}, nil
 	}
 	r := getRoom(p.GetRoomHash())
