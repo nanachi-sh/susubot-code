@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -144,6 +145,9 @@ func (p *Player) GetRobLandownerActionTime() time.Time {
 func (p *Player) GetLastGetDailyTimestamp() int64 {
 	p.lock.Lock()
 	defer p.lock.Unlock()
+	fmt.Println(p.originPlayerInfo)
+	fmt.Println(p.originPlayerInfo == nil)
+	fmt.Println(p.originPlayerInfo.LastGetDailyTimestamp)
 	return p.originPlayerInfo.LastGetDailyTimestamp
 }
 
