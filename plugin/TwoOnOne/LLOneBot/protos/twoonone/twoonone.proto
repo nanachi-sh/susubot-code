@@ -215,6 +215,7 @@ message SendCardResponse {
     }
 
     optional Errors err = 1;
+    optional SendCardActions SenderAction = 10;
     repeated Card SenderCard = 2;
     optional PlayerInfo NextPlayer = 9;
     

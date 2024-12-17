@@ -366,6 +366,7 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 	}
 	return &twoonone_pb.SendCardResponse{
 		Err:                    serr,
+		SenderAction:           &req.Action,
 		SenderCard:             p.GetCards(),
 		NextPlayer:             insidePlayerToPlayerInfo(next),
 		SenderCardNumberNotice: e.SenderCardNumberNotice,
