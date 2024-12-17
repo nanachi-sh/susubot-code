@@ -162,7 +162,7 @@ func (*twononeService) GetDailyCoin(ctx context.Context, req *twoonone_pb.GetDai
 	}
 }
 
-func (*twononeService) GetRoomInfo(ctx context.Context, req *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
+func (*twononeService) GetRoom(ctx context.Context, req *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
 	type d struct {
 		data *twoonone_pb.GetRoomResponse
 		err  error
