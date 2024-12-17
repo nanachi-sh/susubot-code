@@ -97,7 +97,6 @@ func (r *Room) Exit(playerId string) *twoonone_pb.Errors {
 	if !r.delete(playerId) {
 		return twoonone_pb.Errors_PlayerNoExist.Enum()
 	}
-	r.resequence(&r.players)
 	return nil
 }
 
