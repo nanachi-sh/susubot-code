@@ -59,6 +59,9 @@ func GetRooms() []*twoonone_pb.RoomInfo {
 }
 
 func CreateAccount(req *twoonone_pb.CreateAccountRequest) (*twoonone_pb.Errors, error) {
+	if req.PlayerId == "" || req.PlayerName == "" {
+		return twoonone_pb.Errors_Unexpected.Enum(), nil
+	}
 	ai, _ := db.GetPlayer(req.PlayerId)
 	if ai != nil {
 		return twoonone_pb.Errors_PlayerAccountExist.Enum(), nil
