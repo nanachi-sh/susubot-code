@@ -258,6 +258,11 @@ func JoinRoom(req *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, 
 			Err: twoonone_pb.Errors_RoomNoExist.Enum(),
 		}, nil
 	}
+	if _, ok := r.GetPlayer(req.PlayerId); ok {
+		return &twoonone_pb.JoinRoomResponse{
+			Err: twoonone_pb.Errors_RoomExistPlayer.Enum(),
+		}, nil
+	}
 	pi, err := getAccount(req.PlayerId)
 	if err != nil {
 		if err == sql.ErrNoRows {
