@@ -364,6 +364,13 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 		cn = new(int32)
 		*cn = int32(*e.CardNumber)
 	}
+	if e.GameFinish {
+		if !deleteRoomFromRooms(r) {
+			return &twoonone_pb.SendCardResponse{
+				Err: twoonone_pb.Errors_Unexpected.Enum(),
+			}, nil
+		}
+	}
 	return &twoonone_pb.SendCardResponse{
 		Err:                    serr,
 		SenderAction:           &req.Action,
@@ -376,4 +383,14 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 		GameFinishE:            e.GameFinishE,
 		SenderCardType:         e.CardType,
 	}, nil
+}
+
+func deleteRoomFromRooms(r *room.Room) bool {
+	for i, v := range rooms {
+		if v.GetHash() == r.GetHash() {
+			rooms = append(rooms[:i], rooms[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
