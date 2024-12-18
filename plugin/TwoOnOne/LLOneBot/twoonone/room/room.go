@@ -174,9 +174,9 @@ func (r *Room) RobLandownerAction(p *player.Player, action twoonone_pb.RobLandow
 	} else if len(robs) == 1 { //仅一人抢地主
 		r.landowner = robs[0]
 	} else { //一人以上抢地主
-		// 按操作时间升序
+		// 按操作时间降序
 		sort.Slice(robs, func(i, j int) bool {
-			return robs[i].GetRobLandownerActionTime().UnixNano() < robs[j].GetRobLandownerActionTime().UnixNano()
+			return robs[i].GetRobLandownerActionTime().UnixNano() > robs[j].GetRobLandownerActionTime().UnixNano()
 		})
 		r.landowner = robs[0]
 	}

@@ -151,10 +151,7 @@ func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
 	operatorNow := insidePlayerToPlayerInfo(r.GetOperatorNow())
 	lo := r.GetLandowner()
 	landowner := insidePlayerToPlayerInfo(lo)
-	var loCards []twoonone_pb.Card
-	if lo != nil {
-		loCards = lo.GetCards()
-	}
+	loCards := r.GetLandownerCard()
 	var farmers []*twoonone_pb.PlayerInfo
 	for _, v := range r.GetFarmers() {
 		if v == nil {
@@ -170,7 +167,7 @@ func insideRoomToRoom(r *room.Room) *twoonone_pb.RoomInfo {
 		Stage:          r.GetStage(),
 		CardPool:       cps,
 		OperatorNow:    operatorNow,
-		LandownerCards: loCards,
+		LandownerCards: loCards[:],
 		Landowner:      landowner,
 		Farmers:        farmers,
 	}
