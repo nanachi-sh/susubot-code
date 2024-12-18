@@ -397,6 +397,7 @@ func (r *Room) gameFinish() *twoonone_pb.SendCardResponse_GameFinishEvent {
 		Farmer2:   insidePlayerToPlayerInfo(r.farmers[1]),
 		Winner:    winis,
 		Spring:    spring,
+		Multiple:  int32(r.GetMultiple()),
 	}
 }
 

@@ -216,6 +216,7 @@ message SendCardResponse {
         PlayerInfo Farmer2 = 3;
         Role Winner = 4;
         bool Spring = 5;
+        int32 Multiple = 6;
     }
     message SenderCardTypeNoticeEvent {
         int32 Multiple = 1;
