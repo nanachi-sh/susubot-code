@@ -66,6 +66,9 @@ func (r *Room) Join(ai *twoonone_pb.PlayerAccountInfo) *twoonone_pb.Errors {
 	if r.GetStage() != twoonone_pb.RoomStage_WaitingStart {
 		return twoonone_pb.Errors_RoomStarted.Enum()
 	}
+	if len(r.GetPlayers()) == 3 {
+		return twoonone_pb.Errors_RoomFull.Enum()
+	}
 	if _, ok := r.GetPlayer(ai.Id); ok {
 		return twoonone_pb.Errors_RoomExistPlayer.Enum()
 	}
