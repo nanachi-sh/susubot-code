@@ -207,9 +207,9 @@ message SendCardRequest {
 
 message SendCardResponse {
     message GameFinishEvent {
-        repeated Card LandownerCards = 1;
-        repeated Card Farmer1Cards = 2;
-        repeated Card Farmer2Cards = 3;
+        PlayerInfo Landowner = 1;
+        PlayerInfo Farmer1 = 2;
+        PlayerInfo Farmer2 = 3;
         Role Winner = 4;
         bool Spring = 5;
     }

@@ -365,14 +365,37 @@ func (r *Room) gameFinish() *twoonone_pb.SendCardResponse_GameFinishEvent {
 		r.landowner.IncLoseCount()
 	}
 	return &twoonone_pb.SendCardResponse_GameFinishEvent{
-		LandownerCards: r.landowner.GetCards(),
-		Farmer1Cards:   r.farmers[0].GetCards(),
-		Farmer2Cards:   r.farmers[1].GetCards(),
-		Winner:         winis,
-		Spring:         spring,
+		Landowner: insidePlayerToPlayerInfo(r.landowner),
+		Farmer1:   insidePlayerToPlayerInfo(r.farmers[0]),
+		Farmer2:   insidePlayerToPlayerInfo(r.farmers[1]),
+		Winner:    winis,
+		Spring:    spring,
 	}
 }
 
+func insidePlayerToPlayerInfo(p *player.Player) *twoonone_pb.PlayerInfo {
+	if p == nil {
+		return nil
+	}
+	pi := &twoonone_pb.PlayerInfo{
+		AccountInfo: &twoonone_pb.PlayerAccountInfo{
+			Id:                    p.GetId(),
+			Name:                  p.GetName(),
+			WinCount:              int32(p.GetWinCount()),
+			LoseCount:             int32(p.GetLoseCount()),
+			Coin:                  p.GetCoin(),
+			LastGetDailyTimestamp: p.GetLastGetDailyTimestamp(),
+		},
+	}
+	if p.GetRoomHash() != "" {
+		pi.TableInfo = &twoonone_pb.PlayerTableInfo{
+			RoomHash:           p.GetRoomHash(),
+			Cards:              p.GetCards(),
+			RobLandownerAction: p.GetRobLandownerAction(),
+		}
+	}
+	return pi
+}
 func (r *Room) playerUpdateToDatabase() error {
 	for _, p := range r.players {
 		origin := p.GetOriginInfo()
