@@ -196,7 +196,11 @@ message RobLandownerActionRequest {
 message RobLandownerActionResponse {
     optional Errors err = 1;
     PlayerInfo NextOperator = 2;
+    
     bool IntoSendingCard = 3;
+    bool MultipleNotice = 4;
+
+    optional int32 Multiple = 5;
 }
 
 message SendCardRequest {
