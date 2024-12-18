@@ -342,7 +342,7 @@ func RobLandownerAction(req *twoonone_pb.RobLandownerActionRequest) (*twoonone_p
 		}, nil
 	}
 	r := getRoom(p.GetRoomHash())
-	next, err := r.RobLandownerAction(p, req.Action)
+	next, multiple, err := r.RobLandownerAction(p, req.Action)
 	if err != nil {
 		return &twoonone_pb.RobLandownerActionResponse{Err: err}, nil
 	}
@@ -350,9 +350,12 @@ func RobLandownerAction(req *twoonone_pb.RobLandownerActionRequest) (*twoonone_p
 	if r.GetStage() == twoonone_pb.RoomStage_SendingCards {
 		sendcard = true
 	}
+	mn := multiple != nil
 	return &twoonone_pb.RobLandownerActionResponse{
 		NextOperator:    insidePlayerToPlayerInfo(next),
 		IntoSendingCard: sendcard,
+		MultipleNotice:  mn,
+		Multiple:        multiple,
 	}, nil
 }
 

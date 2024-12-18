@@ -138,27 +138,36 @@ func (r *Room) setLandownerCards(cards [3]twoonone_pb.Card) {
 	copy(r.landownerCards[:], cards[:])
 }
 
-func (r *Room) RobLandownerAction(p *player.Player, action twoonone_pb.RobLandownerActions) (*player.Player, *twoonone_pb.Errors) {
+func (r *Room) RobLandownerAction(p *player.Player, action twoonone_pb.RobLandownerActions) (*player.Player, *int32, *twoonone_pb.Errors) {
 	if p.GetRoomHash() != r.GetHash() {
-		return nil, twoonone_pb.Errors_Unexpected.Enum()
+		return nil, nil, twoonone_pb.Errors_Unexpected.Enum()
 	}
 	if r.GetStage() != twoonone_pb.RoomStage_RobLandownering {
-		return nil, twoonone_pb.Errors_RoomNoRobLandownering.Enum()
+		return nil, nil, twoonone_pb.Errors_RoomNoRobLandownering.Enum()
 	}
 	if r.GetOperatorNow().GetId() != p.GetId() {
-		return nil, twoonone_pb.Errors_PlayerNoOperatorNow.Enum()
+		return nil, nil, twoonone_pb.Errors_PlayerNoOperatorNow.Enum()
+	}
+	var multiple *int32
+	if action == twoonone_pb.RobLandownerActions_Rob {
+		// 检查是否需要翻倍
+		if len(r.getRobLandowners()) >= 1 {
+			r.multiple *= 2
+			multiple = new(int32)
+			*multiple = int32(r.GetMultiple())
+		}
 	}
 	p.SetRobLandownerAction(&action)
 	// 尝试找到下一个未参与玩家
 	next := r.nextRobLandownerOperator()
 	if next != nil {
 		r.operatorNow = next
-		return next, nil
+		return next, multiple, nil
 	}
 	// 全部已参与
 	robs := r.getRobLandowners()
 	if len(robs) == 0 { //无人抢地主
-		return nil, twoonone_pb.Errors_RoomNoRobLandownering.Enum()
+		return nil, nil, twoonone_pb.Errors_RoomNoRobLandownering.Enum()
 	} else if len(robs) == 1 { //仅一人抢地主
 		r.landowner = robs[0]
 	} else { //一人以上抢地主
@@ -169,7 +178,7 @@ func (r *Room) RobLandownerAction(p *player.Player, action twoonone_pb.RobLandow
 		r.landowner = robs[0]
 	}
 	r.startSendCard()
-	return r.GetOperatorNow(), nil
+	return r.GetOperatorNow(), multiple, nil
 }
 
 type SendCardEvents struct {
