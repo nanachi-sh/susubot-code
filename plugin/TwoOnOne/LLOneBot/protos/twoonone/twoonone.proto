@@ -213,17 +213,21 @@ message SendCardResponse {
         Role Winner = 4;
         bool Spring = 5;
     }
+    message SenderCardTypeNoticeEvent {
+        int32 Multiple = 1;
+        int32 SenderCardNumber = 2;
+    }
 
     optional Errors err = 1;
     optional SendCardActions SenderAction = 10;
     repeated Card SenderCard = 2;
-    optional PlayerInfo NextPlayer = 9;
+    optional PlayerInfo NextOperator = 9;
     
     bool SenderCardNumberNotice = 3;
     bool GameFinish = 4;
     bool SenderCardTypeNotice = 5;
 
-    optional int32 SenderCardNumber = 6;
+    optional SenderCardTypeNoticeEvent SenderCardNumberNoticeE = 6;
     optional GameFinishEvent GameFinishE = 7;
     optional CardType SenderCardType = 8;
 }

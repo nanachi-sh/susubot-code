@@ -368,11 +368,6 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 	if err != nil {
 		return nil, err
 	}
-	var cn *int32
-	if e.CardNumber != nil {
-		cn = new(int32)
-		*cn = int32(*e.CardNumber)
-	}
 	if e.GameFinish {
 		if !deleteRoomFromRooms(r) {
 			return &twoonone_pb.SendCardResponse{
@@ -381,16 +376,16 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 		}
 	}
 	return &twoonone_pb.SendCardResponse{
-		Err:                    serr,
-		SenderAction:           &req.Action,
-		SenderCard:             p.GetCards(),
-		NextPlayer:             insidePlayerToPlayerInfo(next),
-		SenderCardNumberNotice: e.SenderCardNumberNotice,
-		GameFinish:             e.GameFinish,
-		SenderCardTypeNotice:   e.SenderCardTypeNotice,
-		SenderCardNumber:       cn,
-		GameFinishE:            e.GameFinishE,
-		SenderCardType:         e.CardType,
+		Err:                     serr,
+		SenderAction:            &req.Action,
+		SenderCard:              p.GetCards(),
+		NextOperator:            insidePlayerToPlayerInfo(next),
+		SenderCardNumberNotice:  e.SenderCardNumberNotice,
+		GameFinish:              e.GameFinish,
+		SenderCardTypeNotice:    e.SenderCardTypeNotice,
+		SenderCardNumberNoticeE: e.SenderCardNumberNoticeE,
+		GameFinishE:             e.GameFinishE,
+		SenderCardType:          e.CardType,
 	}, nil
 }
 

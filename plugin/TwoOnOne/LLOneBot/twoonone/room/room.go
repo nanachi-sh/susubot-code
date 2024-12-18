@@ -177,9 +177,9 @@ type SendCardEvents struct {
 	GameFinish             bool
 	SenderCardTypeNotice   bool
 
-	GameFinishE *twoonone_pb.SendCardResponse_GameFinishEvent
-	CardType    *twoonone_pb.CardType
-	CardNumber  *int
+	GameFinishE             *twoonone_pb.SendCardResponse_GameFinishEvent
+	CardType                *twoonone_pb.CardType
+	SenderCardNumberNoticeE *twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent
 }
 
 func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, action twoonone_pb.SendCardActions) (*player.Player, SendCardEvents, *twoonone_pb.Errors, error) {
@@ -226,7 +226,10 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 		}
 	case 1, 2:
 		event.SenderCardNumberNotice = true
-		event.CardNumber = &l
+		event.SenderCardNumberNoticeE = &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+			Multiple:         int32(r.GetMultiple()),
+			SenderCardNumber: int32(l),
+		}
 	}
 	return next, *event, nil, nil
 }
