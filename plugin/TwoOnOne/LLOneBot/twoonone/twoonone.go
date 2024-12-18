@@ -323,13 +323,13 @@ func StartRoom(req *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomRespons
 		}, nil
 	}
 	r := getRoom(pi.GetRoomHash())
-	lastPi, err := r.Start()
+	next, err := r.Start()
 	if err != nil {
 		return &twoonone_pb.StartRoomResponse{Err: err}, nil
 	}
 	loCards := r.GetLandownerCard()
 	return &twoonone_pb.StartRoomResponse{
-		LastOperator:   insidePlayerToPlayerInfo(lastPi),
+		NextOperator:   insidePlayerToPlayerInfo(next),
 		LandownerCards: loCards[:],
 	}, nil
 }
@@ -342,7 +342,7 @@ func RobLandownerAction(req *twoonone_pb.RobLandownerActionRequest) (*twoonone_p
 		}, nil
 	}
 	r := getRoom(p.GetRoomHash())
-	last, err := r.RobLandownerAction(p, req.Action)
+	next, err := r.RobLandownerAction(p, req.Action)
 	if err != nil {
 		return &twoonone_pb.RobLandownerActionResponse{Err: err}, nil
 	}
@@ -351,7 +351,7 @@ func RobLandownerAction(req *twoonone_pb.RobLandownerActionRequest) (*twoonone_p
 		sendcard = true
 	}
 	return &twoonone_pb.RobLandownerActionResponse{
-		LastOperator:    insidePlayerToPlayerInfo(last),
+		NextOperator:    insidePlayerToPlayerInfo(next),
 		IntoSendingCard: sendcard,
 	}, nil
 }

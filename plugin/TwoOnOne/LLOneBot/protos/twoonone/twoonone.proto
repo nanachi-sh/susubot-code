@@ -195,7 +195,7 @@ message RobLandownerActionRequest {
 
 message RobLandownerActionResponse {
     optional Errors err = 1;
-    PlayerInfo LastOperator = 2;
+    PlayerInfo NextOperator = 2;
     bool IntoSendingCard = 3;
 }
 
@@ -252,7 +252,7 @@ message StartRoomRequest {
 
 message StartRoomResponse {
     optional Errors err = 1;
-    PlayerInfo LastOperator = 2;
+    PlayerInfo NextOperator = 2;
     repeated Card LandownerCards = 3;
 }
 
