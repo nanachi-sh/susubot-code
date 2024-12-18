@@ -375,17 +375,22 @@ func SendCardAction(req *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResp
 			}, nil
 		}
 	}
+	var cn *int32
+	if e.SenderCardNumberNotice {
+		cn = new(int32)
+		*cn = int32(*e.SenderCardNumber)
+	}
 	return &twoonone_pb.SendCardResponse{
-		Err:                     serr,
-		SenderAction:            &req.Action,
-		SenderCard:              p.GetCards(),
-		NextOperator:            insidePlayerToPlayerInfo(next),
-		SenderCardNumberNotice:  e.SenderCardNumberNotice,
-		GameFinish:              e.GameFinish,
-		SenderCardTypeNotice:    e.SenderCardTypeNotice,
-		SenderCardNumberNoticeE: e.SenderCardNumberNoticeE,
-		GameFinishE:             e.GameFinishE,
-		SenderCardType:          e.CardType,
+		Err:                    serr,
+		SenderAction:           &req.Action,
+		SenderCard:             p.GetCards(),
+		NextOperator:           insidePlayerToPlayerInfo(next),
+		SenderCardNumberNotice: e.SenderCardNumberNotice,
+		GameFinish:             e.GameFinish,
+		SenderCardTypeNotice:   e.SenderCardTypeNotice,
+		SenderCardTypeNoticeE:  e.SenderCardTypeNoticeE,
+		GameFinishE:            e.GameFinishE,
+		SenderCardNumber:       cn,
 	}, nil
 }
 

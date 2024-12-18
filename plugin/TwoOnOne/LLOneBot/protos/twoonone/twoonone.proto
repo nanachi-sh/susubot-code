@@ -215,7 +215,7 @@ message SendCardResponse {
     }
     message SenderCardTypeNoticeEvent {
         int32 Multiple = 1;
-        int32 SenderCardNumber = 2;
+        CardType SenderCardType = 2;
     }
 
     optional Errors err = 1;
@@ -227,9 +227,9 @@ message SendCardResponse {
     bool GameFinish = 4;
     bool SenderCardTypeNotice = 5;
 
-    optional SenderCardTypeNoticeEvent SenderCardNumberNoticeE = 6;
+    optional SenderCardTypeNoticeEvent SenderCardTypeNoticeE = 6;
     optional GameFinishEvent GameFinishE = 7;
-    optional CardType SenderCardType = 8;
+    optional int32 SenderCardNumber = 8;
 }
 
 message CreateAccountRequest {

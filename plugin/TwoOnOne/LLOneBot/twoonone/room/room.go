@@ -177,9 +177,9 @@ type SendCardEvents struct {
 	GameFinish             bool
 	SenderCardTypeNotice   bool
 
-	GameFinishE             *twoonone_pb.SendCardResponse_GameFinishEvent
-	CardType                *twoonone_pb.CardType
-	SenderCardNumberNoticeE *twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent
+	GameFinishE           *twoonone_pb.SendCardResponse_GameFinishEvent
+	SenderCardNumber      *int
+	SenderCardTypeNoticeE *twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent
 }
 
 func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, action twoonone_pb.SendCardActions) (*player.Player, SendCardEvents, *twoonone_pb.Errors, error) {
@@ -226,10 +226,7 @@ func (r *Room) SendCardAction(p *player.Player, sendcards []twoonone_pb.Card, ac
 		}
 	case 1, 2:
 		event.SenderCardNumberNotice = true
-		event.SenderCardNumberNoticeE = &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
-			Multiple:         int32(r.GetMultiple()),
-			SenderCardNumber: int32(l),
-		}
+		event.SenderCardNumber = &l
 	}
 	return next, *event, nil, nil
 }
@@ -253,7 +250,10 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 		case twoonone_pb.CardType_KingBomb, twoonone_pb.CardType_Bomb:
 			return next, &SendCardEvents{
 				SenderCardTypeNotice: true,
-				CardType:             &cardtype,
+				SenderCardTypeNoticeE: &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+					Multiple:       int32(r.GetMultiple()),
+					SenderCardType: cardtype,
+				},
 			}, nil
 		}
 		return next, nil, nil
@@ -267,7 +267,10 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 		case twoonone_pb.CardType_KingBomb, twoonone_pb.CardType_Bomb:
 			return next, &SendCardEvents{
 				SenderCardTypeNotice: true,
-				CardType:             &cardtype,
+				SenderCardTypeNoticeE: &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+					Multiple:       int32(r.GetMultiple()),
+					SenderCardType: cardtype,
+				},
 			}, nil
 		}
 		return next, nil, nil
@@ -279,7 +282,10 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 		r.operatorNow = next
 		return next, &SendCardEvents{
 			SenderCardTypeNotice: true,
-			CardType:             &cardtype,
+			SenderCardTypeNoticeE: &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+				Multiple:       int32(r.GetMultiple()),
+				SenderCardType: cardtype,
+			},
 		}, nil
 	} else if cardtype == twoonone_pb.CardType_Bomb && lastcard.SendCardType == twoonone_pb.CardType_Bomb { //上一副与当前都为炸弹
 		if cardsize <= lastcard.SendCardSize {
@@ -292,7 +298,10 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 		r.operatorNow = next
 		return next, &SendCardEvents{
 			SenderCardTypeNotice: true,
-			CardType:             &cardtype,
+			SenderCardTypeNoticeE: &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+				Multiple:       int32(r.GetMultiple()),
+				SenderCardType: cardtype,
+			},
 		}, nil
 	} else if cardtype == twoonone_pb.CardType_Bomb && lastcard.SendCardType != twoonone_pb.CardType_KingBomb { //上一副不为王炸且也不为炸弹
 		if err := r.playerSendCard(p, sendcards, cardtype, cardsize, cardcontious); err != nil {
@@ -302,7 +311,10 @@ func (r *Room) sendCard(p *player.Player, sendcards []twoonone_pb.Card) (*player
 		r.operatorNow = next
 		return next, &SendCardEvents{
 			SenderCardTypeNotice: true,
-			CardType:             &cardtype,
+			SenderCardTypeNoticeE: &twoonone_pb.SendCardResponse_SenderCardTypeNoticeEvent{
+				Multiple:       int32(r.GetMultiple()),
+				SenderCardType: cardtype,
+			},
 		}, nil
 	}
 	//完全正常出牌
