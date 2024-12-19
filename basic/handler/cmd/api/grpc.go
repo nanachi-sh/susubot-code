@@ -61,6 +61,12 @@ func (*responseService) Unmarshal(ctx context.Context, req *response_pb.Unmarsha
 			ret.err = err
 			return
 		}
+		if req.IgnoreCmdEvent && responseH.ResponseType() == response_pb.ResponseType_ResponseType_CmdEvent {
+			ret.data = &response_pb.UnmarshalResponse{
+				Type: response_pb.ResponseType_ResponseType_CmdEvent.Enum(),
+			}
+			return
+		}
 		response, err := responseH.MarshalToResponse()
 		if err != nil {
 			ret.err = err

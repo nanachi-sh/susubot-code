@@ -206,6 +206,10 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 	return ret, nil
 }
 
+func (rh *responseH) ResponseType() response.ResponseType {
+	return rh.rtype
+}
+
 func (rh *responseH) matchType() (response.ResponseType, error) {
 	j := new(response_d.JSON_responseType)
 	if err := json.Unmarshal(rh.buf, j); err != nil {

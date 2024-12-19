@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package susubot.basic.connector;
+
+option go_package = "protos/connector";
+
+service Connector {
+    rpc Connect (ConnectRequest) returns (ConnectResponse);
+    rpc Read (Empty) returns (stream ReadResponse);
+    rpc Write (WriteRequest) returns (Empty);
+    rpc Close (Empty) returns (Empty);
+}
+
+message Empty{}
+
+message ConnectRequest {
+    string Addr = 1;
+    int32 Port = 2;
+    optional string Token = 3;
+}
+
+message ConnectResponse {
+    optional bytes buf = 1;
+}
+
+message ReadResponse {
+    bool isClose = 1;
+    bytes buf = 2;
+}
+
+message WriteRequest {
+    bytes buf = 1;
+}
