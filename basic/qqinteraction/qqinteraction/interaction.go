@@ -1188,19 +1188,16 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			return
 		}
 	case twoonone_GetRooms:
-		resp, err := define.TwoOnOneC.GetRooms(define.TwoOnOneCtx, &twoonone_pb.Empty{})
-		if err != nil {
-			logger.Println(err)
-			return
-		}
 		roomnames := ""
-		for i, v := range resp.Rooms {
-			roomnames += fmt.Sprintf("%v.%v", i+1, v.Hash)
-			if i != len(resp.Rooms)-1 {
+		i := 0
+		for _, v := range twoonone_rooms {
+			i++
+			roomnames += fmt.Sprintf("%v.%v", i+1, v.id)
+			if i != len(twoonone_rooms)-1 {
 				roomnames += "\n"
 			}
 		}
-		if len(resp.Rooms) == 0 {
+		if len(twoonone_rooms) == 0 {
 			roomnames += "空"
 		}
 		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
