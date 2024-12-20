@@ -29,7 +29,7 @@ enum MessageChainType {
     MessageChainType_Reply = 5;  //回复
 }
 message MessageChainObject {
-    optional MessageChainType Type = 1;
+    MessageChainType Type = 1;
     optional MessageChain_Text Text = 2;
     optional MessageChain_Image Image = 3;
     optional MessageChain_Voice Voice = 4;

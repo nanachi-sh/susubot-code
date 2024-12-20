@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package susubot.plugin.randomfortune;
+
+option go_package = "protos/randomfortune";
+
+service randomFortune {
+    rpc GetFortune (BasicRequest) returns (BasicResponse);
+}
+
+message BasicRequest {
+    enum ReturnMethods {
+        Hash = 0;
+        Raw = 1;
+    }
+
+    ReturnMethods ReturnMethod = 1;
+}
+
+message BasicResponse {
+    message UploadResponse {
+        string Hash = 1;
+        string URLPath = 2;
+    }
+
+    optional UploadResponse Response = 1;
+    optional bytes Buf = 2;
+}

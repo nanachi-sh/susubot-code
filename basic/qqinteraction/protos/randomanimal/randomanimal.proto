@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package susubot.plugin.randomanimal;
+
+option go_package = "protos/randomanimal";
+
+service randomAnimal {
+    rpc GetDog (BasicRequest) returns (BasicResponse);
+    rpc GetFox (BasicRequest) returns (BasicResponse);
+    rpc GetDuck (BasicRequest) returns (BasicResponse);
+    rpc GetCat (BasicRequest) returns (BasicResponse);
+    rpc GetChiken_CXK (BasicRequest) returns (BasicResponse);
+}
+
+enum Type {
+    Image = 0;
+    Video = 1;
+}
+
+message BasicRequest {
+    bool AutoUpload = 1;
+}
+
+message BasicResponse {
+    message UploadResponse {
+        string Hash = 1;
+        string URLPath = 2;
+    }
+
+    Type Type = 1;
+    optional bytes Buf = 2;
+    optional UploadResponse Response = 3;
+}
