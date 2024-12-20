@@ -22,9 +22,9 @@ import (
 var logger = log.Get()
 
 var (
-	twoonone_rooms        map[string]*roomSI //id To room
-	twoonone_player2room  map[string]*roomSI //
-	twoonone_playerStatus map[string]struct{}
+	twoonone_rooms        = make(map[string]*roomSI) //id To room
+	twoonone_player2room  = make(map[string]*roomSI) //
+	twoonone_playerStatus = make(map[string]struct{})
 )
 
 type roomSI struct {
