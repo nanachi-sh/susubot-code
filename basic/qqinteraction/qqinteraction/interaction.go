@@ -6,12 +6,13 @@ import (
 	"math/rand"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/define"
 	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/log"
-	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/connector"
+	connector_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/connector"
 	request_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/handler/request"
 	response_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/handler/response"
 	randomanimal_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomanimal"
@@ -34,7 +35,7 @@ type roomSI struct {
 }
 
 func Start() {
-	stream, err := define.ConnectorC.Read(define.ConnectorCtx, &connector.Empty{})
+	stream, err := define.ConnectorC.Read(define.ConnectorCtx, &connector_pb.Empty{})
 	if err != nil {
 		logger.Fatalln(err)
 	}
@@ -231,7 +232,7 @@ func sendMessageToGroup(groupid string, mcs []*request_pb.MessageChainObject) er
 	if err != nil {
 		return err
 	}
-	if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector.WriteRequest{
+	if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector_pb.WriteRequest{
 		Buf: req.Buf,
 	}); err != nil {
 		return err
@@ -247,7 +248,7 @@ func sendMessageToFriend(friendid string, mcs []*request_pb.MessageChainObject) 
 	if err != nil {
 		return err
 	}
-	if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector.WriteRequest{
+	if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector_pb.WriteRequest{
 		Buf: req.Buf,
 	}); err != nil {
 		return err
@@ -478,27 +479,54 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			logger.Println(err)
 			return
 		}
-		switch e := *resp.Err; e {
-		default:
-			logger.Printf("未处理异常：%v\n", e.String())
-		case twoonone_pb.Errors_PlayerNoExist:
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_At,
-					At: &request_pb.MessageChain_At{
-						TargetId: senderid,
+		if resp.Err != nil {
+			switch e := *resp.Err; e {
+			default:
+				logger.Printf("未处理异常：%v\n", e.String())
+			case twoonone_pb.Errors_PlayerNoExist:
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
 					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: " 获取失败，你还未开号",
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 获取失败，你还未开号",
+						},
 					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
 			}
+		}
+		ai := resp.Info.AccountInfo
+		playCount := ai.WinCount + ai.LoseCount
+		winChance := ""
+		if playCount != 0 {
+			winChance = strconv.FormatFloat((float64(ai.WinCount)/float64(playCount))*100, 'g', 4, 64)
+		} else {
+			winChance = "0"
+		}
+		accountInfo := fmt.Sprintf("获取成功，你现在有 %v 个豆子，总共进行了 %v 场游戏，获胜 %v 场，失败 %v 场，胜率 %v%%", ai.Coin, playCount, ai.WinCount, ai.LoseCount, winChance)
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_At,
+				At: &request_pb.MessageChain_At{
+					TargetId: senderid,
+				},
+			},
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: " " + accountInfo,
+				},
+			},
+		}); err != nil {
+			panic(err)
 		}
 	case twoonone_CreateRoom:
 		resp, err := define.TwoOnOneC.CreateRoom(define.TwoOnOneCtx, &twoonone_pb.CreateRoomRequest{
@@ -1642,14 +1670,14 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			return
 		}
 		go func() {
-			if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector.WriteRequest{
+			if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector_pb.WriteRequest{
 				Buf: req.Buf,
 			}); err != nil {
 				logger.Println(err)
 				return
 			}
 		}()
-		s, err := define.ConnectorC.Read(define.ConnectorCtx, &connector.Empty{})
+		s, err := define.ConnectorC.Read(define.ConnectorCtx, &connector_pb.Empty{})
 		if err != nil {
 			logger.Println(err)
 			return
