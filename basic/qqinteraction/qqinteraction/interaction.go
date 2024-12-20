@@ -147,6 +147,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 	var resp *randomanimal_pb.BasicResponse
 	switch action {
 	case randomanimal_GetCat:
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "猫猫正在赶来的路上",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 		x, err := define.RandomAnimalC.GetCat(define.RandomAnimalCtx, &randomanimal_pb.BasicRequest{
 			AutoUpload: true,
 		})
@@ -156,6 +167,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		}
 		resp = x
 	case randomanimal_GetFox:
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "小狐狸正在赶来的路上",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 		x, err := define.RandomAnimalC.GetFox(define.RandomAnimalCtx, &randomanimal_pb.BasicRequest{
 			AutoUpload: true,
 		})
@@ -165,6 +187,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		}
 		resp = x
 	case randomanimal_GetDog:
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "狗子正在赶来的路上",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 		x, err := define.RandomAnimalC.GetDog(define.RandomAnimalCtx, &randomanimal_pb.BasicRequest{
 			AutoUpload: true,
 		})
@@ -174,6 +207,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		}
 		resp = x
 	case randomanimal_GetChicken_CXK:
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "坤坤正在赶来的路上",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 		x, err := define.RandomAnimalC.GetChiken_CXK(define.RandomAnimalCtx, &randomanimal_pb.BasicRequest{
 			AutoUpload: true,
 		})
@@ -183,6 +227,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		}
 		resp = x
 	case randomanimal_GetDuck:
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "鸭正在赶来的路上",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 		x, err := define.RandomAnimalC.GetDuck(define.RandomAnimalCtx, &randomanimal_pb.BasicRequest{
 			AutoUpload: true,
 		})
