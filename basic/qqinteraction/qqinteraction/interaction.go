@@ -1841,6 +1841,134 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			logger.Println(err)
 			return
 		}
+	case twoonone_GetRoom:
+		if text == "" {
+			r := twoonone_player2room[senderid]
+			if r == nil {
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 获取桌信息失败，你未在任意桌内",
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
+				return
+			}
+			resp, err := define.TwoOnOneC.GetRoom(define.TwoOnOneCtx, &twoonone_pb.GetRoomRequest{
+				RoomHash: &r.hash,
+			})
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			ri := resp.Info
+			stageStr := ""
+			switch ri.Stage {
+			case twoonone_pb.RoomStage_WaitingStart:
+				stageStr = "等待开始"
+			case twoonone_pb.RoomStage_RobLandownering:
+				stageStr = "抢地主中"
+			case twoonone_pb.RoomStage_SendingCards:
+				stageStr = "出牌中"
+			}
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: fmt.Sprintf(` 获取桌信息成功，你所在桌信息如下：
+						Id：%v
+						哈希：%v
+						底分：%v
+						倍率：%v
+						游戏状态：%v
+						玩家列表：%v
+						`, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, playersToStr(ri.Players)),
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+		} else {
+			r := twoonone_rooms[text]
+			if r == nil {
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 获取桌信息失败，未找到该桌",
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
+				return
+			}
+			resp, err := define.TwoOnOneC.GetRoom(define.TwoOnOneCtx, &twoonone_pb.GetRoomRequest{
+				RoomHash: &r.hash,
+			})
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			ri := resp.Info
+			stageStr := ""
+			switch ri.Stage {
+			case twoonone_pb.RoomStage_WaitingStart:
+				stageStr = "等待开始"
+			case twoonone_pb.RoomStage_RobLandownering:
+				stageStr = "抢地主中"
+			case twoonone_pb.RoomStage_SendingCards:
+				stageStr = "出牌中"
+			}
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: fmt.Sprintf(` 获取桌信息成功， %v 桌信息如下：
+						Id：%v
+						哈希：%v
+						底分：%v
+						倍率：%v
+						游戏状态：%v
+						玩家列表：%v
+						`, r.id, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, playersToStr(ri.Players)),
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+		}
 	}
 }
 
@@ -1877,6 +2005,7 @@ const (
 	twoonone_SendCard_Send
 	twoonone_JoinRoom
 	twoonone_JoinORExit
+	twoonone_GetRoom
 )
 
 func twoonone_adjust(action twoononeAction, text string) string {
@@ -1889,6 +2018,9 @@ func twoonone_adjust(action twoononeAction, text string) string {
 		str = strings.TrimPrefix(str, "！")
 		str = strings.TrimSpace(str)
 		return strings.ToUpper(str)
+	case twoonone_GetRoom:
+		str := strings.TrimPrefix(text, "桌信息")
+		return strings.TrimSpace(str)
 	default:
 		return text
 	}
@@ -1924,6 +2056,9 @@ func twoonone_match(text string) twoononeAction {
 	}
 	if ok, _ := regexp.MatchString(`\A上桌([(0-9)]| ){3,}`, text); ok {
 		return twoonone_JoinRoom
+	}
+	if ok, _ := regexp.MatchString(`\A桌信息.*`, text); ok {
+		return twoonone_GetRoom
 	}
 	return twoonone_Unknown
 }
