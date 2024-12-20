@@ -62,6 +62,7 @@ func init() {
 	GRPCClient = c
 	FilewebCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "fileweb",
+		"version":        "stable",
 	}))
 	ExternalHost = os.Getenv("EXTERNAL_HOST")
 	if ExternalHost == "" {
