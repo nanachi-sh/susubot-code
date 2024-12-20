@@ -371,8 +371,42 @@ func twoonone(message *response_pb.Response_Message, text string) {
 	action := twoonone_match(text)
 	if action == twoonone_JoinORExit {
 		if _, ok := twoonone_playerStatus[senderid]; ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 退出斗地主",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			delete(twoonone_playerStatus, senderid)
 		} else {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 进入斗地主",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			twoonone_playerStatus[senderid] = struct{}{}
 		}
 		return
