@@ -534,7 +534,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: " 开桌成功，桌Id： " + id,
+					Text: " 开桌成功，桌id为： " + id,
 				},
 			},
 		}); err != nil {
@@ -1892,7 +1892,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
 						Text: fmt.Sprintf(` 获取桌信息成功，你所在桌信息如下：
-						Id：%v
+						id：%v
 						哈希：%v
 						底分：%v
 						倍率：%v
@@ -1955,7 +1955,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
 						Text: fmt.Sprintf(` 获取桌信息成功， %v 桌信息如下：
-						Id：%v
+						id：%v
 						哈希：%v
 						底分：%v
 						倍率：%v
