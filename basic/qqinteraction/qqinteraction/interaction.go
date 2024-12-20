@@ -1191,11 +1191,11 @@ func twoonone(message *response_pb.Response_Message, text string) {
 		roomnames := ""
 		i := 0
 		for _, v := range twoonone_rooms {
-			i++
 			roomnames += fmt.Sprintf("%v.%v", i+1, v.id)
 			if i != len(twoonone_rooms)-1 {
 				roomnames += "\n"
 			}
+			i++
 		}
 		if len(twoonone_rooms) == 0 {
 			roomnames += "空"
