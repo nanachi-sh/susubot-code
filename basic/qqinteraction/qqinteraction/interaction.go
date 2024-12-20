@@ -23,18 +23,24 @@ func Start() {
 			logger.Fatalln(err)
 		}
 		respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
-			Buf:          resp.Buf,
-			Type:         &0,
-			CmdEventType: &0,
-			ExtraInfo:    true,
+			Buf:            resp.Buf,
+			ExtraInfo:      true,
+			IgnoreCmdEvent: true,
 		})
 		if err != nil {
 			logger.Fatalln(err)
 		}
+		switch *respum.Type {
+		case response_pb.ResponseType_ResponseType_CmdEvent:
+			continue
+		case response_pb.ResponseType_ResponseType_Message:
+			respum.Message
+		case response_pb.ResponseType_ResponseType_QQEvent:
+		}
 	}
 }
 
-func match(text string) pluginType {
+func message_match(text string) pluginType {
 	switch {
 	case randomanimal_match(text) != randomanimal_Unknown:
 		return pluginType_RandomAnimal
@@ -56,8 +62,26 @@ const (
 	pluginType_TwoOnOne
 )
 
-func randomanimal() {
+func randomanimal(message *response_pb.Response_Message) {
+	if *message.Type != response_pb.MessageType_MessageType_Group {
+		return
+	}
+	group := message.Group
+	text := ""
 
+	if text == "" {
+		return
+	}
+
+}
+
+func getText(mcs []*response_pb.MessageChainObject) string {
+	for _, v := range mcs {
+		if *v.Type == response_pb.MessageChainType_MessageChainType_Text {
+			return v.Text.Text
+			break
+		}
+	}
 }
 
 type randomanimalAction int

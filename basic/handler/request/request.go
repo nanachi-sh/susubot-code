@@ -196,10 +196,7 @@ func GetMessage(messageid string, echo *string) ([]byte, error) {
 func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.MessageChain, error) {
 	ret := []*request_d.MessageChain{}
 	for _, v := range mc {
-		if v.Type == nil {
-			return nil, errors.New("消息链存在Type为nil的消息")
-		}
-		switch *v.Type {
+		switch v.Type {
 		case request.MessageChainType_MessageChainType_Text:
 			if v.Text == nil {
 				return nil, errors.New("消息链Text结构体为nil")

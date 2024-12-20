@@ -324,6 +324,7 @@ message UnmarshalRequest {
     optional ResponseType Type = 2;
     optional CmdEventType CmdEventType = 3; //ResponseType == CmdEvent need
     bool ExtraInfo = 4;
+    bool IgnoreCmdEvent = 5;
 }
 
 message UnmarshalResponse {

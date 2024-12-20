@@ -112,7 +112,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_Text.Enum(),
+					Type: response.MessageChainType_MessageChainType_Text,
 					Text: &response.MessageChain_Text{
 						Text: d,
 					},
@@ -128,7 +128,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_At.Enum(),
+					Type: response.MessageChainType_MessageChainType_At,
 					At: &response.MessageChain_At{
 						TargetId: d,
 					},
@@ -144,7 +144,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_Reply.Enum(),
+					Type: response.MessageChainType_MessageChainType_Reply,
 					Reply: &response.MessageChain_Reply{
 						MessageId: d,
 					},
@@ -160,7 +160,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_Image.Enum(),
+					Type: response.MessageChainType_MessageChainType_Image,
 					Image: &response.MessageChain_Image{
 						URL: d,
 					},
@@ -176,7 +176,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_Voice.Enum(),
+					Type: response.MessageChainType_MessageChainType_Voice,
 					Voice: &response.MessageChain_Voice{
 						URL: d,
 					},
@@ -192,7 +192,7 @@ func unmarshalMessageChain(mc []*response_d.MessageChain) ([]*response.MessageCh
 			switch d := d.(type) {
 			case string:
 				ret = append(ret, &response.MessageChainObject{
-					Type: response.MessageChainType_MessageChainType_Video.Enum(),
+					Type: response.MessageChainType_MessageChainType_Video,
 					Video: &response.MessageChain_Video{
 						URL: d,
 					},
