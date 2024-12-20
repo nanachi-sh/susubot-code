@@ -163,6 +163,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		})
 		if err != nil {
 			logger.Println(err)
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "猫猫跑到半路跑丢了，可能是出错或者超时，再试一次？",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			return
 		}
 		resp = x
@@ -183,6 +194,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		})
 		if err != nil {
 			logger.Println(err)
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "小狐狸跑到半路跑丢了，可能是出错或者超时，再试一次？",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			return
 		}
 		resp = x
@@ -203,6 +225,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		})
 		if err != nil {
 			logger.Println(err)
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "狗子跑到半路跑丢了，可能是出错或者超时，再试一次？",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			return
 		}
 		resp = x
@@ -223,6 +256,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		})
 		if err != nil {
 			logger.Println(err)
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "坤坤跑到半路篮球丢了，可能是出错或者超时或者是未添加坤坤图片，再试一次？",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			return
 		}
 		resp = x
@@ -243,6 +287,17 @@ func randomanimal(message *response_pb.Response_Message, text string) {
 		})
 		if err != nil {
 			logger.Println(err)
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "鸭跑到半路跑丢了，可能是出错或者超时，再试一次？",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			return
 		}
 		resp = x
