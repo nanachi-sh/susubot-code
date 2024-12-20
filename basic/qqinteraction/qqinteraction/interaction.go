@@ -1859,7 +1859,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: " 上桌成功，当前桌内玩家：" + playersToStr(resp.RoomPlayers),
+					Text: " 上桌成功，当前桌内玩家：\n" + playersToStr(resp.RoomPlayers),
 				},
 			},
 		}); err != nil {
@@ -1922,8 +1922,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 						底分：%v
 						倍率：%v
 						游戏状态：%v
-						玩家列表：%v
-						`, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, playersToStr(ri.Players)),
+						玩家列表：%v`, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, "\n"+playersToStr(ri.Players)),
 					},
 				},
 			}); err != nil {
@@ -1985,7 +1984,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 						底分：%v
 						倍率：%v
 						游戏状态：%v
-						玩家列表：%v`, r.id, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, playersToStr(ri.Players)),
+						玩家列表：%v`, r.id, r.id, ri.Hash, ri.BasicCoin, ri.Multiple, stageStr, "\n"+playersToStr(ri.Players)),
 					},
 				},
 			}); err != nil {
