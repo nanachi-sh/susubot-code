@@ -34,7 +34,7 @@ type roomSI struct {
 }
 
 func Start() {
-	stream, err := define.ConnectorC.Read(context.Background(), &connector.Empty{})
+	stream, err := define.ConnectorC.Read(define.ConnectorCtx, &connector.Empty{})
 	if err != nil {
 		logger.Fatalln(err)
 	}
