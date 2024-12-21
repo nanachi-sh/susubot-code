@@ -612,6 +612,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					return
 				}
 			}
+			return
 		}
 		ai := resp.Info.AccountInfo
 		playCount := ai.WinCount + ai.LoseCount
