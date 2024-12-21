@@ -3,9 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/nanachi-sh/susubot-code/plugin/TwoOnOne/log"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/plugin/TwoOnOne/protos/twoonone"
 )
@@ -18,16 +19,15 @@ var (
 )
 
 func initDB() error {
-	// 创建数据库
-	if _, err := database.Exec("CREATE DATABASE twoonone"); err != nil {
+	db, err := sql.Open("sqlite3", dbPosition)
+	if err != nil {
 		return err
 	}
-	//切换数据库
-	if _, err := database.Exec("USE twoonone;"); err != nil {
-		logger.Fatalln(err)
+	if err := db.Ping(); err != nil {
+		return err
 	}
 	// 创建表
-	if _, err := database.Exec(`CREATE TABLE Players (
+	if _, err := db.Exec(`CREATE TABLE Players (
 		Id TEXT NOT NULL UNIQUE,
 		Name TEXT NOT NULL,
 		WinCount INT NOT NULL DEFAULT 0,
@@ -40,25 +40,25 @@ func initDB() error {
 	return nil
 }
 
+const (
+	dbPosition = "/databases/twoonone.db"
+)
+
 func init() {
-	db, err := sql.Open("mysql", "root:@unix(/run/mysqld/mysqld.sock)/")
+	_, err := os.Lstat(dbPosition)
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if err := db.Ping(); err != nil {
-		logger.Fatalln(err)
-	}
-	database = db
-	rows, err := database.Query(`SELECT * FROM information_schema.SCHEMATA where SCHEMA_NAME="twoonone";`)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !rows.Next() {
-		if err := initDB(); err != nil {
-			logger.Fatalln(err)
+		if os.IsNotExist(err) {
+			f, err := os.Create(dbPosition)
+			if err != nil {
+				logger.Fatalln(err)
+			}
+			f.Close()
+			if err := initDB(); err != nil {
+				logger.Fatalln(err)
+			}
 		}
 	}
-	db, err = sql.Open("mysql", "root:@unix(/run/mysqld/mysqld.sock)/twoonone")
+	db, err := sql.Open("sqlite3", dbPosition)
 	if err != nil {
 		logger.Fatalln(err)
 	}
