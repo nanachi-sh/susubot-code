@@ -563,6 +563,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					return
 				}
 			}
+			return
 		}
 		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 			&request_pb.MessageChainObject{
@@ -729,6 +730,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					return
 				}
 			}
+			return
 		}
 		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 			&request_pb.MessageChainObject{
@@ -1153,6 +1155,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 					return
 				}
 			}
+			return
 		}
 		delete(twoonone_player2room, senderid)
 		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
