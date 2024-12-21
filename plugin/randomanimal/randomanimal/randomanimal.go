@@ -147,7 +147,7 @@ func GetDuck() (*define.BasicReturn, error) {
 	}
 	defer resp.Body.Close()
 	var Type *randomanimal_pb.Type
-	switch ct := strings.ToUpper(resp.Header.Get("Content-Type")); ct {
+	switch ct := strings.ToLower(resp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		Type = randomanimal_pb.Type_Image.Enum()
 	default:
