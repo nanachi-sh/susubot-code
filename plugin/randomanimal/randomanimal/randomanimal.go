@@ -4,6 +4,7 @@ import (
 	crand "crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"math/big"
 	"net/http"
@@ -43,12 +44,12 @@ func GetCat() (*define.BasicReturn, error) {
 	}
 	var Type *randomanimal_pb.Type
 	// 通过响应头判断类型
-	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
+	switch ct := strings.ToLower(assetResp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		Type = randomanimal_pb.Type_Image.Enum()
 	default:
 		// 暂时懒得写
-		return nil, errors.New("判断响应类型失败")
+		return nil, fmt.Errorf("判断响应类型失败，Content-Type: %v", ct)
 	}
 	if Type == nil {
 		return nil, errors.New("资源类型为nil")
@@ -83,13 +84,13 @@ func GetDog() (*define.BasicReturn, error) {
 		return nil, err
 	}
 	var Type *randomanimal_pb.Type
-	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
+	switch ct := strings.ToLower(assetResp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		Type = randomanimal_pb.Type_Image.Enum()
-	case "video/mpeg4":
+	case "video/mpeg4", "video/mp4":
 		Type = randomanimal_pb.Type_Video.Enum()
 	default:
-		return nil, errors.New("判断响应类型失败")
+		return nil, fmt.Errorf("判断响应类型失败，Content-Type: %v", ct)
 	}
 	if Type == nil {
 		return nil, errors.New("资源类型为nil")
@@ -120,11 +121,11 @@ func GetFox() (*define.BasicReturn, error) {
 	}
 	defer assetResp.Body.Close()
 	var Type *randomanimal_pb.Type
-	switch strings.ToLower(assetResp.Header.Get("Content-Type")) {
+	switch ct := strings.ToLower(assetResp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		Type = randomanimal_pb.Type_Image.Enum()
 	default:
-		return nil, errors.New("判断响应类型失败")
+		return nil, fmt.Errorf("判断响应类型失败，Content-Type: %v", ct)
 	}
 	if Type == nil {
 		return nil, errors.New("资源类型为nil")
@@ -146,12 +147,12 @@ func GetDuck() (*define.BasicReturn, error) {
 	}
 	defer resp.Body.Close()
 	var Type *randomanimal_pb.Type
-	switch strings.ToUpper(resp.Header.Get("Content-Type")) {
+	switch ct := strings.ToUpper(resp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		Type = randomanimal_pb.Type_Image.Enum()
 	default:
 		// 暂时懒得写
-		return nil, errors.New("判断响应类型失败")
+		return nil, fmt.Errorf("判断响应类型失败，Content-Type: %v", ct)
 	}
 	resp_body, err := io.ReadAll(resp.Body)
 	if err != nil {
