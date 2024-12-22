@@ -40,6 +40,8 @@ func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResp
 				if nowt.Day() > mt.Day() {
 					ok = true
 					break
+				} else {
+					break
 				}
 			} else {
 				//非同一年同一月必然不是同一天
