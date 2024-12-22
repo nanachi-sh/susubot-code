@@ -33,7 +33,7 @@ func GRPCServe() error {
 	if err != nil {
 		return err
 	}
-	gs := grpc.NewServer()
+	gs := grpc.NewServer(grpc.MaxRecvMsgSize(100 * 1024 * 1024))
 	fileweb_pb.RegisterFileWebServer(gs, new(filewebService))
 	return gs.Serve(l)
 }
