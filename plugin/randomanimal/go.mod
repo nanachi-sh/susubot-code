@@ -3,6 +3,8 @@ module github.com/nanachi-sh/susubot-code/plugin/randomanimal
 go 1.23.0
 
 require (
+	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/twmb/murmur3 v1.1.8
 	google.golang.org/grpc v1.68.0
 	google.golang.org/protobuf v1.35.2
 )

@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/define"
-	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/protos/fileweb"
 	randomanimal_pb "github.com/nanachi-sh/susubot-code/plugin/randomanimal/protos/randomanimal"
 	randomanimal "github.com/nanachi-sh/susubot-code/plugin/randomanimal/randomanimal"
 	"google.golang.org/grpc"
@@ -53,32 +52,24 @@ func (*randomanimalService) GetCat(ctx context.Context, req *randomanimal_pb.Bas
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		cat, err := randomanimal.GetCat()
+		cat, err := randomanimal.GetCat(req.AutoUpload)
 		if err != nil {
 			ret.err = err
 			return
 		}
 		if req.AutoUpload {
-			filewebc := fileweb.NewFileWebClient(define.GRPCClient)
-			resp, err := filewebc.Upload(define.FilewebCtx, &fileweb.UploadRequest{
-				Buf: cat.Buf,
-			})
-			if err != nil {
-				ret.err = err
-				return
-			}
 			ret.data = &randomanimal_pb.BasicResponse{
 				Type: cat.Type,
 				Response: &randomanimal_pb.BasicResponse_UploadResponse{
-					Hash:    resp.Hash,
-					URLPath: resp.URLPath,
+					Hash:    *cat.Hash,
+					URLPath: fmt.Sprintf("/assets/%v", *cat.Hash),
 				},
 			}
-			return
-		}
-		ret.data = &randomanimal_pb.BasicResponse{
-			Type: cat.Type,
-			Buf:  cat.Buf,
+		} else {
+			ret.data = &randomanimal_pb.BasicResponse{
+				Type: cat.Type,
+				Buf:  cat.Buf,
+			}
 		}
 	}()
 	select {
@@ -101,31 +92,24 @@ func (*randomanimalService) GetDog(ctx context.Context, req *randomanimal_pb.Bas
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		dog, err := randomanimal.GetDog()
+		dog, err := randomanimal.GetDog(req.AutoUpload)
 		if err != nil {
 			ret.err = err
 			return
 		}
 		if req.AutoUpload {
-			resp, err := fileweb.NewFileWebClient(define.GRPCClient).Upload(define.FilewebCtx, &fileweb.UploadRequest{
-				Buf: dog.Buf,
-			})
-			if err != nil {
-				ret.err = err
-				return
-			}
 			ret.data = &randomanimal_pb.BasicResponse{
 				Type: dog.Type,
 				Response: &randomanimal_pb.BasicResponse_UploadResponse{
-					Hash:    resp.Hash,
-					URLPath: resp.URLPath,
+					Hash:    *dog.Hash,
+					URLPath: fmt.Sprintf("/assets/%v", *dog.Hash),
 				},
 			}
-			return
-		}
-		ret.data = &randomanimal_pb.BasicResponse{
-			Type: dog.Type,
-			Buf:  dog.Buf,
+		} else {
+			ret.data = &randomanimal_pb.BasicResponse{
+				Type: dog.Type,
+				Buf:  dog.Buf,
+			}
 		}
 	}()
 	select {
@@ -148,31 +132,24 @@ func (*randomanimalService) GetFox(ctx context.Context, req *randomanimal_pb.Bas
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		fox, err := randomanimal.GetFox()
+		fox, err := randomanimal.GetFox(req.AutoUpload)
 		if err != nil {
 			ret.err = err
 			return
 		}
 		if req.AutoUpload {
-			resp, err := fileweb.NewFileWebClient(define.GRPCClient).Upload(define.FilewebCtx, &fileweb.UploadRequest{
-				Buf: fox.Buf,
-			})
-			if err != nil {
-				ret.err = err
-				return
-			}
 			ret.data = &randomanimal_pb.BasicResponse{
 				Type: fox.Type,
 				Response: &randomanimal_pb.BasicResponse_UploadResponse{
-					Hash:    resp.Hash,
-					URLPath: resp.URLPath,
+					Hash:    *fox.Hash,
+					URLPath: fmt.Sprintf("/assets/%v", *fox.Hash),
 				},
 			}
-			return
-		}
-		ret.data = &randomanimal_pb.BasicResponse{
-			Type: fox.Type,
-			Buf:  fox.Buf,
+		} else {
+			ret.data = &randomanimal_pb.BasicResponse{
+				Type: fox.Type,
+				Buf:  fox.Buf,
+			}
 		}
 	}()
 	select {
@@ -195,31 +172,24 @@ func (*randomanimalService) GetDuck(ctx context.Context, req *randomanimal_pb.Ba
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
-		duck, err := randomanimal.GetDuck()
+		duck, err := randomanimal.GetDuck(req.AutoUpload)
 		if err != nil {
 			ret.err = err
 			return
 		}
 		if req.AutoUpload {
-			resp, err := fileweb.NewFileWebClient(define.GRPCClient).Upload(define.FilewebCtx, &fileweb.UploadRequest{
-				Buf: duck.Buf,
-			})
-			if err != nil {
-				ret.err = err
-				return
-			}
 			ret.data = &randomanimal_pb.BasicResponse{
 				Type: duck.Type,
 				Response: &randomanimal_pb.BasicResponse_UploadResponse{
-					Hash:    resp.Hash,
-					URLPath: resp.URLPath,
+					Hash:    *duck.Hash,
+					URLPath: fmt.Sprintf("/assets/%v", *duck.Hash),
 				},
 			}
-			return
-		}
-		ret.data = &randomanimal_pb.BasicResponse{
-			Type: duck.Type,
-			Buf:  duck.Buf,
+		} else {
+			ret.data = &randomanimal_pb.BasicResponse{
+				Type: duck.Type,
+				Buf:  duck.Buf,
+			}
 		}
 	}()
 	select {
