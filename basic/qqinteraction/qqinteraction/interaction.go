@@ -452,6 +452,7 @@ func randomfortune(message *response_pb.Response_Message, text string) {
 			logger.Println(err)
 			return
 		}
+		return
 	}
 	u := fmt.Sprintf("%v%v", define.ExternalURL, resp.Response.URLPath)
 	if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
