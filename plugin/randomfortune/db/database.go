@@ -32,7 +32,7 @@ func initDB() error {
 	}
 	if _, err := db.Exec(`CREATE TABLE GetFortuneMembers (
 		Id TEXT NOT NULL UNIQUE,
-		LastGetFortuneTime INTEGER NOT NULL DEFAULT 0,
+		LastGetFortuneTime INTEGER NOT NULL DEFAULT 0
 	);`); err != nil {
 		return err
 	}
