@@ -3,6 +3,7 @@ module github.com/nanachi-sh/susubot-code/plugin/randomfortune
 go 1.23.0
 
 require (
+	github.com/mattn/go-sqlite3 v1.14.24
 	google.golang.org/grpc v1.68.1
 	google.golang.org/protobuf v1.35.2
 )

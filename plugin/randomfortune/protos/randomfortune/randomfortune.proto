@@ -15,6 +15,7 @@ message BasicRequest {
     }
 
     ReturnMethods ReturnMethod = 1;
+    optional string MemberId = 2;
 }
 
 message BasicResponse {
@@ -25,4 +26,5 @@ message BasicResponse {
 
     optional UploadResponse Response = 1;
     optional bytes Buf = 2;
+    bool AlreadyGetFortune = 3;
 }

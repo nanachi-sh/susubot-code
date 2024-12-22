@@ -2,6 +2,7 @@ package randomfortune
 
 import (
 	crand "crypto/rand"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,12 +10,49 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/nanachi-sh/susubot-code/plugin/randomfortune/db"
 	"github.com/nanachi-sh/susubot-code/plugin/randomfortune/define"
 	randomfortune_pb "github.com/nanachi-sh/susubot-code/plugin/randomfortune/protos/randomfortune"
 )
 
 func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResponse, error) {
+	if req.MemberId != nil {
+		memberid := *req.MemberId
+		ok := false
+		for {
+			ts, err := db.GetLastGetFortuneTime(memberid)
+			if err != nil {
+				if sql.ErrNoRows == err { //用户不存在
+					ok = true
+					if err := db.AddMember(memberid); err != nil {
+						return nil, err
+					}
+					break
+				}
+				return nil, err
+			}
+			nowt := time.Now()
+			mt := time.Unix(ts, 0)
+			// 判断是否为同一年同一月
+			if nowt.Month() == mt.Month() && nowt.Year() == mt.Year() {
+				if nowt.Day() > mt.Day() {
+					ok = true
+					break
+				}
+			} else {
+				//非同一年同一月必然不是同一天
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			return &randomfortune_pb.BasicResponse{
+				AlreadyGetFortune: true,
+			}, nil
+		}
+	}
 	d, err := os.ReadFile("/config/fortune_HashList.json")
 	if err != nil {
 		return nil, err
@@ -33,6 +71,11 @@ func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResp
 	hash := j[i.Int64()]
 	switch req.ReturnMethod {
 	case randomfortune_pb.BasicRequest_Hash:
+		if req.MemberId != nil {
+			if err := db.UpdateLastGetFortuneTime(*req.MemberId, 0); err != nil {
+				return nil, err
+			}
+		}
 		return &randomfortune_pb.BasicResponse{
 			Response: &randomfortune_pb.BasicResponse_UploadResponse{
 				Hash:    hash,
@@ -48,6 +91,11 @@ func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResp
 		resp_body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
+		}
+		if req.MemberId != nil {
+			if err := db.UpdateLastGetFortuneTime(*req.MemberId, 0); err != nil {
+				return nil, err
+			}
 		}
 		return &randomfortune_pb.BasicResponse{
 			Buf: resp_body,
