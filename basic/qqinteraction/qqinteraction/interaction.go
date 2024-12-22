@@ -426,12 +426,32 @@ func randomfortune(message *response_pb.Response_Message, text string) {
 	case randomfortune_GetFortune:
 		x, err := define.RandomFortuneC.GetFortune(define.RandomFortuneCtx, &randomfortune_pb.BasicRequest{
 			ReturnMethod: randomfortune_pb.BasicRequest_Hash,
+			MemberId:     &group.SenderId,
 		})
 		if err != nil {
 			logger.Println(err)
 			return
 		}
 		resp = x
+	}
+	if resp.AlreadyGetFortune {
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_At,
+				At: &request_pb.MessageChain_At{
+					TargetId: group.SenderId,
+				},
+			},
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: " 你今天已经求过签了",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
+		}
 	}
 	u := fmt.Sprintf("%v%v", define.ExternalURL, resp.Response.URLPath)
 	if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
