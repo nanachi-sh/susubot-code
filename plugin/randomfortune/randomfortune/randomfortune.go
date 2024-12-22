@@ -35,9 +35,6 @@ func GetFortune(req *randomfortune_pb.BasicRequest) (*randomfortune_pb.BasicResp
 			}
 			nowt := time.Now()
 			mt := time.Unix(ts, 0)
-			fmt.Println(nowt.Unix(), mt.Unix())
-			fmt.Println(nowt.Year(), nowt.Month(), nowt.Day())
-			fmt.Println(mt.Year(), mt.Month(), mt.Day())
 			// 判断是否为同一年同一月
 			if nowt.Month() == mt.Month() && nowt.Year() == mt.Year() {
 				if nowt.Day() > mt.Day() {
