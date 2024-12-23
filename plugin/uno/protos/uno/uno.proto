@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+package susubot.plugin.uno;
+
+option go_package = "protos/uno";
+
+service uno {
+    rpc CreateRoom (Empty) returns (CreateRoomResponse);
+    rpc GetRooms (Empty) returns (GetRoomsResponse);
+    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
+    rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
+    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
+    rpc StartRoom (StartRoomRequest) returns (BasicResponse);
+    rpc DrawCard (DrawCardRequest) returns (DrawCardResponse);
+    rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse);
+}
+
+enum Stage {
+    WaitingStart = 0;
+    ElectingBanker = 1;
+    SendingCard = 2;
+}
+
+enum Errors {
+    Unexpected = 0; //意外错误
+    RoomStarted = 1; //房间已开始游戏
+    RoomFull = 2; //房间已满
+    RoomExistPlayer = 3; //玩家已存在房间内
+    RoomNoReachPlayers = 4; //玩家数未达到
+    RoomNoExistPlayer = 5; //玩家不存在房间内
+}
+
+enum CardColor {
+    Blue = 0;
+    Yellow = 1;
+    Red = 2;
+    Green = 3;
+    Black = 4;
+}
+
+enum CardNumber {
+    Zero = 0;
+    One = 1;
+    Two = 2;
+    Three = 3;
+    Four = 4;
+    Five = 5;
+    Six = 6;
+    Seven = 7;
+    Eight = 8;
+    Nine = 9;
+}
+
+enum FeatureCards {
+    Skip = 0;
+    Reverse = 1;
+    DrawTwo = 2;
+    Wild = 3;
+    WildDrawFour = 4;
+}
+
+message Card {
+    optional NormalCard NormalCard = 1;
+    optional FeatureCard FeatureCard = 2;
+}
+
+message NormalCard {
+    CardColor Color = 1;
+    CardNumber Number = 2;
+}
+
+message FeatureCard {
+    CardColor Color = 1;
+    FeatureCards FeatureCard = 2;
+}
+
+message PlayerAccountInfo {
+    string Id = 1;
+    string Name = 2;
+}
+
+message PlayerRoomInfo {
+    string RoomHash = 1;
+    
+}
+
+message PlayerInfo {
+    PlayerAccountInfo PlayerAccountInfo = 1;
+    optional PlayerRoomInfo PlayerRoomInfo = 2;
+}
+
+message Room {
+    string Hash = 1;
+    Stage Stage = 2;
+
+}
+
+message Empty{}
+message BasicResponse {
+    optional Errors err = 1;
+}
+
+message CreateRoomResponse {
+    string RoomHash = 1;
+}
+
+message GetRoomRequest {
+    string RoomHash = 1;
+}
+
+message GetRoomResponse {
+    Room Info = 1;
+}
+
+message GetRoomsResponse {
+    repeated Room Infos = 1;
+}
+
+message JoinRoomRequest {
+    string PlayerId = 1;
+    string PlayerName = 2;
+    string RoomHash = 3;
+}
+
+message JoinRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerAccountInfo Players = 2;
+}
+
+message ExitRoomRequest {
+    string PlayerId = 1;
+}
+
+message ExitRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerAccountInfo Players = 2;
+}
+
+message StartRoomRequest {
+    optional string PlayerId = 1;
+    optional string RoomHash = 2;
+}
+
+message DrawCardRequest {
+    string PlayerId = 1;
+}
+
+message DrawCardResponse {
+    optional Errors err = 1;
+}
+
+message SendCardActionRequest {
+    string PlayerId = 1;
+    repeated Card SendCards = 2;
+}
+
+message SendCardActionResponse {
+    optional Errors err = 1;
+    PlayerInfo NextOperator = 2;
+}
