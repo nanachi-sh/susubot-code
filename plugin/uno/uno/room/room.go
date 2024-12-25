@@ -103,17 +103,17 @@ func (r *Room) Start() *uno_pb.Errors {
 	return nil
 }
 
-func (r *Room) DrawCard(p *player.Player) *uno_pb.Errors {
+func (r *Room) DrawCard(p *player.Player) (bool, *uno_pb.Errors) {
 	// 仅分流
 	switch r.stage {
 	case uno_pb.Stage_WaitingStart:
-		return uno_pb.Errors_RoomNoStart.Enum()
+		return false, uno_pb.Errors_RoomNoStart.Enum()
 	case uno_pb.Stage_ElectingBanker:
 		return r.drawCard_ElectingBanker(p)
 	case uno_pb.Stage_SendingCard:
-		return r.drawCard_SendingCard(p)
+		return false, r.drawCard_SendingCard(p)
 	default:
-		return uno_pb.Errors_Unexpected.Enum()
+		return false, uno_pb.Errors_Unexpected.Enum()
 	}
 }
 
@@ -377,9 +377,9 @@ func (r *Room) startSendCard() {
 	r.resequence(r.players)
 }
 
-func (r *Room) drawCard_ElectingBanker(p *player.Player) *uno_pb.Errors {
+func (r *Room) drawCard_ElectingBanker(p *player.Player) (bool, *uno_pb.Errors) {
 	if p.GetElectBankerCard() != nil {
-		return uno_pb.Errors_PlayerAlreadyDrawCard.Enum()
+		return false, uno_pb.Errors_PlayerAlreadyDrawCard.Enum()
 	}
 	for {
 		card := r.cutCards(1)[0]
@@ -392,8 +392,9 @@ func (r *Room) drawCard_ElectingBanker(p *player.Player) *uno_pb.Errors {
 	}
 	if len(r.getTakeElectBankerPlayers()) == len(r.players) {
 		r.startSendCard()
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
 func (r *Room) drawCard_SendingCard(p *player.Player) *uno_pb.Errors {

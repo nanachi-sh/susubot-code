@@ -196,6 +196,9 @@ message DrawCardResponse {
     optional Card ElectBankerCard = 2; //仅抽庄家时
     repeated Card PlayerCard = 3; //仅出牌阶段时
     Stage Stage = 4;
+
+    bool IntoSendCard = 6;
+    repeated PlayerInfo Players = 5; //仅进入出牌阶段时
 }
 
 message SendCardActionRequest {

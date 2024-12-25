@@ -158,8 +158,19 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	if serr := r.DrawCard(p); serr != nil {
+	intoSendCard, serr := r.DrawCard(p)
+	if serr != nil {
 		return &uno_pb.DrawCardResponse{Err: serr}
+	}
+	if intoSendCard {
+		ps := []*uno_pb.PlayerInfo{}
+		for _, v := range r.GetPlayers() {
+			ps = append(ps, v.FormatToProtoBuf())
+		}
+		return &uno_pb.DrawCardResponse{
+			IntoSendCard: intoSendCard,
+			Players:      ps,
+		}
 	}
 	switch stage := r.GetStage(); stage {
 	case uno_pb.Stage_ElectingBanker:
