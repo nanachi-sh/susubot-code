@@ -135,6 +135,12 @@ func (r *Room) SendCardAction(p *player.Player, sendcard uno_pb.Card, action uno
 }
 
 func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
+	if r.stage != uno_pb.Stage_SendingCard {
+		return nil, nil, uno_pb.Errors_RoomNoSendingCard.Enum()
+	}
+	if r.operatorNow.GetId() != p.GetId() {
+		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
+	}
 	sendcardFC := sendcard.FeatureCard
 	last := r.GetLastCard()
 	// 特殊情况判断
@@ -261,6 +267,12 @@ func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 }
 
 func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
+	if r.stage != uno_pb.Stage_SendingCard {
+		return nil, nil, uno_pb.Errors_RoomNoSendingCard.Enum()
+	}
+	if r.operatorNow.GetId() != p.GetId() {
+		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
+	}
 	_, _, ok := r.getStackFeatureCard()
 	if ok {
 		return nil, nil, uno_pb.Errors_PlayerCardNoExist.Enum()
