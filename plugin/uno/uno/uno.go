@@ -194,7 +194,14 @@ func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionRes
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	next, e, serr := r.SendCardAction(p, *req.SendCard, req.Action)
+	if req.Action == uno_pb.SendCardActions_Send && req.SendCard == nil {
+		return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
+	sc := uno_pb.Card{}
+	if req.SendCard != nil {
+		sc = *req.SendCard
+	}
+	next, e, serr := r.SendCardAction(p, sc, req.Action)
 	if serr != nil {
 		return &uno_pb.SendCardActionResponse{Err: serr}
 	}
