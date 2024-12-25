@@ -512,7 +512,8 @@ func (r *Room) startElectBanker() {
 	cardsArr := r.generateCards()
 	cards := cardsArr[:]
 	r.resequence(&cards)
-	fmt.Println(copy(r.cardHeap, cards))
+	r.cardHeap = make([]uno_pb.Card, 108)
+	copy(r.cardHeap, cards)
 	r.stage = uno_pb.Stage_ElectingBanker
 }
 
