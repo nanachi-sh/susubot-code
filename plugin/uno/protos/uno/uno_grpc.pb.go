@@ -27,6 +27,9 @@ const (
 	Uno_StartRoom_FullMethodName      = "/susubot.plugin.uno.uno/StartRoom"
 	Uno_DrawCard_FullMethodName       = "/susubot.plugin.uno.uno/DrawCard"
 	Uno_SendCardAction_FullMethodName = "/susubot.plugin.uno.uno/SendCardAction"
+	Uno_CallUNO_FullMethodName        = "/susubot.plugin.uno.uno/CallUNO"
+	Uno_Challenge_FullMethodName      = "/susubot.plugin.uno.uno/Challenge"
+	Uno_IndicateUNO_FullMethodName    = "/susubot.plugin.uno.uno/IndicateUNO"
 )
 
 // UnoClient is the client API for Uno service.
@@ -41,6 +44,9 @@ type UnoClient interface {
 	StartRoom(ctx context.Context, in *StartRoomRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 	DrawCard(ctx context.Context, in *DrawCardRequest, opts ...grpc.CallOption) (*DrawCardResponse, error)
 	SendCardAction(ctx context.Context, in *SendCardActionRequest, opts ...grpc.CallOption) (*SendCardActionResponse, error)
+	CallUNO(ctx context.Context, in *CallUNORequest, opts ...grpc.CallOption) (*CallUNOResponse, error)
+	Challenge(ctx context.Context, in *ChallengeRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
+	IndicateUNO(ctx context.Context, in *IndicateUNORequest, opts ...grpc.CallOption) (*IndicateUNOResponse, error)
 }
 
 type unoClient struct {
@@ -131,6 +137,36 @@ func (c *unoClient) SendCardAction(ctx context.Context, in *SendCardActionReques
 	return out, nil
 }
 
+func (c *unoClient) CallUNO(ctx context.Context, in *CallUNORequest, opts ...grpc.CallOption) (*CallUNOResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CallUNOResponse)
+	err := c.cc.Invoke(ctx, Uno_CallUNO_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unoClient) Challenge(ctx context.Context, in *ChallengeRequest, opts ...grpc.CallOption) (*ChallengeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChallengeResponse)
+	err := c.cc.Invoke(ctx, Uno_Challenge_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unoClient) IndicateUNO(ctx context.Context, in *IndicateUNORequest, opts ...grpc.CallOption) (*IndicateUNOResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IndicateUNOResponse)
+	err := c.cc.Invoke(ctx, Uno_IndicateUNO_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UnoServer is the server API for Uno service.
 // All implementations must embed UnimplementedUnoServer
 // for forward compatibility.
@@ -143,6 +179,9 @@ type UnoServer interface {
 	StartRoom(context.Context, *StartRoomRequest) (*BasicResponse, error)
 	DrawCard(context.Context, *DrawCardRequest) (*DrawCardResponse, error)
 	SendCardAction(context.Context, *SendCardActionRequest) (*SendCardActionResponse, error)
+	CallUNO(context.Context, *CallUNORequest) (*CallUNOResponse, error)
+	Challenge(context.Context, *ChallengeRequest) (*ChallengeResponse, error)
+	IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error)
 	mustEmbedUnimplementedUnoServer()
 }
 
@@ -176,6 +215,15 @@ func (UnimplementedUnoServer) DrawCard(context.Context, *DrawCardRequest) (*Draw
 }
 func (UnimplementedUnoServer) SendCardAction(context.Context, *SendCardActionRequest) (*SendCardActionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendCardAction not implemented")
+}
+func (UnimplementedUnoServer) CallUNO(context.Context, *CallUNORequest) (*CallUNOResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CallUNO not implemented")
+}
+func (UnimplementedUnoServer) Challenge(context.Context, *ChallengeRequest) (*ChallengeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Challenge not implemented")
+}
+func (UnimplementedUnoServer) IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IndicateUNO not implemented")
 }
 func (UnimplementedUnoServer) mustEmbedUnimplementedUnoServer() {}
 func (UnimplementedUnoServer) testEmbeddedByValue()             {}
@@ -342,6 +390,60 @@ func _Uno_SendCardAction_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Uno_CallUNO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CallUNORequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).CallUNO(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_CallUNO_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).CallUNO(ctx, req.(*CallUNORequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Uno_Challenge_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChallengeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).Challenge(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_Challenge_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).Challenge(ctx, req.(*ChallengeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Uno_IndicateUNO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IndicateUNORequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).IndicateUNO(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_IndicateUNO_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).IndicateUNO(ctx, req.(*IndicateUNORequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Uno_ServiceDesc is the grpc.ServiceDesc for Uno service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +482,18 @@ var Uno_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendCardAction",
 			Handler:    _Uno_SendCardAction_Handler,
+		},
+		{
+			MethodName: "CallUNO",
+			Handler:    _Uno_CallUNO_Handler,
+		},
+		{
+			MethodName: "Challenge",
+			Handler:    _Uno_Challenge_Handler,
+		},
+		{
+			MethodName: "IndicateUNO",
+			Handler:    _Uno_IndicateUNO_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

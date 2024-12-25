@@ -13,6 +13,9 @@ service uno {
     rpc StartRoom (StartRoomRequest) returns (BasicResponse);
     rpc DrawCard (DrawCardRequest) returns (DrawCardResponse);
     rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse);
+    rpc CallUNO (CallUNORequest) returns (CallUNOResponse);
+    rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
+    rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
 }
 
 enum Stage {
@@ -28,6 +31,22 @@ enum Errors {
     RoomExistPlayer = 3; //玩家已存在房间内
     RoomNoReachPlayers = 4; //玩家数未达到
     RoomNoExistPlayer = 5; //玩家不存在房间内
+    PlayerNoOperatorNow = 6; //玩家不是当前操作者
+    PlayerCardNoExist = 7; //玩家卡牌不足
+    PlayerCannotSendCard = 8; //玩家不能出牌
+    SendCardColorORNumberNELastCard = 9; //所出牌颜色或数字与上一张牌不同
+    RoomNoStart = 10; //房间还未开始游戏
+    PlayerAlreadyDrawCard = 11; //玩家已抽过牌
+    PlayerNoDrawCard = 12; //玩家还未抽牌
+    PlayerCannotNoSendCard = 13; //玩家不能不出牌
+    Challenged = 14; //已挑战
+    PlayerCannotCallUNO = 15; //玩家不能喊UNO
+    RoomNoneSendCard = 16; //房间还未出过牌
+    CannotChallenge = 17; //无法挑战
+    RoomNoSendingCard = 18; //房间还未进入出牌阶段
+    PlayerAlreadyCallUNO = 19; //玩家已喊UNO
+    RoomNoExist = 20; //房间不存在
+    PlayerNoExistAnyRoom = 21; //玩家不在任意一个房间内
 }
 
 enum CardColor {
@@ -59,9 +78,31 @@ enum FeatureCards {
     WildDrawFour = 4;
 }
 
+enum SendCardActions {
+    Send = 0;
+    NoSend = 1;
+}
+
+enum CardType {
+    Normal = 0;
+    Feature = 1;
+}
+
+enum WildDrawFourStatus {
+    ChallengerLose = 0; //挑战者失败
+    ChallengedLose = 1; //被挑战者失败
+}
+
+message SendCard {
+    string SenderId = 1;
+    Card SendCard = 2;
+    optional WildDrawFourStatus WildDrawFourStatus = 3;
+}
+
 message Card {
     optional NormalCard NormalCard = 1;
     optional FeatureCard FeatureCard = 2;
+    CardType Type = 3;
 }
 
 message NormalCard {
@@ -81,7 +122,7 @@ message PlayerAccountInfo {
 
 message PlayerRoomInfo {
     string RoomHash = 1;
-    
+    repeated Card Cards = 2;
 }
 
 message PlayerInfo {
@@ -92,7 +133,11 @@ message PlayerInfo {
 message Room {
     string Hash = 1;
     Stage Stage = 2;
-
+    optional PlayerInfo Banker = 3;
+    repeated Card CardHeap = 4;
+    repeated SendCard CardPool = 5;
+    optional PlayerInfo OperatorNow = 6;
+    repeated PlayerInfo Players = 7;
 }
 
 message Empty{}
@@ -109,7 +154,8 @@ message GetRoomRequest {
 }
 
 message GetRoomResponse {
-    Room Info = 1;
+    optional Errors err = 1;
+    Room Info = 2;
 }
 
 message GetRoomsResponse {
@@ -124,7 +170,7 @@ message JoinRoomRequest {
 
 message JoinRoomResponse {
     optional Errors err = 1;
-    repeated PlayerAccountInfo Players = 2;
+    repeated PlayerInfo Players = 2;
 }
 
 message ExitRoomRequest {
@@ -133,7 +179,7 @@ message ExitRoomRequest {
 
 message ExitRoomResponse {
     optional Errors err = 1;
-    repeated PlayerAccountInfo Players = 2;
+    repeated PlayerInfo Players = 2;
 }
 
 message StartRoomRequest {
@@ -147,14 +193,55 @@ message DrawCardRequest {
 
 message DrawCardResponse {
     optional Errors err = 1;
+    optional Card ElectBankerCard = 2; //仅抽庄家时
+    repeated Card PlayerCard = 3; //仅出牌阶段时
+    Stage Stage = 4;
 }
 
 message SendCardActionRequest {
     string PlayerId = 1;
-    repeated Card SendCards = 2;
+    Card SendCard = 2;
+    SendCardActions Action = 3;
 }
 
 message SendCardActionResponse {
+    message GameFinishEvent {
+        repeated PlayerInfo Players = 1;
+        PlayerInfo Winner = 2;
+    }
+
     optional Errors err = 1;
     PlayerInfo NextOperator = 2;
+
+    optional GameFinishEvent GameFinishE = 3;
+}
+
+message CallUNORequest {
+    string PlayerId = 1;
+}
+
+message CallUNOResponse {
+    optional Errors err = 1;
+    repeated Card PlayerCard = 2;
+}
+
+message ChallengeRequest {
+    string PlayerId = 1;
+}
+
+message ChallengeResponse {
+    optional Errors err = 1;
+    bool Win = 2;
+    repeated Card LastPlayerCard = 3;
+}
+
+message IndicateUNORequest {
+    // string PlayerId = 1;
+    string TargetId = 2;
+}
+
+message IndicateUNOResponse {
+    optional Errors err = 1;
+    bool IndicateOK = 2;
+    repeated Card PunishedCard = 3;
 }
