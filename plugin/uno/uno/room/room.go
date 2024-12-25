@@ -366,6 +366,9 @@ func (r *Room) startSendCard() {
 }
 
 func (r *Room) drawCard_ElectingBanker(p *player.Player) *uno_pb.Errors {
+	if p.GetElectBankerCard() != nil {
+		return uno_pb.Errors_PlayerAlreadyDrawCard.Enum()
+	}
 	for {
 		card := r.cutCards(1)[0]
 		if card.NormalCard == nil {
