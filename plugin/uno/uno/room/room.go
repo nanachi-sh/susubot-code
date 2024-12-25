@@ -66,7 +66,10 @@ func (r *Room) Join(ai *uno_pb.PlayerAccountInfo) *uno_pb.Errors {
 	}
 	p := player.New(&uno_pb.PlayerInfo{
 		PlayerAccountInfo: ai,
-		PlayerRoomInfo:    &uno_pb.PlayerRoomInfo{},
+		PlayerRoomInfo: &uno_pb.PlayerRoomInfo{
+			RoomHash: r.hash,
+			Cards:    []*uno_pb.Card{},
+		},
 	})
 	if p == nil {
 		return uno_pb.Errors_Unexpected.Enum()

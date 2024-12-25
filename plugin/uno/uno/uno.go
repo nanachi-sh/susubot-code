@@ -76,7 +76,7 @@ func GetRooms() *uno_pb.GetRoomsResponse {
 }
 
 func GetRoom(req *uno_pb.GetRoomRequest) *uno_pb.GetRoomResponse {
-	if r, ok := getRoom(req.RoomHash); ok {
+	if r, ok := getRoom(req.RoomHash); !ok {
 		return &uno_pb.GetRoomResponse{
 			Err: uno_pb.Errors_RoomNoExist.Enum(),
 		}
