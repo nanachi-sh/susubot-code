@@ -144,17 +144,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 	sendcardFC := sendcard.FeatureCard
 	last := r.GetLastCard()
 	// 特殊情况判断
-	if last == nil { //第一次出牌
-		if serr := r.playerSendCard(p, sendcard); serr != nil {
-			return nil, nil, serr
-		}
-		if sendcardFC != nil {
-			r.sendCard_featureCardAction(sendcardFC.FeatureCard)
-		}
-		next := r.nextOperator()
-		r.operatorNow = next
-		return next, nil, nil
-	} else if p.GetDrawCard() != nil { //出摸来的牌
+	if p.GetDrawCard() != nil { //出摸来的牌
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 		}
@@ -371,6 +361,14 @@ func (r *Room) startSendCard() {
 	for _, v := range r.players {
 		cards := r.cutCards(7)
 		v.AddCards(cards)
+	}
+	// 添加引牌
+	for _, v := range r.cardHeap {
+		if v.Type == uno_pb.CardType_Normal {
+			r.addCardToCardPool(SendCard{
+				SendCard: v,
+			})
+		}
 	}
 	r.stage = uno_pb.Stage_SendingCard
 	// 重排顺序
