@@ -327,11 +327,11 @@ func (r *Room) convertBlackCardColor(last uno_pb.Card, now uno_pb.Card) {
 }
 
 func (r *Room) playerSendCard(p *player.Player, sendcard uno_pb.Card) *uno_pb.Errors {
-	if last := r.GetLastCard(); last != nil {
-		r.convertBlackCardColor(last.SendCard, sendcard)
-	}
 	if !p.DeleteCardFromHandCard(sendcard) {
 		return uno_pb.Errors_PlayerCardNoExist.Enum()
+	}
+	if last := r.GetLastCard(); last != nil {
+		r.convertBlackCardColor(last.SendCard, sendcard)
 	}
 	r.addCardToCardPool(SendCard{
 		SenderId: p.GetId(),
