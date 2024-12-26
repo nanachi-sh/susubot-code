@@ -363,11 +363,15 @@ func (r *Room) startSendCard() {
 		v.AddCards(cards)
 	}
 	// 添加引牌
-	for _, v := range r.cardHeap {
-		if v.Type == uno_pb.CardType_Normal {
+	for {
+		card := r.cutCards(1)[0]
+		if card.Type == uno_pb.CardType_Normal {
 			r.addCardToCardPool(SendCard{
-				SendCard: v,
+				SendCard: card,
 			})
+			break
+		} else {
+			r.addCardsToCardHeap([]uno_pb.Card{card})
 		}
 	}
 	r.stage = uno_pb.Stage_SendingCard
@@ -456,7 +460,8 @@ func (r *Room) getStackFeatureCard() (uno_pb.FeatureCards, int, bool) {
 		ct    *uno_pb.FeatureCards
 		count int
 	)
-	for n := len(r.cardPool); n > 0; n-- {
+FOROUT:
+	for n := len(r.cardPool); n != 0; n-- {
 		sc := r.cardPool[n]
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
 			break
@@ -465,7 +470,7 @@ func (r *Room) getStackFeatureCard() (uno_pb.FeatureCards, int, bool) {
 		switch fC.FeatureCard {
 		case uno_pb.FeatureCards_DrawTwo, uno_pb.FeatureCards_WildDrawFour:
 		default:
-			break
+			break FOROUT
 		}
 		if ct == nil {
 			ct = &fC.FeatureCard
