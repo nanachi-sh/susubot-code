@@ -352,7 +352,7 @@ func (r *Room) startSendCard() {
 		cards := r.cutCards(7)
 		v.AddCards(cards)
 	}
-	// 添加引牌
+	// 设置引牌
 	for {
 		card := r.cutCards(1)[0]
 		if card.Type == uno_pb.CardType_Normal {
@@ -654,26 +654,29 @@ func (r *Room) generateCards() [108]uno_pb.Card {
 	return [108]uno_pb.Card(cards)
 }
 
-func (r *Room) resequence(x any) {
-	switch xPoint := x.(type) {
-	case *[]uno_pb.Card:
-		x := *xPoint
-		rand.Shuffle(len(x), func(i, j int) {
-			x[i], x[j] = x[j], x[i]
-		})
-	case *[]*player.Player:
-		if r.stage == uno_pb.Stage_SendingCard {
-			var xCopy []*player.Player
-			xCopy = append(xCopy, r.banker)
-			for _, v := range xCopy {
-				if v.GetId() == r.banker.GetId() {
-					continue
-				}
-				xCopy = append(xCopy, v)
-			}
-			*xPoint = xCopy
+func (r *Room) cardResequence(x []uno_pb.Card) {
+	rand.Shuffle(len(x), func(i, j int) {
+		x[i], x[j] = x[j], x[i]
+	})
+}
+
+func (r *Room) playerResequence() {
+	var (
+		xCopy        []*player.Player
+		sequenceCopy []string
+	)
+	xCopy = append(xCopy, r.banker)
+	sequenceCopy = append(sequenceCopy, r.banker.GetId())
+	for _, v := range xCopy {
+		if v.GetId() == r.banker.GetId() {
+			continue
 		}
+		xCopy = append(xCopy, v)
+		sequenceCopy = append(sequenceCopy, v.GetId())
 	}
+	r.players = xCopy
+	r.sequence = sequenceCopy
+	r.sequencePosition = 0
 }
 
 func (r *Room) deletePlayer(playerid string) bool {
