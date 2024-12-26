@@ -199,6 +199,7 @@ message DrawCardResponse {
 
     bool IntoSendCard = 6;
     repeated PlayerInfo Players = 5; //仅进入出牌阶段时
+    optional PlayerInfo Banker = 7; //仅进入出牌阶段时
 }
 
 message SendCardActionRequest {

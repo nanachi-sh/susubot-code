@@ -168,8 +168,11 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 			ps = append(ps, v.FormatToProtoBuf())
 		}
 		return &uno_pb.DrawCardResponse{
-			IntoSendCard: intoSendCard,
-			Players:      ps,
+			ElectBankerCard: p.GetElectBankerCard(),
+			Stage:           r.GetStage(),
+			IntoSendCard:    intoSendCard,
+			Players:         ps,
+			Banker:          r.GetBanker().FormatToProtoBuf(),
 		}
 	}
 	switch stage := r.GetStage(); stage {
