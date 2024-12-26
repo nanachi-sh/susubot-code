@@ -224,7 +224,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
-	} else if r.sendCard_checkSkipCard(last.SendCard) { //上一张牌为跳过牌，且这次出的不为跳过牌，则不允许出牌
+	} else if r.sendCard_checkSkippedCard(last) { //上一张牌为跳过牌，且这次出的不为跳过牌，则不允许出牌
 		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
 	}
 	// 正常出牌
@@ -288,21 +288,23 @@ func (r *Room) sendCard_checkStackCard(last, now uno_pb.Card) bool {
 }
 
 // 检查是否为具有跳过性质的卡
-func (r *Room) sendCard_checkSkipCard(last uno_pb.Card) bool {
-	if last.Type != uno_pb.CardType_Feature {
+func (r *Room) sendCard_checkSkippedCard(last *SendCard) bool {
+	if last == nil {
 		return false
 	}
-	lastFC := last.FeatureCard
+	if last.SendCard.Type != uno_pb.CardType_Feature {
+		return false
+	}
+	lastFC := last.SendCard.FeatureCard
 	switch lastFC.FeatureCard {
 	case uno_pb.FeatureCards_Skip, uno_pb.FeatureCards_DrawTwo:
 		return true
 	}
-	lastSC := r.GetLastCard()
 	if lastFC.FeatureCard == uno_pb.FeatureCards_WildDrawFour {
-		if lastSC.wildDrawFourStatus == nil {
+		if last.wildDrawFourStatus == nil {
 			return true
 		}
-		return *lastSC.wildDrawFourStatus == wildDrawFourStatus_challengerLose
+		return *last.wildDrawFourStatus == wildDrawFourStatus_challengerLose
 	}
 	return false
 }
@@ -349,9 +351,16 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	if r.operatorNow.GetId() != p.GetId() {
 		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
 	}
-	_, _, ok := r.getStackFeatureCard()
+	stackFC, _, ok := r.getStackFeatureCard()
 	if ok {
-		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
+		if stackFC == uno_pb.FeatureCards_WildDrawFour {
+			last := r.GetLastCard()
+			if r.sendCard_checkSkippedCard(last) {
+				return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
+			}
+		} else {
+			return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
+		}
 	} else if p.GetDrawCard() != nil {
 		p.AddCards([]uno_pb.Card{*p.GetDrawCard()})
 		p.ClearDrawCard()
