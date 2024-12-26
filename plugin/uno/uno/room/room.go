@@ -685,10 +685,10 @@ func (r *Room) resequence(x any) {
 }
 
 func (r *Room) deletePlayer(playerid string) bool {
-	for i, v := range r.GetPlayers() {
+	for i, v := range r.players {
 		if v.GetId() == playerid {
 			if len(r.players) == 1 {
-				r.players = r.players[0:]
+				r.players = r.players[:0]
 			} else {
 				r.players = append(r.players[:i], r.players[i+1:]...)
 			}
