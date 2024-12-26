@@ -461,7 +461,7 @@ func (r *Room) getStackFeatureCard() (uno_pb.FeatureCards, int, bool) {
 		count int
 	)
 FOROUT:
-	for n := len(r.cardPool) - 1; n != 0; n-- {
+	for n := len(r.cardPool) - 1; n >= 0; n-- {
 		sc := r.cardPool[n]
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
 			break
