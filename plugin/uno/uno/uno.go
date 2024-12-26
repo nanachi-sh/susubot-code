@@ -223,6 +223,7 @@ func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionRes
 	resp := new(uno_pb.SendCardActionResponse)
 	if next != nil {
 		resp.NextOperator = next.FormatToProtoBuf()
+		resp.SenderCard = &r.GetLastCard().SendCard
 	}
 	if e != nil {
 		if e.GameFinish {
