@@ -375,8 +375,6 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 func (r *Room) sendCard_featureCardAction(featureCard uno_pb.FeatureCards) {
 	switch featureCard {
 	case uno_pb.FeatureCards_Skip:
-		// 跳过下一个玩家
-		r.nextOperator()
 	case uno_pb.FeatureCards_Reverse:
 		r.reverseSequence()
 	case uno_pb.FeatureCards_DrawTwo:
