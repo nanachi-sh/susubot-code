@@ -307,7 +307,7 @@ func (r *Room) nextOperator() *player.Player {
 func (r *Room) reverseSequence() {
 	playersCopy := make([]*player.Player, len(r.players))
 	copy(playersCopy, r.players)
-	for n, N := len(playersCopy), 0; ; {
+	for n, N := len(playersCopy)-1, 0; ; {
 		if n == len(r.players)-1 || N < 0 {
 			break
 		}
@@ -461,7 +461,7 @@ func (r *Room) getStackFeatureCard() (uno_pb.FeatureCards, int, bool) {
 		count int
 	)
 FOROUT:
-	for n := len(r.cardPool); n != 0; n-- {
+	for n := len(r.cardPool) - 1; n != 0; n-- {
 		sc := r.cardPool[n]
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
 			break
