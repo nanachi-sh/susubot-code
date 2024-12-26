@@ -189,6 +189,7 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 		}
 		return &uno_pb.DrawCardResponse{
 			PlayerCard: cs,
+			DrawCard:   p.GetDrawCard(),
 			Stage:      stage,
 		}
 	default:

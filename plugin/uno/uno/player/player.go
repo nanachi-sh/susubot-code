@@ -181,6 +181,7 @@ func (p *Player) FormatToProtoBuf() *uno_pb.PlayerInfo {
 		pi.PlayerRoomInfo = &uno_pb.PlayerRoomInfo{
 			RoomHash: p.roomhash,
 			Cards:    cards,
+			DrawCard: p.GetDrawCard(),
 		}
 	}
 	return pi
