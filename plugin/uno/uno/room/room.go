@@ -3,6 +3,7 @@ package room
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -12,13 +13,15 @@ import (
 )
 
 type Room struct {
-	hash        string
-	players     []*player.Player
-	operatorNow *player.Player
-	stage       uno_pb.Stage
-	cardPool    []*SendCard
-	banker      *player.Player
-	cardHeap    []uno_pb.Card
+	hash             string
+	players          []*player.Player
+	operatorNow      *player.Player
+	stage            uno_pb.Stage
+	cardPool         []*SendCard
+	banker           *player.Player
+	cardHeap         []uno_pb.Card
+	sequence         []string //存储玩家Id
+	sequencePosition int
 }
 
 type wildDrawFourStatus int
@@ -51,6 +54,8 @@ func New() *Room {
 		stage:       uno_pb.Stage_WaitingStart,
 		cardPool:    []*SendCard{},
 		banker:      nil,
+		cardHeap:    []uno_pb.Card{},
+		sequence:    []string{},
 	}
 }
 
@@ -75,6 +80,7 @@ func (r *Room) Join(ai *uno_pb.PlayerAccountInfo) *uno_pb.Errors {
 		return uno_pb.Errors_Unexpected.Enum()
 	}
 	r.players = append(r.players, p)
+	r.sequence = append(r.sequence, p.GetId())
 	return nil
 }
 
@@ -291,28 +297,20 @@ func (r *Room) sendCard_featureCardAction(featureCard uno_pb.FeatureCards) {
 }
 
 func (r *Room) nextOperator() *player.Player {
-	ps := r.GetPlayers()
-	for i, v := range ps {
-		if r.GetOperatorNow().GetId() == v.GetId() {
-			if i == len(ps)-1 {
-				return ps[0]
-			} else {
-				return ps[i+1]
-			}
-		}
+	if r.sequencePosition > len(r.sequence)-1 {
+		r.sequencePosition = 0
+	} else {
+		r.sequencePosition++
 	}
-	return nil
+	p, ok := r.GetPlayer(r.sequence[r.sequencePosition])
+	if !ok {
+		return nil
+	}
+	return p
 }
 
 func (r *Room) reverseSequence() {
-	playersCopy := make([]*player.Player, len(r.players))
-	copy(playersCopy, r.players)
-	for n, N := len(playersCopy)-1, 0; ; {
-		if n == len(r.players)-1 || N < 0 {
-			break
-		}
-		r.players[N] = playersCopy[n]
-	}
+	slices.Reverse(r.sequence)
 }
 
 func (r *Room) convertBlackCardColor(last uno_pb.Card, now uno_pb.Card) {
