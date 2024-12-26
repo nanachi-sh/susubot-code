@@ -269,6 +269,12 @@ func (r *Room) sendCard_checkSkipORReverseCard(now uno_pb.Card) bool {
 
 // 检查是否为堆叠卡
 func (r *Room) sendCard_checkStackCard(last, now uno_pb.Card) bool {
+	if last.Type != uno_pb.CardType_Feature {
+		return false
+	}
+	if now.Type != uno_pb.CardType_Feature {
+		return false
+	}
 	lastFC := last.FeatureCard
 	nowFC := now.FeatureCard
 	switch lastFC.FeatureCard {
