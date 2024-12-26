@@ -224,7 +224,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
-	} else if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() { //上一张牌为跳过牌，且这次出的不为跳过牌，则不允许出牌
+	} else if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() { //上一张牌为跳过牌，且这次出的不为跳过牌，并且不为同一人，则不允许出牌
 		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
 	}
 	// 正常出牌
