@@ -224,7 +224,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
-	} else if r.sendCard_checkSkippedCard(last) { //上一张牌为跳过牌，且这次出的不为跳过牌，则不允许出牌
+	} else if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() { //上一张牌为跳过牌，且这次出的不为跳过牌，则不允许出牌
 		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
 	}
 	// 正常出牌
@@ -405,17 +405,14 @@ func (r *Room) convertBlackCardColor(last uno_pb.Card, now uno_pb.Card) {
 	if now.Type == uno_pb.CardType_Feature {
 		switch now.FeatureCard.FeatureCard {
 		case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
-			last := r.GetLastCard()
-			if last != nil {
-				var clr uno_pb.CardColor
-				switch last.SendCard.Type {
-				case uno_pb.CardType_Normal:
-					clr = last.SendCard.NormalCard.Color
-				case uno_pb.CardType_Feature:
-					clr = last.SendCard.FeatureCard.Color
-				}
-				now.FeatureCard.Color = clr
+			var clr uno_pb.CardColor
+			switch last.Type {
+			case uno_pb.CardType_Normal:
+				clr = last.NormalCard.Color
+			case uno_pb.CardType_Feature:
+				clr = last.FeatureCard.Color
 			}
+			now.FeatureCard.Color = clr
 		}
 	}
 }
@@ -667,17 +664,18 @@ func (r *Room) Challenge(p *player.Player) (bool, []uno_pb.Card, *uno_pb.Errors)
 	}
 	clr := last.SendCard.FeatureCard.Color
 	win := false
+FOROUT:
 	for _, v := range p.GetCards() {
 		switch v.Type {
 		case uno_pb.CardType_Normal:
 			if v.NormalCard.Color == clr {
 				win = true
-				break
+				break FOROUT
 			}
 		case uno_pb.CardType_Feature:
 			if v.FeatureCard.Color == clr {
 				win = true
-				break
+				break FOROUT
 			}
 		}
 	}
