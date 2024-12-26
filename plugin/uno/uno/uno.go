@@ -158,22 +158,31 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	intoSendCard, serr := r.DrawCard(p)
+	e, serr := r.DrawCard(p)
 	if serr != nil {
 		return &uno_pb.DrawCardResponse{Err: serr}
 	}
-	if intoSendCard {
-		ps := []*uno_pb.PlayerInfo{}
-		for _, v := range r.GetPlayers() {
-			ps = append(ps, v.FormatToProtoBuf())
-		}
-		return &uno_pb.DrawCardResponse{
-			ElectBankerCard: p.GetElectBankerCard(),
-			Stage:           r.GetStage(),
-			IntoSendCard:    intoSendCard,
-			Players:         ps,
-			Banker:          r.GetBanker().FormatToProtoBuf(),
-			LeadCard:        &r.GetLastCard().SendCard,
+	if e != nil {
+		switch {
+		case e.IntoSendCard:
+			return &uno_pb.DrawCardResponse{
+				ElectBankerCard: p.GetElectBankerCard(),
+				Stage:           r.GetStage(),
+				IntoSendCard:    e.IntoSendCard,
+				IntoSendCardE:   e.IntoSendCardE,
+			}
+		case e.Skipped:
+			cs := []*uno_pb.Card{}
+			for _, v := range p.GetCards() {
+				cs = append(cs, &v)
+			}
+			return &uno_pb.DrawCardResponse{
+				PlayerCard: cs,
+				DrawCard:   p.GetDrawCard(),
+				Stage:      r.GetStage(),
+				Skipped:    e.Skipped,
+				SkippedE:   e.SkippedE,
+			}
 		}
 	}
 	switch stage := r.GetStage(); stage {

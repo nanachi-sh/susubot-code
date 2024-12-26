@@ -193,6 +193,15 @@ message DrawCardRequest {
 }
 
 message DrawCardResponse {
+    message IntoSendCardEvent {
+        repeated PlayerInfo Players = 1;
+        PlayerInfo Banker = 2; //
+        Card LeadCard = 3; //引牌    
+    }
+    message SkippedEvent {
+        PlayerInfo NextOperator = 1;
+    }
+
     optional Errors err = 1;
     optional Card ElectBankerCard = 2; //仅抽庄家时
     repeated Card PlayerCard = 3; //仅出牌阶段时
@@ -200,12 +209,9 @@ message DrawCardResponse {
     Stage Stage = 4;
 
     bool IntoSendCard = 6;
-    repeated PlayerInfo Players = 5; //IntoSendCard == true
-    optional PlayerInfo Banker = 7; //
-    optional Card LeadCard = 8; //引牌
-
-    bool Skipped = 10; //玩家被Draw two等牌跳过回合
-    optional PlayerInfo NextOperator = 11; //Skipped == true
+    optional IntoSendCardEvent IntoSendCardE = 7;
+    bool Skipped = 5; //玩家被Draw two等牌跳过回合
+    optional SkippedEvent SkippedE = 8; //Skipped == true
 }
 
 message SendCardActionRequest {
