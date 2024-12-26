@@ -173,6 +173,17 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 			SenderId: p.GetId(),
 			SendCard: sendcard,
 		})
+		next := r.nextOperator()
+		r.operatorNow = next
+		return next, nil, nil
+	} else if sendcardFC != nil && (sendcardFC.FeatureCard == uno_pb.FeatureCards_Skip || sendcardFC.FeatureCard == uno_pb.FeatureCards_Reverse) { //Skip, Reverse无视上一张牌类型
+		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
+			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
+		}
+		if serr := r.playerSendCard(p, sendcard); serr != nil {
+			return nil, nil, serr
+		}
+		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 		if len(p.GetCards()) == 0 {
 			ps := []*uno_pb.PlayerInfo{}
 			for _, v := range r.players {
@@ -189,17 +200,6 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
-	} else if sendcardFC != nil && (sendcardFC.FeatureCard == uno_pb.FeatureCards_Skip || sendcardFC.FeatureCard == uno_pb.FeatureCards_Reverse) { //Skip, Reverse无视上一张牌类型
-		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
-			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
-		}
-		if serr := r.playerSendCard(p, sendcard); serr != nil {
-			return nil, nil, serr
-		}
-		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
-		next := r.nextOperator()
-		r.operatorNow = next
-		return next, nil, nil
 	} else if sendcardFC != nil && last.SendCard.FeatureCard != nil && ((sendcardFC.FeatureCard == uno_pb.FeatureCards_DrawTwo || sendcardFC.FeatureCard == uno_pb.FeatureCards_WildDrawFour) && (last.SendCard.FeatureCard.FeatureCard == uno_pb.FeatureCards_DrawTwo || last.SendCard.FeatureCard.FeatureCard == uno_pb.FeatureCards_WildDrawFour)) { //上一张为Draw two/Wild Draw four，且这一张也同样
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
@@ -208,6 +208,19 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 			return nil, nil, serr
 		}
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
+		if len(p.GetCards()) == 0 {
+			ps := []*uno_pb.PlayerInfo{}
+			for _, v := range r.players {
+				ps = append(ps, v.FormatToProtoBuf())
+			}
+			return nil, &SendCardEvent{
+				GameFinish: true,
+				GameFinishE: &uno_pb.SendCardActionResponse_GameFinishEvent{
+					Players: ps,
+					Winner:  p.FormatToProtoBuf(),
+				},
+			}, nil
+		}
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
@@ -224,6 +237,19 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 	if sendcardFC != nil {
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 	}
+	if len(p.GetCards()) == 0 {
+		ps := []*uno_pb.PlayerInfo{}
+		for _, v := range r.players {
+			ps = append(ps, v.FormatToProtoBuf())
+		}
+		return nil, &SendCardEvent{
+			GameFinish: true,
+			GameFinishE: &uno_pb.SendCardActionResponse_GameFinishEvent{
+				Players: ps,
+				Winner:  p.FormatToProtoBuf(),
+			},
+		}, nil
+	}
 	next := r.nextOperator()
 	r.operatorNow = next
 	return next, nil, nil
@@ -238,12 +264,12 @@ func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 	case uno_pb.CardType_Normal:
 		switch last.Type {
 		case uno_pb.CardType_Normal:
-			if nowNC.Color != lastNC.Color && nowNC.Number != lastNC.Number {
-				return false
+			if nowNC.Color == lastNC.Color || nowNC.Number == lastNC.Number {
+				return true
 			}
 		case uno_pb.CardType_Feature:
 			if nowNC.Color != lastFC.Color {
-				return false
+				return true
 			}
 		}
 	case uno_pb.CardType_Feature:
@@ -252,16 +278,16 @@ func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 		}
 		switch last.Type {
 		case uno_pb.CardType_Normal:
-			if nowFC.Color != lastNC.Color {
-				return false
+			if nowFC.Color == lastNC.Color {
+				return true
 			}
 		case uno_pb.CardType_Feature:
-			if nowFC.Color != lastFC.Color && nowFC.FeatureCard != lastFC.FeatureCard {
-				return false
+			if nowFC.Color == lastFC.Color || nowFC.FeatureCard == lastFC.FeatureCard {
+				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
