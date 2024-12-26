@@ -661,9 +661,13 @@ func (r *Room) Challenge(p *player.Player) (bool, []uno_pb.Card, *uno_pb.Errors)
 		return false, nil, uno_pb.Errors_CannotChallenge.Enum()
 	}
 	clr := last.SendCard.FeatureCard.Color
+	lastP, ok := r.GetPlayer(last.SenderId)
+	if !ok {
+		return false, nil, uno_pb.Errors_Unexpected.Enum()
+	}
 	win := false
 FOROUT:
-	for _, v := range p.GetCards() {
+	for _, v := range lastP.GetCards() {
 		switch v.Type {
 		case uno_pb.CardType_Normal:
 			if v.NormalCard.Color == clr {
