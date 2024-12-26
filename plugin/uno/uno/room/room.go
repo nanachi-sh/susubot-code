@@ -294,6 +294,8 @@ func (r *Room) nextOperator() *player.Player {
 	}
 	fmt.Println(r.sequencePosition)
 	fmt.Println(r.sequence[r.sequencePosition])
+	fmt.Println(r.players)
+	fmt.Println(r.sequence)
 	p, ok := r.GetPlayer(r.sequence[r.sequencePosition])
 	if !ok {
 		return nil
