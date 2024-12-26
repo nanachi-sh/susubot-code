@@ -685,6 +685,7 @@ func (r *Room) resequence(x any) {
 }
 
 func (r *Room) deletePlayer(playerid string) bool {
+	// 从玩家切片删除
 	for i, v := range r.players {
 		if v.GetId() == playerid {
 			if len(r.players) == 1 {
@@ -693,6 +694,19 @@ func (r *Room) deletePlayer(playerid string) bool {
 				r.players = append(r.players[:i], r.players[i+1:]...)
 			}
 			return true
+		}
+	}
+	// 从顺序切片删除
+	for i, v := range r.sequence {
+		if v == playerid {
+			if r.sequencePosition == i {
+				r.sequencePosition = 0
+			}
+			if len(r.sequence) == 1 {
+				r.sequence = r.sequence[:0]
+			} else {
+				r.sequence = append(r.sequence[:i], r.sequence[i+1:]...)
+			}
 		}
 	}
 	return false
