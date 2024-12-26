@@ -297,7 +297,7 @@ func (r *Room) sendCard_featureCardAction(featureCard uno_pb.FeatureCards) {
 }
 
 func (r *Room) nextOperator() *player.Player {
-	if r.sequencePosition > len(r.sequence)-1 {
+	if r.sequencePosition+1 > len(r.sequence)-1 {
 		r.sequencePosition = 0
 	} else {
 		r.sequencePosition++
