@@ -182,17 +182,8 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		r.operatorNow = next
 		return next, nil, nil
 	} else if sendcardFC != nil && (sendcardFC.FeatureCard == uno_pb.FeatureCards_Skip || sendcardFC.FeatureCard == uno_pb.FeatureCards_Reverse) { //Skip, Reverse无视上一张牌类型
-		switch {
-		case last.SendCard.FeatureCard != nil:
-			lastFC := last.SendCard.FeatureCard
-			if lastFC.Color != sendcardFC.Color {
-				return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
-			}
-		case last.SendCard.NormalCard != nil:
-			lastNC := last.SendCard.NormalCard
-			if lastNC.Color != sendcardFC.Color {
-				return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
-			}
+		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
+			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 		}
 		if serr := r.playerSendCard(p, sendcard); serr != nil {
 			return nil, nil, serr
@@ -287,8 +278,7 @@ func (r *Room) sendCard_featureCardAction(featureCard uno_pb.FeatureCards) {
 	switch featureCard {
 	case uno_pb.FeatureCards_Skip:
 		// 跳过下一个玩家
-		skipP := r.nextOperator()
-		r.operatorNow = skipP
+		r.nextOperator()
 	case uno_pb.FeatureCards_Reverse:
 		r.reverseSequence()
 	case uno_pb.FeatureCards_DrawTwo:
@@ -302,6 +292,8 @@ func (r *Room) nextOperator() *player.Player {
 	} else {
 		r.sequencePosition++
 	}
+	fmt.Println(r.sequencePosition)
+	fmt.Println(r.sequence[r.sequencePosition])
 	p, ok := r.GetPlayer(r.sequence[r.sequencePosition])
 	if !ok {
 		return nil
