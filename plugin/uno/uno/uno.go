@@ -224,11 +224,13 @@ func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionRes
 	if next != nil {
 		resp.NextOperator = next.FormatToProtoBuf()
 	}
-	if e.GameFinish {
-		if !deleteRoom(r) {
-			return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	if e != nil {
+		if e.GameFinish {
+			if !deleteRoom(r) {
+				return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+			}
+			resp.GameFinishE = e.GameFinishE
 		}
-		resp.GameFinishE = e.GameFinishE
 	}
 	return resp
 }
