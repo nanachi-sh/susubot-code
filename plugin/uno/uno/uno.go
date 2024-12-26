@@ -173,6 +173,7 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 			IntoSendCard:    intoSendCard,
 			Players:         ps,
 			Banker:          r.GetBanker().FormatToProtoBuf(),
+			LeadCard:        &r.GetLastCard().SendCard,
 		}
 	}
 	switch stage := r.GetStage(); stage {
