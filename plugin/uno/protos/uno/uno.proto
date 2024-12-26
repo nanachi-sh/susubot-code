@@ -217,7 +217,7 @@ message SendCardActionResponse {
 
     optional Errors err = 1;
     PlayerInfo NextOperator = 2;
-    repeated Card SenderCard = 4;
+    optional Card SenderCard = 4;
 
     optional GameFinishEvent GameFinishE = 3;
 }
