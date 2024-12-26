@@ -346,7 +346,7 @@ func (r *Room) startSendCard() {
 	for _, v := range r.players {
 		r.addCardsToCardHeap([]uno_pb.Card{*v.GetElectBankerCard()})
 	}
-	r.resequence(&r.cardHeap)
+	r.cardResequence(r.cardHeap)
 	// 为玩家发牌
 	for _, v := range r.players {
 		cards := r.cutCards(7)
@@ -366,7 +366,7 @@ func (r *Room) startSendCard() {
 	}
 	r.stage = uno_pb.Stage_SendingCard
 	// 重排顺序
-	r.resequence(r.players)
+	r.playerResequence()
 }
 
 func (r *Room) drawCard_ElectingBanker(p *player.Player) (bool, *uno_pb.Errors) {
@@ -504,7 +504,7 @@ func (r *Room) getTakeElectBankerPlayers() []*player.Player {
 func (r *Room) startElectBanker() {
 	cardsArr := r.generateCards()
 	cards := cardsArr[:]
-	r.resequence(&cards)
+	r.cardResequence(cards)
 	r.cardHeap = make([]uno_pb.Card, 108)
 	copy(r.cardHeap, cards)
 	r.stage = uno_pb.Stage_ElectingBanker
