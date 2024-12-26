@@ -239,9 +239,12 @@ func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 			}
 		}
 	case uno_pb.CardType_Feature:
+		if nowFC.Color == uno_pb.CardColor_Black {
+			return true
+		}
 		switch last.Type {
 		case uno_pb.CardType_Normal:
-			if nowFC.Color != lastNC.Color && nowFC.Color != uno_pb.CardColor_Black {
+			if nowFC.Color != lastNC.Color {
 				return false
 			}
 		case uno_pb.CardType_Feature:
