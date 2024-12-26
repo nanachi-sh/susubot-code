@@ -200,9 +200,12 @@ message DrawCardResponse {
     Stage Stage = 4;
 
     bool IntoSendCard = 6;
-    repeated PlayerInfo Players = 5; //仅进入出牌阶段时
-    optional PlayerInfo Banker = 7; //仅进入出牌阶段时
-    optional Card LeadCard = 8; //引牌，仅进入出牌阶段时
+    repeated PlayerInfo Players = 5; //IntoSendCard == true
+    optional PlayerInfo Banker = 7; //
+    optional Card LeadCard = 8; //引牌
+
+    bool Skipped = 10; //玩家被Draw two等牌跳过回合
+    optional PlayerInfo NextOperator = 11; //Skipped == true
 }
 
 message SendCardActionRequest {

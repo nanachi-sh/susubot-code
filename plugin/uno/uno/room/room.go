@@ -265,7 +265,7 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	}
 	_, _, ok := r.getStackFeatureCard()
 	if ok {
-		return nil, nil, uno_pb.Errors_PlayerCardNoExist.Enum()
+		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
 	} else if p.GetDrawCard() != nil {
 		p.AddCards([]uno_pb.Card{*p.GetDrawCard()})
 		p.ClearDrawCard()
