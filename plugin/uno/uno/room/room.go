@@ -669,7 +669,7 @@ func (r *Room) playerResequence() {
 	)
 	xCopy = append(xCopy, r.banker)
 	sequenceCopy = append(sequenceCopy, r.banker.GetId())
-	for _, v := range xCopy {
+	for _, v := range r.players {
 		if v.GetId() == r.banker.GetId() {
 			continue
 		}
