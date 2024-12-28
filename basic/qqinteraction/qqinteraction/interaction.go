@@ -2368,6 +2368,8 @@ func uno_match(text string) unoAction {
 		return uno_JoinORExit
 	case "挑战":
 		return uno_Challenge
+	case "摸牌", "摸卡", "抽牌", "抽卡":
+		return uno_DrawCard
 	}
 	switch strings.ToUpper(text) {
 	case "UNO!", "UNO！", "UNO":
