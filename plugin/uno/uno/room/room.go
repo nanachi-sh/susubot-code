@@ -361,6 +361,10 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	last := r.GetLastCard()
 	if r.sendCard_checkNeedDrawCard(last) {
 		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
+	} else if r.sendCard_checkSkipCard(last) {
+		next := r.nextOperator()
+		r.operatorNow = next
+		return next, nil, nil
 	} else if p.GetDrawCard() != nil {
 		p.AddCards([]uno_pb.Card{*p.GetDrawCard()})
 		p.ClearDrawCard()
