@@ -3347,6 +3347,24 @@ func uno(message *response_pb.Response_Message, text string) {
 			switch e := *resp.Err; e {
 			default:
 				logger.Printf("未处理错误类型：%v\n", e.String())
+			case uno_pb.Errors_PlayerCannotDrawCard:
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 抽牌失败，你不能抽牌，可能是受到Skip等牌的影响",
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
 			case uno_pb.Errors_RoomNoStart:
 				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 					&request_pb.MessageChainObject{
