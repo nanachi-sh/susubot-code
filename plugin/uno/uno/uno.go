@@ -315,7 +315,7 @@ func IndicateUNO(req *uno_pb.IndicateUNORequest) *uno_pb.IndicateUNOResponse {
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	pi, serr := r.IndicateUNO(tp)
+	pi, ok, serr := r.IndicateUNO(tp)
 	if serr != nil {
 		return &uno_pb.IndicateUNOResponse{Err: serr}
 	}
