@@ -95,7 +95,6 @@ func init() {
 	if testIP := os.Getenv("TEST_GATEWAY_IP"); testIP != "" {
 		port := os.Getenv("TEST_GATEWAY_PORT")
 		testip := net.ParseIP(testIP)
-		fmt.Println(fmt.Sprintf("%v:%v", testip.String(), port))
 		c, err := grpc.NewClient(fmt.Sprintf("%v:%v", testip.String(), port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			logger.Fatalln(err)

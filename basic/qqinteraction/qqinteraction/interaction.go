@@ -2354,7 +2354,7 @@ func uno_match(text string) unoAction {
 		return uno_SendCard_NoSend
 	case "开始游戏":
 		return uno_StartRoom
-	case "#UNO", "#乌诺":
+	case "#UNO", "#乌诺", "#uno", "#Uno":
 		return uno_JoinORExit
 	case "挑战":
 		return uno_Challenge
