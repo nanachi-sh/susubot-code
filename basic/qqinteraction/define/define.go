@@ -93,8 +93,9 @@ func init() {
 	}
 	GRPCClient = c
 	if testIP := os.Getenv("TEST_GATEWAY_IP"); testIP != "" {
+		port := os.Getenv("TEST_GATEWAY_PORT")
 		testip := net.ParseIP(testIP)
-		c, err := grpc.NewClient(fmt.Sprintf("%v:2080", testip.String()), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		c, err := grpc.NewClient(fmt.Sprintf("%v:%v", testip.String(), port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			logger.Fatalln(err)
 		}
