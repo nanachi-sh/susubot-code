@@ -4181,6 +4181,7 @@ func uno_playersToStr(x []*uno_pb.PlayerInfo) string {
 
 func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 	text = strings.ToUpper(text)
+	fmt.Println(text)
 	switch text {
 	case "R0":
 		return uno_pb.Card{
