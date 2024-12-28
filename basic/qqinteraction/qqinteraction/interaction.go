@@ -3507,12 +3507,12 @@ func uno(message *response_pb.Response_Message, text string) {
 					return
 				}
 			}
-			img, err := uno_getCardImage(*e.LeadCard, nil)
+			img, err = uno_getCardImage(*e.LeadCard, nil)
 			if err != nil {
 				logger.Println(err)
 				return
 			}
-			buf, err := image2Buf(img)
+			buf, err = image2Buf(img)
 			if err != nil {
 				logger.Println(err)
 				return
