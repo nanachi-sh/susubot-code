@@ -256,6 +256,9 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 }
 
 func (r *Room) sendCard_checkSkipORReverseCard(now uno_pb.Card) bool {
+	if len(r.players) == 2 {
+		return false
+	}
 	if now.Type != uno_pb.CardType_Feature {
 		return false
 	}

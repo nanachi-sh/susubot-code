@@ -2695,6 +2695,24 @@ func uno(message *response_pb.Response_Message, text string) {
 			switch e := *resp.Err; e {
 			default:
 				logger.Printf("未处理异常：%v\n", e.String())
+			case uno_pb.Errors_PlayerNoDrawCard:
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 不出牌失败，你还未摸牌",
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
 			case uno_pb.Errors_RoomNoSendingCard:
 				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 					&request_pb.MessageChainObject{
