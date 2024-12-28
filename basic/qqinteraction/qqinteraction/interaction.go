@@ -437,7 +437,9 @@ func matchWhiteList(groupid string) bool {
 }
 
 func getText(mcs []*response_pb.MessageChainObject) string {
+	fmt.Println(len(mcs))
 	for _, v := range mcs {
+		fmt.Println(v)
 		if v.Type == response_pb.MessageChainType_MessageChainType_Text {
 			return v.Text.Text
 		}
