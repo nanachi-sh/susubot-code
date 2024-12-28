@@ -35,6 +35,7 @@ type SendCard struct {
 	SenderId           string
 	SendCard           uno_pb.Card
 	wildDrawFourStatus *wildDrawFourStatus //若为Wild draw four时有效
+	featureEffected    bool
 }
 
 func hash() string {
@@ -298,6 +299,9 @@ func (r *Room) sendCard_checkSkippedCard(last *SendCard) bool {
 	if last == nil {
 		return false
 	}
+	if last.featureEffected {
+		return false
+	}
 	if last.SendCard.Type != uno_pb.CardType_Feature {
 		return false
 	}
@@ -508,11 +512,13 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 	}
 	//
 	stackFC, count, ok := r.getStackFeatureCard()
+	last := r.GetLastCard()
 	if ok && stackFC == uno_pb.FeatureCards_DrawTwo { //遭到Draw two
 		// 摸两张牌，并跳过回合
 		cards := r.cutCards(2 * count)
 		p.AddCards(cards)
 		p.SetCallUNO(false)
+		last.featureEffected = true
 		next := r.nextOperator()
 		r.operatorNow = next
 		return &DrawCardEvent{
@@ -522,12 +528,12 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 			},
 		}, nil
 	} else if ok && stackFC == uno_pb.FeatureCards_Wild { //遭到Wild draw four
-		last := r.GetLastCard()
 		if last.wildDrawFourStatus == nil { //未挑战
 			cards := r.cutCards(4 * count)
 			p.AddCards(cards)
 			next := r.nextOperator()
 			p.SetCallUNO(false)
+			last.featureEffected = true
 			r.operatorNow = next
 			return &DrawCardEvent{
 				Skipped: true,
@@ -579,6 +585,9 @@ FOROUT:
 	for n := len(r.cardPool) - 1; n >= 0; n-- {
 		sc := r.cardPool[n]
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
+			break
+		}
+		if sc.featureEffected {
 			break
 		}
 		fC := sc.SendCard.FeatureCard
