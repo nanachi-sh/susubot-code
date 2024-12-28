@@ -3430,6 +3430,39 @@ func uno(message *response_pb.Response_Message, text string) {
 		}
 		if resp.IntoSendCard {
 			e := resp.IntoSendCardE
+			img, err := uno_getCardImage(*resp.ElectBankerCard, nil)
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			buf, err := image2Buf(img)
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Image,
+					Image: &request_pb.MessageChain_Image{
+						Buf: buf,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 你抽到了",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
 			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
@@ -3518,6 +3551,7 @@ func uno(message *response_pb.Response_Message, text string) {
 				logger.Println(err)
 				return
 			}
+			return
 		}
 		if resp.Skipped {
 			e := resp.SkippedE
