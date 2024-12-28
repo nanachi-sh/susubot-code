@@ -2375,7 +2375,7 @@ func uno_match(text string) unoAction {
 	case "UNO!", "UNO！":
 		return uno_CallUNO
 	}
-	if ok, _ := regexp.MatchString(`(?i)^(?:!|！)+(([RGYB][0-9])?|([RGYB]Skip|Wild|[RGYB]Draw two|[RGYB]dt|Wild draw four|wdf|[RGYB]Reverse|rev)?){1,1}$`, text); ok {
+	if ok, _ := regexp.MatchString(`(?i)^(?:!|！)+(([RGYB][0-9])?|([RGYB]Skip|Wild|[RGYB]Draw two|[RGYB]dt|Wild draw four|wdf|[RGYB]Reverse|[RGYB]rev|[RGYB]re)?){1,1}$`, text); ok {
 		return uno_SendCard_Send
 	}
 	if ok, _ := regexp.MatchString(`\A上桌([(0-9)]| ){3,}`, text); ok {
@@ -4278,7 +4278,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "RREVERSE":
+	case "RREVERSE", "RREV", "RRE":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Red,
@@ -4382,7 +4382,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "YREVERSE":
+	case "YREVERSE", "YREV", "YRE":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Yellow,
@@ -4486,7 +4486,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "BREVERSE":
+	case "BREVERSE", "BRE", "BREV":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Blue,
@@ -4590,7 +4590,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "GREVERSE":
+	case "GREVERSE", "GREV", "GRE":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Green,

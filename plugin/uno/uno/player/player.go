@@ -88,6 +88,29 @@ func (p *Player) DeleteCardFromHandCard(x uno_pb.Card) bool {
 	return false
 }
 
+func (p *Player) CheckCardFromHandCard(x uno_pb.Card) bool {
+	for _, v := range p.cards {
+		if v.Type != x.Type {
+			continue
+		}
+		switch x.Type {
+		case uno_pb.CardType_Normal:
+			vNC := v.NormalCard
+			xNC := x.NormalCard
+			if vNC.Number == xNC.Number && vNC.Color == xNC.Color {
+				return true
+			}
+		case uno_pb.CardType_Feature:
+			vFC := v.FeatureCard
+			xFC := x.FeatureCard
+			if vFC.Color == xFC.Color && vFC.FeatureCard == xFC.FeatureCard {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (p *Player) DeleteCardFromDrawCard(x uno_pb.Card) bool {
 	if p.drawCard == nil {
 		return false

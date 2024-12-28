@@ -48,6 +48,7 @@ enum Errors {
     RoomNoExist = 20; //房间不存在
     PlayerNoExistAnyRoom = 21; //玩家不在任意一个房间内
     PlayerCannotDrawCard = 22; //玩家不能摸牌
+    PlayerCannotSendCardFromHandCard = 23; //玩家不能从手牌中出牌
 }
 
 enum CardColor {

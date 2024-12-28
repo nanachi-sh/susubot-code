@@ -138,6 +138,17 @@ type SendCardEvent struct {
 	GameFinishE *uno_pb.SendCardActionResponse_GameFinishEvent
 }
 
+func (r *Room) gameFinish() *uno_pb.SendCardActionResponse_GameFinishEvent {
+	ps := []*uno_pb.PlayerInfo{}
+	for _, v := range r.players {
+		ps = append(ps, v.FormatToProtoBuf())
+	}
+	return &uno_pb.SendCardActionResponse_GameFinishEvent{
+		Players: ps,
+		Winner:  r.operatorNow.FormatToProtoBuf(),
+	}
+}
+
 func (r *Room) SendCardAction(p *player.Player, sendcard uno_pb.Card, action uno_pb.SendCardActions) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
 	switch action {
 	case uno_pb.SendCardActions_Send:
@@ -163,6 +174,9 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 		}
+		if p.CheckCardFromHandCard(sendcard) {
+			return nil, nil, uno_pb.Errors_PlayerCannotSendCardFromHandCard.Enum()
+		}
 		if !p.DeleteCardFromDrawCard(sendcard) {
 			return nil, nil, uno_pb.Errors_PlayerCardNoExist.Enum()
 		}
@@ -186,16 +200,9 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		}
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 		if len(p.GetCards()) == 0 {
-			ps := []*uno_pb.PlayerInfo{}
-			for _, v := range r.players {
-				ps = append(ps, v.FormatToProtoBuf())
-			}
 			return nil, &SendCardEvent{
-				GameFinish: true,
-				GameFinishE: &uno_pb.SendCardActionResponse_GameFinishEvent{
-					Players: ps,
-					Winner:  p.FormatToProtoBuf(),
-				},
+				GameFinish:  true,
+				GameFinishE: r.gameFinish(),
 			}, nil
 		}
 		next := r.nextOperator()
@@ -210,22 +217,15 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		}
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 		if len(p.GetCards()) == 0 {
-			ps := []*uno_pb.PlayerInfo{}
-			for _, v := range r.players {
-				ps = append(ps, v.FormatToProtoBuf())
-			}
 			return nil, &SendCardEvent{
-				GameFinish: true,
-				GameFinishE: &uno_pb.SendCardActionResponse_GameFinishEvent{
-					Players: ps,
-					Winner:  p.FormatToProtoBuf(),
-				},
+				GameFinish:  true,
+				GameFinishE: r.gameFinish(),
 			}, nil
 		}
 		next := r.nextOperator()
 		r.operatorNow = next
 		return next, nil, nil
-	} else if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() { //上一张牌为跳过牌，且这次出的不为跳过牌，并且不为同一人，则不允许出牌
+	} else if r.sendCard_checkNeedDrawCard(last) { //上一张牌未生效，且这次出的不为跳过牌，并且不为同一人，则不允许出牌
 		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
 	}
 	// 正常出牌
@@ -239,16 +239,9 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 	}
 	if len(p.GetCards()) == 0 {
-		ps := []*uno_pb.PlayerInfo{}
-		for _, v := range r.players {
-			ps = append(ps, v.FormatToProtoBuf())
-		}
 		return nil, &SendCardEvent{
-			GameFinish: true,
-			GameFinishE: &uno_pb.SendCardActionResponse_GameFinishEvent{
-				Players: ps,
-				Winner:  p.FormatToProtoBuf(),
-			},
+			GameFinish:  true,
+			GameFinishE: r.gameFinish(),
 		}, nil
 	}
 	next := r.nextOperator()
@@ -297,8 +290,8 @@ func (r *Room) sendCard_checkStackCard(last, now uno_pb.Card) bool {
 	return false
 }
 
-// 检查是否为具有跳过性质的卡
-func (r *Room) sendCard_checkSkippedCard(last *SendCard) bool {
+// 检查是否为需摸牌且还未生效的卡
+func (r *Room) sendCard_checkNeedDrawCard(last *SendCard) bool {
 	if last == nil {
 		return false
 	}
@@ -310,7 +303,7 @@ func (r *Room) sendCard_checkSkippedCard(last *SendCard) bool {
 	}
 	lastFC := last.SendCard.FeatureCard
 	switch lastFC.FeatureCard {
-	case uno_pb.FeatureCards_Skip, uno_pb.FeatureCards_DrawTwo:
+	case uno_pb.FeatureCards_DrawTwo:
 		return true
 	}
 	if lastFC.FeatureCard == uno_pb.FeatureCards_WildDrawFour {
@@ -374,18 +367,9 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	if r.operatorNow.GetId() != p.GetId() {
 		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
 	}
-	stacks, ok := r.getStackFeatureCard()
 	last := r.GetLastCard()
-	if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() {
+	if r.sendCard_checkNeedDrawCard(last) && last.SenderId != p.GetId() {
 		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
-	} else if ok && last.SenderId != p.GetId() {
-		if stacks[0].count > 0 {
-			if r.sendCard_checkSkippedCard(last) {
-				return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
-			}
-		} else {
-			return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
-		}
 	} else if p.GetDrawCard() != nil {
 		p.AddCards([]uno_pb.Card{*p.GetDrawCard()})
 		p.ClearDrawCard()
@@ -517,6 +501,7 @@ func (r *Room) drawCard_ElectingBanker(p *player.Player) (*DrawCardEvent, *uno_p
 }
 
 func (r *Room) effectedStackFeatureCard() {
+FOROUT:
 	for n := len(r.cardPool) - 1; n >= 0; n-- {
 		sc := r.cardPool[n]
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
@@ -527,7 +512,7 @@ func (r *Room) effectedStackFeatureCard() {
 		case uno_pb.FeatureCards_DrawTwo, uno_pb.FeatureCards_WildDrawFour:
 			sc.featureEffected = true
 		default:
-			break
+			break FOROUT
 		}
 	}
 }
