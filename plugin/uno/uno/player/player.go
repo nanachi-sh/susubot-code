@@ -162,6 +162,10 @@ func (p *Player) ClearDrawCard() {
 	p.drawCard = nil
 }
 
+func (p *Player) GetCallUNO() bool {
+	return p.callUNO
+}
+
 func (p *Player) SetCallUNO(x bool) {
 	p.callUNO = x
 }

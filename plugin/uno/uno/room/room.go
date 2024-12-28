@@ -374,12 +374,12 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	if r.operatorNow.GetId() != p.GetId() {
 		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
 	}
-	stackFC, _, ok := r.getStackFeatureCard()
+	stacks, ok := r.getStackFeatureCard()
 	last := r.GetLastCard()
 	if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() {
 		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
 	} else if ok && last.SenderId != p.GetId() {
-		if stackFC == uno_pb.FeatureCards_WildDrawFour {
+		if stacks[0].count > 0 {
 			if r.sendCard_checkSkippedCard(last) {
 				return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
 			}
@@ -516,6 +516,22 @@ func (r *Room) drawCard_ElectingBanker(p *player.Player) (*DrawCardEvent, *uno_p
 	return nil, nil
 }
 
+func (r *Room) effectedStackFeatureCard() {
+	for n := len(r.cardPool) - 1; n >= 0; n-- {
+		sc := r.cardPool[n]
+		if sc.SendCard.Type != uno_pb.CardType_Feature {
+			break
+		}
+		fC := sc.SendCard.FeatureCard
+		switch fC.FeatureCard {
+		case uno_pb.FeatureCards_DrawTwo, uno_pb.FeatureCards_WildDrawFour:
+			sc.featureEffected = true
+		default:
+			break
+		}
+	}
+}
+
 func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.Errors) {
 	// 可以抽牌的情况：
 	// 1.遭到Wild draw four, Draw two(可以打出Skip或Wild draw four跳到下一个玩家，相关见SendCard)
@@ -524,16 +540,32 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 		return nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
 	}
 	//
-	stackFC, count, ok := r.getStackFeatureCard()
+	stacks, ok := r.getStackFeatureCard()
 	last := r.GetLastCard()
 	if r.sendCard_checkSkipCard(last) {
 		return nil, uno_pb.Errors_PlayerCannotDrawCard.Enum()
-	} else if ok && stackFC == uno_pb.FeatureCards_DrawTwo { //遭到Draw two
-		// 摸两张牌，并跳过回合
-		cards := r.cutCards(2 * count)
-		p.AddCards(cards)
+	} else if ok {
+		dts := stacks[0]
+		wdfs := stacks[1]
+		if dts.count > 0 {
+			cards := r.cutCards(2 * dts.count)
+			p.AddCards(cards)
+		}
+		if wdfs.count > 0 {
+			extra := 0
+			if last.wildDrawFourStatus != nil {
+				switch *last.wildDrawFourStatus {
+				default:
+					return nil, uno_pb.Errors_Unexpected.Enum()
+				case wildDrawFourStatus_challengerLose: //挑战者失败
+					extra = 2
+				}
+			}
+			cards := r.cutCards(4*wdfs.count + extra)
+			p.AddCards(cards)
+		}
 		p.SetCallUNO(false)
-		last.featureEffected = true
+		r.effectedStackFeatureCard()
 		next := r.nextOperator()
 		r.operatorNow = next
 		return &DrawCardEvent{
@@ -542,41 +574,6 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 				NextOperator: r.operatorNow.FormatToProtoBuf(),
 			},
 		}, nil
-	} else if ok && stackFC == uno_pb.FeatureCards_Wild { //遭到Wild draw four
-		if last.wildDrawFourStatus == nil { //未挑战
-			cards := r.cutCards(4 * count)
-			p.AddCards(cards)
-			next := r.nextOperator()
-			p.SetCallUNO(false)
-			last.featureEffected = true
-			r.operatorNow = next
-			return &DrawCardEvent{
-				Skipped: true,
-				SkippedE: &uno_pb.DrawCardResponse_SkippedEvent{
-					NextOperator: r.operatorNow.FormatToProtoBuf(),
-				},
-			}, nil
-		} else { //已挑战
-			switch *last.wildDrawFourStatus {
-			default:
-				return nil, uno_pb.Errors_Unexpected.Enum()
-			case wildDrawFourStatus_challengedLose: //被挑战者失败
-				//被挑战者失败不应在此处理
-				return nil, uno_pb.Errors_Unexpected.Enum()
-			case wildDrawFourStatus_challengerLose: //挑战者失败
-				cards := r.cutCards(4*count + 2)
-				p.AddCards(cards)
-				p.SetCallUNO(false)
-				next := r.nextOperator()
-				r.operatorNow = next
-				return &DrawCardEvent{
-					Skipped: true,
-					SkippedE: &uno_pb.DrawCardResponse_SkippedEvent{
-						NextOperator: r.operatorNow.FormatToProtoBuf(),
-					},
-				}, nil
-			}
-		}
 	} else if p.GetDrawCard() != nil { //已抽过一张牌
 		return nil, uno_pb.Errors_PlayerAlreadyDrawCard.Enum()
 	}
@@ -587,15 +584,26 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 	return nil, nil
 }
 
-func (r *Room) getStackFeatureCard() (uno_pb.FeatureCards, int, bool) {
+type stackCardInfo struct {
+	fc    uno_pb.FeatureCards
+	count int
+}
+
+func (r *Room) getStackFeatureCard() ([2]stackCardInfo, bool) {
+	ret := [2]stackCardInfo{
+		stackCardInfo{
+			fc:    uno_pb.FeatureCards_DrawTwo,
+			count: 0,
+		},
+		stackCardInfo{
+			fc:    uno_pb.FeatureCards_WildDrawFour,
+			count: 0,
+		},
+	}
 	last := r.GetLastCard()
 	if last == nil {
-		return 0, 0, false
+		return ret, false
 	}
-	var (
-		ct    *uno_pb.FeatureCards
-		count int
-	)
 FOROUT:
 	for n := len(r.cardPool) - 1; n >= 0; n-- {
 		sc := r.cardPool[n]
@@ -607,23 +615,18 @@ FOROUT:
 		}
 		fC := sc.SendCard.FeatureCard
 		switch fC.FeatureCard {
-		case uno_pb.FeatureCards_DrawTwo, uno_pb.FeatureCards_WildDrawFour:
+		case uno_pb.FeatureCards_DrawTwo:
+			ret[0].count++
+		case uno_pb.FeatureCards_WildDrawFour:
+			ret[1].count++
 		default:
 			break FOROUT
 		}
-		if ct == nil {
-			ct = &fC.FeatureCard
-			count++
-		} else if *ct == fC.FeatureCard {
-			count++
-		} else {
-			break
-		}
 	}
-	if ct == nil {
-		return 0, 0, false
+	if ret[0].count == 0 && ret[1].count == 0 {
+		return ret, false
 	} else {
-		return *ct, count, true
+		return ret, true
 	}
 }
 
@@ -670,6 +673,9 @@ func (r *Room) CallUNO(p *player.Player) ([]uno_pb.Card, *uno_pb.Errors) {
 		cards := r.cutCards(2)
 		p.AddCards(cards)
 		return p.GetCards(), uno_pb.Errors_PlayerCannotCallUNO.Enum()
+	}
+	if p.GetCallUNO() {
+		return nil, uno_pb.Errors_PlayerAlreadyCallUNO.Enum()
 	}
 	p.SetCallUNO(true)
 	return nil, nil
@@ -733,16 +739,19 @@ FOROUT:
 	}
 }
 
-func (r *Room) IndicateUNO(tP *player.Player) (*uno_pb.PlayerInfo, *uno_pb.Errors) {
+func (r *Room) IndicateUNO(tP *player.Player) (*uno_pb.PlayerInfo, bool, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
-		return nil, uno_pb.Errors_RoomNoSendingCard.Enum()
+		return nil, false, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
 	if len(tP.GetCards()) < 2 {
+		if tP.GetCallUNO() {
+			return nil, false, uno_pb.Errors_PlayerAlreadyCallUNO.Enum()
+		}
 		cards := r.cutCards(2)
 		tP.AddCards(cards)
-		return tP.FormatToProtoBuf(), uno_pb.Errors_PlayerCannotCallUNO.Enum()
+		return tP.FormatToProtoBuf(), true, nil
 	} else {
-		return nil, uno_pb.Errors_PlayerAlreadyCallUNO.Enum()
+		return nil, false, uno_pb.Errors_PlayerCannotCallUNO.Enum()
 	}
 }
 
