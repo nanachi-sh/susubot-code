@@ -2388,16 +2388,6 @@ func uno_match(text string) unoAction {
 	return uno_Unknown
 }
 
-func uno_cardMatch(text string) (uno_pb.CardType, bool) {
-	if ok, _ := regexp.MatchString(`(?i)^([RGYB][0-9]){1,1}$`, text); ok {
-		return uno_pb.CardType_Normal, true
-	}
-	if ok, _ := regexp.MatchString(`(?i)^(Skip|Wild|Draw two|dt|Wild draw four|wdf|Reverse|rev){1,1}$`, text); ok {
-		return uno_pb.CardType_Feature, true
-	}
-	return -1, false
-}
-
 func uno_adjust(action unoAction, text string) string {
 	switch action {
 	case uno_JoinRoom:
@@ -3287,7 +3277,7 @@ func uno(message *response_pb.Response_Message, text string) {
 				return
 			}
 		} else {
-			r := twoonone_rooms[text]
+			r := uno_rooms[text]
 			if r == nil {
 				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 					&request_pb.MessageChainObject{
