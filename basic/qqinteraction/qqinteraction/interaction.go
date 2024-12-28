@@ -4232,7 +4232,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		card := resp.Info.CardPool[len(resp.Info.CardHeap)-1]
+		card := resp.Info.CardPool[len(resp.Info.CardPool)-1]
 		img, err := uno_getCardImage(*card.SendCard, nil)
 		if err != nil {
 			logger.Println(err)
