@@ -260,11 +260,8 @@ func (r *Room) sendCard_checkSkipORReverseCard(last *SendCard, now uno_pb.Card) 
 	if len(r.players) == 2 {
 		return false
 	}
-	if last.SendCard.Type == uno_pb.CardType_Feature && !last.featureEffected {
-		sendcardFC := last.SendCard.FeatureCard
-		if sendcardFC.FeatureCard == uno_pb.FeatureCards_Skip {
-			return false
-		}
+	if r.sendCard_checkSkipCard(last) {
+		return false
 	}
 	if now.Type != uno_pb.CardType_Feature {
 		return false
@@ -321,6 +318,16 @@ func (r *Room) sendCard_checkSkippedCard(last *SendCard) bool {
 			return true
 		}
 		return *last.wildDrawFourStatus == wildDrawFourStatus_challengerLose
+	}
+	return false
+}
+
+// 检查上一张牌是否为有效的Skip
+func (r *Room) sendCard_checkSkipCard(last *SendCard) bool {
+	if last.SendCard.Type == uno_pb.CardType_Feature && !last.featureEffected {
+		if last.SendCard.FeatureCard.FeatureCard == uno_pb.FeatureCards_Skip {
+			return true
+		}
 	}
 	return false
 }
@@ -519,7 +526,7 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 	//
 	stackFC, count, ok := r.getStackFeatureCard()
 	last := r.GetLastCard()
-	if r.sendCard_checkSkippedCard(last) {
+	if r.sendCard_checkSkipCard(last) {
 		return nil, uno_pb.Errors_PlayerCannotDrawCard.Enum()
 	} else if ok && stackFC == uno_pb.FeatureCards_DrawTwo { //遭到Draw two
 		// 摸两张牌，并跳过回合
