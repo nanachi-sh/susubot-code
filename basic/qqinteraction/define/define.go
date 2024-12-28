@@ -17,6 +17,7 @@ import (
 	randomanimal_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomanimal"
 	randomfortune_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomfortune"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/twoonone"
+	uno_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/uno"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -27,6 +28,7 @@ var (
 
 	GatewayIP         net.IP
 	GRPCClient        *grpc.ClientConn
+	testClient        *grpc.ClientConn
 	ConnectorCtx      context.Context
 	ConnectorC        connector_pb.ConnectorClient
 	HandlerCtx        context.Context
@@ -38,6 +40,8 @@ var (
 	RandomFortuneCtx  context.Context
 	TwoOnOneC         twoonone_pb.TwoOnOneClient
 	TwoOnOneCtx       context.Context
+	UnoC              uno_pb.UnoClient
+	UnoCtx            context.Context
 
 	ExternalHost     string
 	ExternalHTTPPort int
@@ -88,6 +92,14 @@ func init() {
 		logger.Fatalln(err)
 	}
 	GRPCClient = c
+	if testIP := os.Getenv("TEST_GATEWAY_IP"); testIP != "" {
+		testip := net.ParseIP(testIP)
+		c, err := grpc.NewClient(fmt.Sprintf("%v:2080", testip.String()), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		testClient = c
+	}
 	ConnectorCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "connector",
 		"version":        "stable",
@@ -114,6 +126,12 @@ func init() {
 		"service-target": "twoonone",
 		"version":        "stable",
 	}))
+	UnoC = uno_pb.NewUnoClient(testClient)
+	UnoCtx = context.Background()
+	// UnoCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
+	// 	"service-target": "uno",
+	// 	"version":        "stable",
+	// }))
 	ExternalHost = os.Getenv("EXTERNAL_HOST")
 	if ExternalHost == "" {
 		logger.Fatalln("External Host未设置")

@@ -234,7 +234,11 @@ func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionRes
 	if next != nil {
 		resp.NextOperator = next.FormatToProtoBuf()
 		if req.Action == uno_pb.SendCardActions_Send {
-			resp.SenderCard = &r.GetLastCard().SendCard
+			cs := []*uno_pb.Card{}
+			for _, v := range p.GetCards() {
+				cs = append(cs, &v)
+			}
+			resp.SenderCard = cs
 		}
 	}
 	if e != nil {
@@ -242,6 +246,7 @@ func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionRes
 			if !deleteRoom(r) {
 				return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
 			}
+			resp.GameFinish = e.GameFinish
 			resp.GameFinishE = e.GameFinishE
 		}
 	}
@@ -287,17 +292,13 @@ func Challenge(req *uno_pb.ChallengeRequest) *uno_pb.ChallengeResponse {
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	win, cards, serr := r.Challenge(p)
+	win, pi, serr := r.Challenge(p)
 	if serr != nil {
 		return &uno_pb.ChallengeResponse{Err: serr}
 	}
-	retCards := []*uno_pb.Card{}
-	for _, v := range cards {
-		retCards = append(retCards, &v)
-	}
 	return &uno_pb.ChallengeResponse{
-		Win:            win,
-		LastPlayerCard: retCards,
+		Win:        win,
+		LastPlayer: pi,
 	}
 }
 
@@ -314,17 +315,13 @@ func IndicateUNO(req *uno_pb.IndicateUNORequest) *uno_pb.IndicateUNOResponse {
 			Err: uno_pb.Errors_Unexpected.Enum(),
 		}
 	}
-	cards, serr := r.IndicateUNO(tp)
+	pi, serr := r.IndicateUNO(tp)
 	if serr != nil {
 		return &uno_pb.IndicateUNOResponse{Err: serr}
 	}
-	retCards := []*uno_pb.Card{}
-	for _, v := range cards {
-		retCards = append(retCards, &v)
-	}
 	return &uno_pb.IndicateUNOResponse{
-		PunishedCard: retCards,
-		IndicateOK:   ok,
+		Punished:   pi,
+		IndicateOK: ok,
 	}
 }
 

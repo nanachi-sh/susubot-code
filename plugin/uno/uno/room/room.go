@@ -269,6 +269,9 @@ func (r *Room) sendCard_checkSkipORReverseCard(now uno_pb.Card) bool {
 
 // 检查是否为堆叠卡
 func (r *Room) sendCard_checkStackCard(last, now uno_pb.Card) bool {
+	if len(r.players) == 2 {
+		return false
+	}
 	if last.Type != uno_pb.CardType_Feature {
 		return false
 	}
@@ -643,7 +646,7 @@ func (r *Room) CallUNO(p *player.Player) ([]uno_pb.Card, *uno_pb.Errors) {
 	return nil, nil
 }
 
-func (r *Room) Challenge(p *player.Player) (bool, []uno_pb.Card, *uno_pb.Errors) {
+func (r *Room) Challenge(p *player.Player) (bool, *uno_pb.PlayerInfo, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return false, nil, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
@@ -659,6 +662,9 @@ func (r *Room) Challenge(p *player.Player) (bool, []uno_pb.Card, *uno_pb.Errors)
 	}
 	if last.SendCard.FeatureCard.FeatureCard != uno_pb.FeatureCards_WildDrawFour {
 		return false, nil, uno_pb.Errors_CannotChallenge.Enum()
+	}
+	if last.wildDrawFourStatus != nil {
+		return false, nil, uno_pb.Errors_Challenged.Enum()
 	}
 	clr := last.SendCard.FeatureCard.Color
 	lastP, ok := r.GetPlayer(last.SenderId)
@@ -690,7 +696,7 @@ FOROUT:
 			return false, nil, uno_pb.Errors_Unexpected.Enum()
 		}
 		lastP.AddCards(cards)
-		return true, lastP.GetCards(), nil
+		return true, lastP.FormatToProtoBuf(), nil
 	} else {
 		last.wildDrawFourStatus = new(wildDrawFourStatus)
 		*last.wildDrawFourStatus = wildDrawFourStatus_challengerLose
@@ -698,14 +704,14 @@ FOROUT:
 	}
 }
 
-func (r *Room) IndicateUNO(tP *player.Player) ([]uno_pb.Card, *uno_pb.Errors) {
+func (r *Room) IndicateUNO(tP *player.Player) (*uno_pb.PlayerInfo, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
 	if len(tP.GetCards()) < 2 {
 		cards := r.cutCards(2)
 		tP.AddCards(cards)
-		return tP.GetCards(), uno_pb.Errors_PlayerCannotCallUNO.Enum()
+		return tP.FormatToProtoBuf(), uno_pb.Errors_PlayerCannotCallUNO.Enum()
 	} else {
 		return nil, uno_pb.Errors_PlayerAlreadyCallUNO.Enum()
 	}
