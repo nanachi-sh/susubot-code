@@ -2988,7 +2988,8 @@ func uno(message *response_pb.Response_Message, text string) {
 				}
 				break
 			}
-			winner := resp.GameFinishE.Winner
+			e := resp.GameFinishE
+			winner := e.Winner
 			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
@@ -2999,6 +3000,40 @@ func uno(message *response_pb.Response_Message, text string) {
 			}); err != nil {
 				logger.Println(err)
 				return
+			}
+			for _, v := range e.Players {
+				if v.PlayerAccountInfo.Id == winner.PlayerAccountInfo.Id {
+					continue
+				}
+				cs := []uno_pb.Card{}
+				for _, v := range v.PlayerRoomInfo.Cards {
+					cs = append(cs, *v)
+				}
+				img, err := uno_generateCardsImage(cs, -1)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				buf, err := image2Buf(img)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type:  request_pb.MessageChainType_MessageChainType_Image,
+						Image: &request_pb.MessageChain_Image{Buf: buf},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: fmt.Sprintf("%v(%v)剩余牌", v.PlayerAccountInfo.Name, v.PlayerAccountInfo.Id),
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
 			}
 			return
 		}
@@ -3970,7 +4005,7 @@ func uno(message *response_pb.Response_Message, text string) {
 				return
 			}
 		}
-	case uno_IndicateUNO: //待完善
+	case uno_IndicateUNO:
 		atTarget := ""
 		for _, v := range group.MessageChain {
 			if v.Type == response_pb.MessageChainType_MessageChainType_At {
@@ -4145,6 +4180,83 @@ func uno(message *response_pb.Response_Message, text string) {
 				logger.Println(err)
 				return
 			}
+		}
+	case uno_GetLastCard:
+		r := uno_player2room[senderid]
+		if r == nil {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 获取上一张牌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.GetRoom(define.UnoCtx, &uno_pb.GetRoomRequest{
+			RoomHash: r.hash,
+		})
+		if err != nil {
+			logger.Println(err)
+			return
+		}
+		if len(resp.Info.CardPool) == 0 {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 获取上一张牌失败，牌池为空",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		card := resp.Info.CardHeap[len(resp.Info.CardHeap)-1]
+		img, err := uno_getCardImage(*card, nil)
+		if err != nil {
+			logger.Println(err)
+			return
+		}
+		buf, err := image2Buf(img)
+		if err != nil {
+			logger.Println(err)
+			return
+		}
+		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Image,
+				Image: &request_pb.MessageChain_Image{
+					Buf: buf,
+				},
+			},
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Text,
+				Text: &request_pb.MessageChain_Text{
+					Text: "上一张牌为",
+				},
+			},
+		}); err != nil {
+			logger.Println(err)
+			return
 		}
 	}
 }
@@ -5162,7 +5274,7 @@ func uno_getCardImagesFromPool() (*uno_cardImages, error) {
 	case error:
 		return nil, x
 	default:
-		return nil, errors.New("Unexcepted Type")
+		return nil, errors.New("unexcepted type")
 	}
 }
 
@@ -5404,4 +5516,5 @@ const (
 	uno_CallUNO
 	uno_Challenge
 	uno_IndicateUNO
+	uno_GetLastCard
 )
