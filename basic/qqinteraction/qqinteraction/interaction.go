@@ -4232,8 +4232,8 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		card := resp.Info.CardHeap[len(resp.Info.CardHeap)-1]
-		img, err := uno_getCardImage(*card, nil)
+		card := resp.Info.CardPool[len(resp.Info.CardHeap)-1]
+		img, err := uno_getCardImage(*card.SendCard, nil)
 		if err != nil {
 			logger.Println(err)
 			return
