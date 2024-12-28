@@ -359,7 +359,9 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 	}
 	stackFC, _, ok := r.getStackFeatureCard()
 	last := r.GetLastCard()
-	if ok && last.SenderId != p.GetId() {
+	if r.sendCard_checkSkippedCard(last) && last.SenderId != p.GetId() {
+		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
+	} else if ok && last.SenderId != p.GetId() {
 		if stackFC == uno_pb.FeatureCards_WildDrawFour {
 			if r.sendCard_checkSkippedCard(last) {
 				return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
