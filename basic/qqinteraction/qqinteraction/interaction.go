@@ -3489,7 +3489,7 @@ func uno(message *response_pb.Response_Message, text string) {
 					logger.Println(err)
 					return
 				}
-				if err := sendMessageToFriend(group.SenderId, []*request_pb.MessageChainObject{
+				if err := sendMessageToFriend(v.PlayerAccountInfo.Id, []*request_pb.MessageChainObject{
 					&request_pb.MessageChainObject{
 						Type: request_pb.MessageChainType_MessageChainType_Image,
 						Image: &request_pb.MessageChain_Image{
