@@ -145,15 +145,20 @@ func Start() {
 				if text == "" {
 					return
 				}
-				switch message_match(text) {
-				case pluginType_RandomAnimal:
-					randomanimal(message, text)
-				case pluginType_RandomFortune:
-					randomfortune(message, text)
-				case pluginType_TwoOnOne:
-					twoonone(message, text)
-				case pluginType_Uno:
-					uno(message, text)
+				matchs, ok := message_match(text)
+				if ok {
+					for _, v := range matchs {
+						switch v {
+						case pluginType_RandomAnimal:
+							go randomanimal(message, text)
+						case pluginType_RandomFortune:
+							go randomfortune(message, text)
+						case pluginType_TwoOnOne:
+							go twoonone(message, text)
+						case pluginType_Uno:
+							go uno(message, text)
+						}
+					}
 				}
 			case response_pb.ResponseType_ResponseType_QQEvent:
 			}
@@ -161,19 +166,24 @@ func Start() {
 	}
 }
 
-func message_match(text string) pluginType {
-	switch {
-	case randomanimal_match(text) != randomanimal_Unknown:
-		return pluginType_RandomAnimal
-	case randomfortune_match(text) != randomfortune_Unknown:
-		return pluginType_RandomFortune
-	case twoonone_match(text) != twoonone_Unknown:
-		return pluginType_TwoOnOne
-	case uno_match(text) != uno_Unknown:
-		return pluginType_Uno
-	default:
-		return pluginType_Unknown
+func message_match(text string) ([]pluginType, bool) {
+	ret := []pluginType{}
+	if randomanimal_match(text) != randomanimal_Unknown {
+		ret = append(ret, pluginType_RandomAnimal)
 	}
+	if randomfortune_match(text) != randomfortune_Unknown {
+		ret = append(ret, pluginType_RandomFortune)
+	}
+	if twoonone_match(text) != twoonone_Unknown {
+		ret = append(ret, pluginType_TwoOnOne)
+	}
+	if uno_match(text) != uno_Unknown {
+		ret = append(ret, pluginType_Uno)
+	}
+	if len(ret) == 0 {
+		return nil, false
+	}
+	return ret, true
 }
 
 type pluginType int
