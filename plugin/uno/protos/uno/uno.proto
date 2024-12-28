@@ -47,6 +47,7 @@ enum Errors {
     PlayerAlreadyCallUNO = 19; //玩家已喊UNO
     RoomNoExist = 20; //房间不存在
     PlayerNoExistAnyRoom = 21; //玩家不在任意一个房间内
+    PlayerCannotDrawCard = 22; //玩家不能摸牌
 }
 
 enum CardColor {
@@ -97,6 +98,7 @@ message SendCard {
     string SenderId = 1;
     Card SendCard = 2;
     optional WildDrawFourStatus WildDrawFourStatus = 3;
+    bool FeatureEffected = 4;
 }
 
 message Card {

@@ -950,7 +950,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
-						Text: fmt.Sprintf(" %v(%v)当上了地主", resp.NextOperator.AccountInfo.Name, resp.NextOperator.AccountInfo.Id),
+						Text: fmt.Sprintf("%v(%v)当上了地主", resp.NextOperator.AccountInfo.Name, resp.NextOperator.AccountInfo.Id),
 					},
 				},
 			}); err != nil {
@@ -1113,7 +1113,7 @@ func twoonone(message *response_pb.Response_Message, text string) {
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
-						Text: fmt.Sprintf(" %v(%v)当上了地主", resp.NextOperator.AccountInfo.Name, resp.NextOperator.AccountInfo.Id),
+						Text: fmt.Sprintf("%v(%v)当上了地主", resp.NextOperator.AccountInfo.Name, resp.NextOperator.AccountInfo.Id),
 					},
 				},
 			}); err != nil {
@@ -3032,12 +3032,6 @@ func uno(message *response_pb.Response_Message, text string) {
 					Buf: buf,
 				},
 			},
-			&request_pb.MessageChainObject{
-				Type: request_pb.MessageChainType_MessageChainType_Text,
-				Text: &request_pb.MessageChain_Text{
-					Text: "你的手牌为",
-				},
-			},
 		}); err != nil {
 			logger.Println(err)
 			return
@@ -3485,7 +3479,7 @@ func uno(message *response_pb.Response_Message, text string) {
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
-						Text: fmt.Sprintf(" %v(%v)当上了庄家", e.Banker.PlayerAccountInfo.Name, e.Banker.PlayerAccountInfo.Id),
+						Text: fmt.Sprintf("%v(%v)当上了庄家", e.Banker.PlayerAccountInfo.Name, e.Banker.PlayerAccountInfo.Id),
 					},
 				},
 			}); err != nil {
@@ -3512,12 +3506,6 @@ func uno(message *response_pb.Response_Message, text string) {
 						Type: request_pb.MessageChainType_MessageChainType_Image,
 						Image: &request_pb.MessageChain_Image{
 							Buf: buf,
-						},
-					},
-					&request_pb.MessageChainObject{
-						Type: request_pb.MessageChainType_MessageChainType_Text,
-						Text: &request_pb.MessageChain_Text{
-							Text: "你的手牌为",
 						},
 					},
 				}); err != nil {
@@ -3651,12 +3639,6 @@ func uno(message *response_pb.Response_Message, text string) {
 						Buf: buf,
 					},
 				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: "你的手牌为",
-					},
-				},
 			}); err != nil {
 				logger.Println(err)
 				return
@@ -3747,12 +3729,6 @@ func uno(message *response_pb.Response_Message, text string) {
 						Type: request_pb.MessageChainType_MessageChainType_Image,
 						Image: &request_pb.MessageChain_Image{
 							Buf: buf,
-						},
-					},
-					&request_pb.MessageChainObject{
-						Type: request_pb.MessageChainType_MessageChainType_Text,
-						Text: &request_pb.MessageChain_Text{
-							Text: "你的手牌为",
 						},
 					},
 				}); err != nil {
@@ -3935,12 +3911,6 @@ func uno(message *response_pb.Response_Message, text string) {
 						Buf: buf,
 					},
 				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: "你的手牌为",
-					},
-				},
 			}); err != nil {
 				logger.Println(err)
 				return
@@ -4115,12 +4085,6 @@ func uno(message *response_pb.Response_Message, text string) {
 					Type: request_pb.MessageChainType_MessageChainType_Image,
 					Image: &request_pb.MessageChain_Image{
 						Buf: buf,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: "你的手牌为",
 					},
 				},
 			}); err != nil {
