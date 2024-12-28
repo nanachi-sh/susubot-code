@@ -3518,7 +3518,6 @@ func uno(message *response_pb.Response_Message, text string) {
 				logger.Println(err)
 				return
 			}
-			return
 		}
 		if resp.Skipped {
 			e := resp.SkippedE
@@ -3568,7 +3567,7 @@ func uno(message *response_pb.Response_Message, text string) {
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
-						Text: "你抽到了",
+						Text: " 你抽到了",
 					},
 				},
 			}); err != nil {
