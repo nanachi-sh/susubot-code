@@ -845,8 +845,8 @@ func (r *Room) deletePlayer(playerid string) bool {
 				r.sequencePosition = 0
 			}
 			if len(r.players) == 1 {
-				r.players = r.players[:0]
-				r.sequence = r.sequence[:0]
+				r.players = []*player.Player{}
+				r.sequence = []string{}
 			} else {
 				r.players = append(r.players[:i], r.players[i+1:]...)
 				r.sequence = append(r.sequence[:i], r.sequence[i+1:]...)

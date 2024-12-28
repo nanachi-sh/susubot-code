@@ -135,7 +135,7 @@ func (p *Player) DeleteCardFromDrawCard(x uno_pb.Card) bool {
 
 func (p *Player) deleteCardFromPosition(postion int) {
 	if len(p.cards) == 1 {
-		p.cards = p.cards[0:]
+		p.cards = []uno_pb.Card{}
 	} else {
 		p.cards = append(p.cards[:postion], p.cards[postion+1:]...)
 	}
