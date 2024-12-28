@@ -160,6 +160,13 @@ func (r *Room) SendCardAction(p *player.Player, sendcard uno_pb.Card, action uno
 	}
 }
 
+type sendcard_from int
+
+const (
+	handCard sendcard_from = iota
+	drawCard
+)
+
 func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, nil, uno_pb.Errors_RoomNoSendingCard.Enum()
@@ -169,35 +176,22 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 	}
 	sendcardFC := sendcard.FeatureCard
 	last := r.GetLastCard()
+	from := handCard
+	if p.GetDrawCard() != nil {
+		from = drawCard
+	}
 	// 特殊情况判断
-	if p.GetDrawCard() != nil { //已摸过牌
-		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
-			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
-		}
-		if p.CheckCardFromHandCard(sendcard) {
-			return nil, nil, uno_pb.Errors_PlayerCannotSendCardFromHandCard.Enum()
-		}
-		if !p.DeleteCardFromDrawCard(sendcard) {
-			return nil, nil, uno_pb.Errors_PlayerCardNoExist.Enum()
-		}
-		if sendcardFC != nil {
-			r.convertBlackCardColor(last.SendCard, sendcard)
-			r.sendCard_featureCardAction(sendcardFC.FeatureCard)
-		}
-		r.addCardToCardPool(SendCard{
-			SenderId: p.GetId(),
-			SendCard: sendcard,
-		})
-		next := r.nextOperator()
-		r.operatorNow = next
-		return next, nil, nil
+	if r.sendCard_checkSkipCard(last) {
+		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
 	} else if r.sendCard_checkSkipORReverseCard(last, sendcard) { //上一张不为Skip，Skip, Reverse可无视牌出
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 		}
-		if serr := r.playerSendCard(p, sendcard); serr != nil {
+		if serr := r.playerSendCard(p, from, sendcard); serr != nil {
 			return nil, nil, serr
 		}
+		jnlast := r.GetLastCard()
+		jnlast.featureEffected = true
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 		if len(p.GetCards()) == 0 {
 			return nil, &SendCardEvent{
@@ -212,7 +206,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 		}
-		if serr := r.playerSendCard(p, sendcard); serr != nil {
+		if serr := r.playerSendCard(p, from, sendcard); serr != nil {
 			return nil, nil, serr
 		}
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
@@ -232,7 +226,7 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 	if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 		return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
 	}
-	if serr := r.playerSendCard(p, sendcard); serr != nil {
+	if serr := r.playerSendCard(p, from, sendcard); serr != nil {
 		return nil, nil, serr
 	}
 	if sendcardFC != nil {
@@ -251,9 +245,6 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 
 func (r *Room) sendCard_checkSkipORReverseCard(last *SendCard, now uno_pb.Card) bool {
 	if len(r.players) == 2 {
-		return false
-	}
-	if r.sendCard_checkSkipCard(last) {
 		return false
 	}
 	if now.Type != uno_pb.CardType_Feature {
@@ -368,7 +359,7 @@ func (r *Room) noSendCard(p *player.Player) (*player.Player, *SendCardEvent, *un
 		return nil, nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
 	}
 	last := r.GetLastCard()
-	if r.sendCard_checkNeedDrawCard(last) && last.SenderId != p.GetId() {
+	if r.sendCard_checkNeedDrawCard(last) {
 		return nil, nil, uno_pb.Errors_PlayerCannotNoSendCard.Enum()
 	} else if p.GetDrawCard() != nil {
 		p.AddCards([]uno_pb.Card{*p.GetDrawCard()})
@@ -424,9 +415,21 @@ func (r *Room) convertBlackCardColor(last uno_pb.Card, now uno_pb.Card) {
 	}
 }
 
-func (r *Room) playerSendCard(p *player.Player, sendcard uno_pb.Card) *uno_pb.Errors {
-	if !p.DeleteCardFromHandCard(sendcard) {
-		return uno_pb.Errors_PlayerCardNoExist.Enum()
+func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno_pb.Card) *uno_pb.Errors {
+	switch from {
+	case handCard:
+		if !p.DeleteCardFromHandCard(sendcard) {
+			return uno_pb.Errors_PlayerCardNoExist.Enum()
+		}
+	case drawCard:
+		if p.CheckCardFromHandCard(sendcard) {
+			return uno_pb.Errors_PlayerCannotSendCardFromHandCard.Enum()
+		}
+		if !p.DeleteCardFromDrawCard(sendcard) {
+			return uno_pb.Errors_PlayerCardNoExist.Enum()
+		}
+	default:
+		return uno_pb.Errors_Unexpected.Enum()
 	}
 	if last := r.GetLastCard(); last != nil {
 		r.convertBlackCardColor(last.SendCard, sendcard)
@@ -710,6 +713,7 @@ FOROUT:
 	if win {
 		last.wildDrawFourStatus = new(wildDrawFourStatus)
 		*last.wildDrawFourStatus = wildDrawFourStatus_challengedLose
+		last.featureEffected = true
 		cards := r.cutCards(4)
 		lastP, ok := r.GetPlayer(last.SenderId)
 		if !ok {

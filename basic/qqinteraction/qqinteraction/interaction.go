@@ -3022,7 +3022,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: fmt.Sprintf("%v(%v)出了", sendername, senderid),
+					Text: fmt.Sprintf("%v(%v)出了，他还剩下 %v 张牌", sendername, senderid, len(resp.SenderCard)),
 				},
 			},
 		}); err != nil {
