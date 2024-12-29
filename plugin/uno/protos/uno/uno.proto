@@ -50,6 +50,7 @@ enum Errors {
     PlayerCannotDrawCard = 22; //玩家不能摸牌
     PlayerCannotSendCardFromHandCard = 23; //玩家不能从手牌中出牌
     BlackCardNoSpecifiedColor = 24; //黑牌未指定颜色
+    PlayerIsOperatorNow = 25; //玩家为当前操作者
 }
 
 enum CardColor {

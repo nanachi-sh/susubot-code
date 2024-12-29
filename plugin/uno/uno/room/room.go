@@ -201,8 +201,10 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		if serr := r.playerSendCard(p, from, sendcard); serr != nil {
 			return nil, nil, serr
 		}
-		jnlast := r.GetLastCard()
-		jnlast.featureEffected = true
+		if r.sendCard_checkNeedDrawCard(last) {
+			jnlast := r.GetLastCard()
+			jnlast.featureEffected = true
+		}
 		r.sendCard_featureCardAction(sendcardFC.FeatureCard)
 		if len(p.GetCards()) == 0 {
 			return nil, &SendCardEvent{
@@ -678,10 +680,7 @@ func (r *Room) CallUNO(p *player.Player) ([]uno_pb.Card, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
-	if r.operatorNow.GetId() != p.GetId() {
-		return nil, uno_pb.Errors_PlayerNoOperatorNow.Enum()
-	}
-	if len(p.GetCards()) > 2 {
+	if len(p.GetCards()) != 2 {
 		cards := r.cutCards(2)
 		p.AddCards(cards)
 		return p.GetCards(), uno_pb.Errors_PlayerCannotCallUNO.Enum()
@@ -756,7 +755,9 @@ func (r *Room) IndicateUNO(tP *player.Player) (*uno_pb.PlayerInfo, bool, *uno_pb
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, false, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
-	if len(tP.GetCards()) < 2 {
+	if r.operatorNow.GetId() == tP.GetId() {
+		return nil, false, uno_pb.Errors_PlayerIsOperatorNow.Enum()
+	} else if len(tP.GetCards()) < 2 {
 		if tP.GetCallUNO() {
 			return nil, false, uno_pb.Errors_PlayerAlreadyCallUNO.Enum()
 		}
