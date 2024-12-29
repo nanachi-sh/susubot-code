@@ -3057,6 +3057,22 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
+		extra := ""
+		if card.FeatureCard != nil {
+			switch card.FeatureCard.FeatureCard {
+			case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+				switch card.FeatureCard.Color {
+				case uno_pb.CardColor_Red:
+					extra = "黑牌，转变为红色"
+				case uno_pb.CardColor_Green:
+					extra = "黑牌，转变为绿色"
+				case uno_pb.CardColor_Blue:
+					extra = "黑牌，转变为蓝色"
+				case uno_pb.CardColor_Yellow:
+					extra = "黑牌，转变为黄色"
+				}
+			}
+		}
 		img, err := uno_getCardImage(card, nil)
 		if err != nil {
 			logger.Println(err)
@@ -3077,7 +3093,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: fmt.Sprintf("%v(%v)出了，他还剩下 %v 张牌", sendername, senderid, len(resp.SenderCard)),
+					Text: fmt.Sprintf("%v(%v)出了%v，他还剩下 %v 张牌", sendername, senderid, extra, len(resp.SenderCard)),
 				},
 			},
 		}); err != nil {
@@ -4251,6 +4267,22 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 		card := resp.Info.CardPool[len(resp.Info.CardPool)-1]
+		extra := ""
+		if card.SendCard.FeatureCard != nil {
+			switch card.SendCard.FeatureCard.FeatureCard {
+			case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+				switch card.SendCard.FeatureCard.Color {
+				case uno_pb.CardColor_Red:
+					extra = "黑牌，转变为红色"
+				case uno_pb.CardColor_Green:
+					extra = "黑牌，转变为绿色"
+				case uno_pb.CardColor_Blue:
+					extra = "黑牌，转变为蓝色"
+				case uno_pb.CardColor_Yellow:
+					extra = "黑牌，转变为黄色"
+				}
+			}
+		}
 		img, err := uno_getCardImage(*card.SendCard, nil)
 		if err != nil {
 			logger.Println(err)
@@ -4271,7 +4303,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: "上一张牌为",
+					Text: fmt.Sprintf("上一张牌为%v", extra),
 				},
 			},
 		}); err != nil {
