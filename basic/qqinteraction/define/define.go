@@ -92,15 +92,6 @@ func init() {
 		logger.Fatalln(err)
 	}
 	GRPCClient = c
-	if testIP := os.Getenv("TEST_GATEWAY_IP"); testIP != "" {
-		port := os.Getenv("TEST_GATEWAY_PORT")
-		testip := net.ParseIP(testIP)
-		c, err := grpc.NewClient(fmt.Sprintf("%v:%v", testip.String(), port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		testClient = c
-	}
 	ConnectorCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "connector",
 		"version":        "stable",
@@ -127,12 +118,11 @@ func init() {
 		"service-target": "twoonone",
 		"version":        "stable",
 	}))
-	UnoC = uno_pb.NewUnoClient(testClient)
-	UnoCtx = context.Background()
-	// UnoCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
-	// 	"service-target": "uno",
-	// 	"version":        "stable",
-	// }))
+	UnoC = uno_pb.NewUnoClient(GRPCClient)
+	UnoCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
+		"service-target": "uno",
+		"version":        "stable",
+	}))
 	ExternalHost = os.Getenv("EXTERNAL_HOST")
 	if ExternalHost == "" {
 		logger.Fatalln("External Host未设置")
@@ -150,4 +140,15 @@ func init() {
 	}
 	ExternalHTTPPort = int(httpport)
 	ExternalURL = fmt.Sprintf("http://%v:%v", ExternalHost, ExternalHTTPPort)
+	if testIP := os.Getenv("TEST_GATEWAY_IP"); testIP != "" {
+		port := os.Getenv("TEST_GATEWAY_PORT")
+		testip := net.ParseIP(testIP)
+		c, err := grpc.NewClient(fmt.Sprintf("%v:%v", testip.String(), port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		testClient = c
+		UnoC = uno_pb.NewUnoClient(testClient)
+		UnoCtx = context.Background()
+	}
 }
