@@ -55,13 +55,14 @@ func hash() string {
 
 func New() *Room {
 	return &Room{
-		hash:        hash(),
-		players:     []*player.Player{},
-		operatorNow: nil,
-		stage:       uno_pb.Stage_WaitingStart,
-		cardPool:    []*SendCard{},
-		banker:      nil,
-		cardHeap:    []uno_pb.Card{},
+		hash:              hash(),
+		players:           []*player.Player{},
+		operatorNow:       nil,
+		stage:             uno_pb.Stage_WaitingStart,
+		cardPool:          []*SendCard{},
+		banker:            nil,
+		cardHeap:          []uno_pb.Card{},
+		sequenceDirection: fd,
 	}
 }
 
