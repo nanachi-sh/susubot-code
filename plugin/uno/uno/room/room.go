@@ -276,7 +276,7 @@ func (r *Room) sendCard_checkSkipORReverseCard(last *SendCard, now uno_pb.Card) 
 	return false
 }
 
-// 检查是否为堆叠卡
+// 检查是否为可堆叠卡
 func (r *Room) sendCard_checkStackCard(last, now uno_pb.Card) bool {
 	if len(r.players) == 2 {
 		return false
@@ -469,10 +469,10 @@ func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno
 		if !p.DeleteCardFromDrawCard(sendcard) {
 			return uno_pb.Errors_PlayerCardNoExist.Enum()
 		}
-		p.SetCallUNO(false)
 	default:
 		return uno_pb.Errors_Unexpected.Enum()
 	}
+	p.SetCallUNO(false)
 	if oColor != uno_pb.CardColor_Black {
 		sendcard.FeatureCard.Color = oColor
 	}
@@ -639,14 +639,17 @@ FOROUT:
 		if sc.SendCard.Type != uno_pb.CardType_Feature {
 			break
 		}
-		if sc.featureEffected {
-			break
-		}
 		fC := sc.SendCard.FeatureCard
 		switch fC.FeatureCard {
 		case uno_pb.FeatureCards_DrawTwo:
+			if sc.featureEffected {
+				break FOROUT
+			}
 			ret[0].count++
 		case uno_pb.FeatureCards_WildDrawFour:
+			if sc.featureEffected && last.wildDrawFourStatus != nil {
+				break
+			}
 			ret[1].count++
 		default:
 			break FOROUT
