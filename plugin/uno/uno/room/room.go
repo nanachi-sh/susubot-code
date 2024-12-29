@@ -167,13 +167,20 @@ const (
 	drawCard
 )
 
+func (r *Room) sendCard_checkBlackCard(card uno_pb.Card) bool {
+	if card.Type != uno_pb.CardType_Feature {
+		return false
+	}
+	switch card.FeatureCard.FeatureCard {
+	case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+		return true
+	}
+	return false
+}
+
 func (r *Room) sendCard_checkBlackCardExist(cards []uno_pb.Card) bool {
 	for _, v := range cards {
-		if v.Type != uno_pb.CardType_Feature {
-			continue
-		}
-		switch v.FeatureCard.FeatureCard {
-		case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+		if r.sendCard_checkBlackCard(v) {
 			return true
 		}
 	}
@@ -343,6 +350,9 @@ func (r *Room) sendCard_checkNotSPECBlackCard(now uno_pb.Card) bool {
 }
 
 func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
+	if r.sendCard_checkBlackCard(now) {
+		return true
+	}
 	lastNC := last.NormalCard
 	lastFC := last.FeatureCard
 	nowNC := now.NormalCard
@@ -360,9 +370,6 @@ func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 			}
 		}
 	case uno_pb.CardType_Feature:
-		if nowFC.Color == uno_pb.CardColor_Black {
-			return true
-		}
 		switch last.Type {
 		case uno_pb.CardType_Normal:
 			if nowFC.Color == lastNC.Color {
