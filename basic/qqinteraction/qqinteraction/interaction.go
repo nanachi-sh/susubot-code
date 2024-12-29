@@ -4402,7 +4402,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "RDRAW TWO", "RDT":
+	case "RDRAW TWO", "RDT", "R+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Red,
@@ -4506,7 +4506,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "YDRAW TWO", "YDT":
+	case "YDRAW TWO", "YDT", "Y+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Yellow,
@@ -4610,7 +4610,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "BDRAW TWO", "BDT":
+	case "BDRAW TWO", "BDT", "B+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Blue,
@@ -4714,7 +4714,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "GDRAW TWO", "GDT":
+	case "GDRAW TWO", "GDT", "G+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Green,
@@ -4730,7 +4730,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "RWILD", "R+2":
+	case "RWILD":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Red,
@@ -4738,7 +4738,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "YWILD", "Y+2":
+	case "YWILD":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Yellow,
@@ -4746,7 +4746,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "GWILD", "G+2":
+	case "GWILD":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Green,
@@ -4754,7 +4754,7 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "BWILD", "B+2":
+	case "BWILD":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
 				Color:       uno_pb.CardColor_Blue,
