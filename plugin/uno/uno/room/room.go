@@ -3,7 +3,6 @@ package room
 import (
 	"fmt"
 	"math/rand"
-	"slices"
 	"sort"
 	"strconv"
 
@@ -13,16 +12,23 @@ import (
 )
 
 type Room struct {
-	hash             string
-	players          []*player.Player
-	operatorNow      *player.Player
-	stage            uno_pb.Stage
-	cardPool         []*SendCard
-	banker           *player.Player
-	cardHeap         []uno_pb.Card
-	sequence         []string //存储玩家Id
-	sequencePosition int
+	hash              string
+	players           []*player.Player
+	operatorNow       *player.Player
+	stage             uno_pb.Stage
+	cardPool          []*SendCard
+	banker            *player.Player
+	cardHeap          []uno_pb.Card
+	sequenceDirection direction
+	sequencePosition  int
 }
+
+type direction int
+
+const (
+	fd direction = iota
+	rd
+)
 
 type wildDrawFourStatus int
 
@@ -412,20 +418,30 @@ func (r *Room) sendCard_featureCardAction(featureCard uno_pb.FeatureCards) {
 }
 
 func (r *Room) nextOperator() *player.Player {
-	if r.sequencePosition+1 > len(r.sequence)-1 {
-		r.sequencePosition = 0
-	} else {
-		r.sequencePosition++
+	switch r.sequenceDirection {
+	case fd:
+		if r.sequencePosition+1 > len(r.players)-1 {
+			r.sequencePosition = 0
+		} else {
+			r.sequencePosition++
+		}
+	case rd:
+		if r.sequencePosition-1 < 0 {
+			r.sequencePosition = len(r.players) - 1
+		} else {
+			r.sequencePosition--
+		}
 	}
-	p, ok := r.GetPlayer(r.sequence[r.sequencePosition])
-	if !ok {
-		return nil
-	}
-	return p
+	return r.players[r.sequencePosition]
 }
 
 func (r *Room) reverseSequence() {
-	slices.Reverse(r.sequence)
+	switch r.sequenceDirection {
+	case fd:
+		r.sequenceDirection = rd
+	case rd:
+		r.sequenceDirection = fd
+	}
 }
 
 func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno_pb.Card) *uno_pb.Errors {
@@ -855,22 +871,19 @@ func (r *Room) playerResequence() {
 		sequenceCopy = append(sequenceCopy, v.GetId())
 	}
 	r.players = xCopy
-	r.sequence = sequenceCopy
 	r.sequencePosition = 0
 }
 
 func (r *Room) deletePlayer(playerid string) bool {
 	for i, v := range r.players {
 		if v.GetId() == playerid {
-			if r.sequencePosition == i {
+			if r.sequencePosition > i {
 				r.sequencePosition = 0
 			}
 			if len(r.players) == 1 {
 				r.players = []*player.Player{}
-				r.sequence = []string{}
 			} else {
 				r.players = append(r.players[:i], r.players[i+1:]...)
-				r.sequence = append(r.sequence[:i], r.sequence[i+1:]...)
 			}
 			return true
 		}
