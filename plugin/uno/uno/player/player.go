@@ -174,7 +174,7 @@ func (p *Player) DeleteCards(x []uno_pb.Card) bool {
 }
 
 func (p *Player) ClearHandCard() {
-
+	p.cards = []uno_pb.Card{}
 }
 
 func (p *Player) SetDrawCard(card uno_pb.Card) {
