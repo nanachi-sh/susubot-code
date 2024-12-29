@@ -167,6 +167,19 @@ const (
 	drawCard
 )
 
+func (r *Room) sendCard_checkBlackCardExist(cards []uno_pb.Card) bool {
+	for _, v := range cards {
+		if v.Type != uno_pb.CardType_Feature {
+			continue
+		}
+		switch v.FeatureCard.FeatureCard {
+		case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+			return true
+		}
+	}
+	return false
+}
+
 func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player, *SendCardEvent, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, nil, uno_pb.Errors_RoomNoSendingCard.Enum()
@@ -181,8 +194,10 @@ func (r *Room) sendCard(p *player.Player, sendcard uno_pb.Card) (*player.Player,
 		from = drawCard
 	}
 	// 特殊情况判断
-	if r.sendCard_checkSkipCard(last) {
+	if r.sendCard_checkSkipCard(last) { //上一张为Skip
 		return nil, nil, uno_pb.Errors_PlayerCannotSendCard.Enum()
+	} else if pcards := p.GetCards(); len(pcards) == 2 && r.sendCard_checkBlackCardExist(pcards) { //仅剩下两张牌，且某一张为黑牌
+		return nil, nil, uno_pb.Errors_PlayerWillOnlyRemainBlackCard.Enum()
 	} else if r.sendCard_checkSkipORReverseCard(last, sendcard) { //上一张不为Skip，Skip, Reverse可无视牌出
 		if !r.sendCard_cardCheck(last.SendCard, sendcard) {
 			return nil, nil, uno_pb.Errors_SendCardColorORNumberNELastCard.Enum()
@@ -316,6 +331,17 @@ func (r *Room) sendCard_checkSkipCard(last *SendCard) bool {
 	return false
 }
 
+func (r *Room) sendCard_checkNotSPECBlackCard(now uno_pb.Card) bool {
+	if now.Type != uno_pb.CardType_Feature {
+		return false
+	}
+	switch now.FeatureCard.FeatureCard {
+	case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
+		return now.FeatureCard.Color == uno_pb.CardColor_Black
+	}
+	return false
+}
+
 func (r *Room) sendCard_cardCheck(last, now uno_pb.Card) bool {
 	lastNC := last.NormalCard
 	lastFC := last.FeatureCard
@@ -404,23 +430,10 @@ func (r *Room) reverseSequence() {
 	slices.Reverse(r.sequence)
 }
 
-func (r *Room) convertBlackCardColor(last uno_pb.Card, now uno_pb.Card) {
-	if now.Type == uno_pb.CardType_Feature {
-		switch now.FeatureCard.FeatureCard {
-		case uno_pb.FeatureCards_Wild, uno_pb.FeatureCards_WildDrawFour:
-			var clr uno_pb.CardColor
-			switch last.Type {
-			case uno_pb.CardType_Normal:
-				clr = last.NormalCard.Color
-			case uno_pb.CardType_Feature:
-				clr = last.FeatureCard.Color
-			}
-			now.FeatureCard.Color = clr
-		}
-	}
-}
-
 func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno_pb.Card) *uno_pb.Errors {
+	if r.sendCard_checkNotSPECBlackCard(sendcard) {
+		return uno_pb.Errors_BlackCardNoSpecifiedColor.Enum()
+	}
 	switch from {
 	case handCard:
 		if !p.DeleteCardFromHandCard(sendcard) {
@@ -435,9 +448,6 @@ func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno
 		}
 	default:
 		return uno_pb.Errors_Unexpected.Enum()
-	}
-	if last := r.GetLastCard(); last != nil {
-		r.convertBlackCardColor(last.SendCard, sendcard)
 	}
 	r.addCardToCardPool(SendCard{
 		SenderId: p.GetId(),

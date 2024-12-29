@@ -2377,7 +2377,7 @@ func uno_match(text string) unoAction {
 	case "UNO!", "UNO！":
 		return uno_CallUNO
 	}
-	if ok, _ := regexp.MatchString(`(?i)^(?:!|！)+(([RGYB][0-9])?|([RGYB]Skip|Wild|[RGYB]Draw two|[RGYB]dt|Wild draw four|wdf|[RGYB]Reverse|[RGYB]rev|[RGYB]re)?){1,1}$`, text); ok {
+	if ok, _ := regexp.MatchString(`(?i)^(?:!|！)+(([RGYB][0-9])?|([RGYB](dt|draw two|wild draw four|wdf|reverse|rev|re|wild|skip|\+2|\+4))?){1,1}$`, text); ok {
 		return uno_SendCard_Send
 	}
 	if ok, _ := regexp.MatchString(`\A上桌([(0-9)]| ){3,}`, text); ok {
@@ -4730,18 +4730,66 @@ func uno_cardStr2Card(text string) (uno_pb.Card, bool) {
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "WILD":
+	case "RWILD", "R+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
-				Color:       uno_pb.CardColor_Black,
+				Color:       uno_pb.CardColor_Red,
 				FeatureCard: uno_pb.FeatureCards_Wild,
 			},
 			Type: uno_pb.CardType_Feature,
 		}, true
-	case "WILD DRAW FOUR", "WDF":
+	case "YWILD", "Y+2":
 		return uno_pb.Card{
 			FeatureCard: &uno_pb.FeatureCard{
-				Color:       uno_pb.CardColor_Black,
+				Color:       uno_pb.CardColor_Yellow,
+				FeatureCard: uno_pb.FeatureCards_Wild,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "GWILD", "G+2":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Green,
+				FeatureCard: uno_pb.FeatureCards_Wild,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "BWILD", "B+2":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Blue,
+				FeatureCard: uno_pb.FeatureCards_Wild,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "RWILD DRAW FOUR", "RWDF", "R+4":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Red,
+				FeatureCard: uno_pb.FeatureCards_WildDrawFour,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "YWILD DRAW FOUR", "YWDF", "Y+4":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Yellow,
+				FeatureCard: uno_pb.FeatureCards_WildDrawFour,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "GWILD DRAW FOUR", "GWDF", "G+4":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Green,
+				FeatureCard: uno_pb.FeatureCards_WildDrawFour,
+			},
+			Type: uno_pb.CardType_Feature,
+		}, true
+	case "BWILD DRAW FOUR", "BWDF", "B+4":
+		return uno_pb.Card{
+			FeatureCard: &uno_pb.FeatureCard{
+				Color:       uno_pb.CardColor_Blue,
 				FeatureCard: uno_pb.FeatureCards_WildDrawFour,
 			},
 			Type: uno_pb.CardType_Feature,
