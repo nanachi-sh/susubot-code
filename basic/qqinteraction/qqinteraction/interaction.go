@@ -114,7 +114,8 @@ func Start() {
 	for {
 		resp, err := stream.Recv()
 		if err != nil {
-			logger.Fatalln(err)
+			logger.Println(err)
+			continue
 		}
 		go func() {
 			respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
