@@ -114,8 +114,7 @@ func Start() {
 	for {
 		resp, err := stream.Recv()
 		if err != nil {
-			logger.Println(err)
-			continue
+			logger.Fatalln(err)
 		}
 		go func() {
 			respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
@@ -124,7 +123,8 @@ func Start() {
 				IgnoreCmdEvent: true,
 			})
 			if err != nil {
-				logger.Fatalln(err)
+				logger.Println(err)
+				return
 			}
 			switch *respum.Type {
 			case response_pb.ResponseType_ResponseType_CmdEvent:
