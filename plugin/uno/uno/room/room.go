@@ -469,6 +469,7 @@ func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno
 		if !p.DeleteCardFromDrawCard(sendcard) {
 			return uno_pb.Errors_PlayerCardNoExist.Enum()
 		}
+		p.SetCallUNO(false)
 	default:
 		return uno_pb.Errors_Unexpected.Enum()
 	}
@@ -608,7 +609,6 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 	}
 	// 玩家回合抽牌
 	card := r.cutCards(1)[0]
-	p.SetCallUNO(false)
 	p.SetDrawCard(card)
 	return nil, nil
 }
@@ -695,7 +695,11 @@ func (r *Room) CallUNO(p *player.Player) ([]uno_pb.Card, *uno_pb.Errors) {
 	if r.stage != uno_pb.Stage_SendingCard {
 		return nil, uno_pb.Errors_RoomNoSendingCard.Enum()
 	}
-	if len(p.GetCards()) != 2 {
+	l := len(p.GetCards())
+	if p.GetDrawCard() != nil {
+		l++
+	}
+	if l != 2 {
 		cards := r.cutCards(2)
 		p.AddCards(cards)
 		return p.GetCards(), uno_pb.Errors_PlayerCannotCallUNO.Enum()

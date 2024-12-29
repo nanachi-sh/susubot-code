@@ -267,15 +267,13 @@ func CallUNO(req *uno_pb.CallUNORequest) *uno_pb.CallUNOResponse {
 		}
 	}
 	cards, serr := r.CallUNO(p)
-	if serr != nil {
-		return &uno_pb.CallUNOResponse{Err: serr}
-	}
-	retCards := []*uno_pb.Card{}
+	cs := []*uno_pb.Card{}
 	for _, v := range cards {
-		retCards = append(retCards, &v)
+		cs = append(cs, &v)
 	}
 	return &uno_pb.CallUNOResponse{
-		PlayerCard: retCards,
+		PlayerCard: cs,
+		Err:        serr,
 	}
 }
 
