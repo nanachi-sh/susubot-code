@@ -62,7 +62,6 @@ func New() *Room {
 		cardPool:    []*SendCard{},
 		banker:      nil,
 		cardHeap:    []uno_pb.Card{},
-		sequence:    []string{},
 	}
 }
 
@@ -87,7 +86,6 @@ func (r *Room) Join(ai *uno_pb.PlayerAccountInfo) *uno_pb.Errors {
 		return uno_pb.Errors_Unexpected.Enum()
 	}
 	r.players = append(r.players, p)
-	r.sequence = append(r.sequence, p.GetId())
 	return nil
 }
 
