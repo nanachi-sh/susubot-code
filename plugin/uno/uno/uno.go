@@ -332,3 +332,19 @@ func deleteRoom(r *room.Room) bool {
 	}
 	return false
 }
+
+func TEST_SetPlayerCard(req *uno_pb.TEST_SetPlayerCardRequest) *uno_pb.BasicResponse {
+	p, ok := getPlayerFromRooms(req.PlayerId)
+	if !ok {
+		return &uno_pb.BasicResponse{
+			Err: uno_pb.Errors_PlayerNoExistAnyRoom.Enum(),
+		}
+	}
+	p.ClearHandCard()
+	cs := []uno_pb.Card{}
+	for _, v := range req.Cards {
+		cs = append(cs, *v)
+	}
+	p.AddCards(cs)
+	return nil
+}

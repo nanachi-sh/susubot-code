@@ -336,3 +336,30 @@ func (*unoService) IndicateUNO(ctx context.Context, req *uno_pb.IndicateUNOReque
 		return x.data, nil
 	}
 }
+
+func (*unoService) TEST_SetPlayerCard(ctx context.Context, req *uno_pb.TEST_SetPlayerCardRequest) (*uno_pb.BasicResponse, error) {
+	type d struct {
+		data *uno_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		resp := uno.TEST_SetPlayerCard(req)
+		if resp == nil {
+			ret.data = &uno_pb.BasicResponse{}
+		} else {
+			ret.data = resp
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}

@@ -16,6 +16,8 @@ service uno {
     rpc CallUNO (CallUNORequest) returns (CallUNOResponse);
     rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
     rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
+    // 测试用接口，前端禁止直接调用
+    rpc TEST_SetPlayerCard (TEST_SetPlayerCardRequest) returns (BasicResponse);
 }
 
 enum Stage {
@@ -268,4 +270,9 @@ message IndicateUNOResponse {
     optional Errors err = 1;
     bool IndicateOK = 2;
     optional PlayerInfo Punished = 3;
+}
+
+message TEST_SetPlayerCardRequest {
+    string PlayerId = 1;
+    repeated Card Cards = 2;
 }
