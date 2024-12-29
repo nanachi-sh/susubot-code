@@ -430,6 +430,16 @@ func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno
 	if r.sendCard_checkNotSPECBlackCard(sendcard) {
 		return uno_pb.Errors_BlackCardNoSpecifiedColor.Enum()
 	}
+	oColor := uno_pb.CardColor_Black
+	if r.sendCard_checkBlackCard(sendcard) {
+		switch sendcard.Type {
+		case uno_pb.CardType_Normal:
+			oColor = sendcard.NormalCard.Color
+		case uno_pb.CardType_Feature:
+			oColor = sendcard.FeatureCard.Color
+		}
+		sendcard.FeatureCard.Color = uno_pb.CardColor_Black
+	}
 	switch from {
 	case handCard:
 		if !p.DeleteCardFromHandCard(sendcard) {
@@ -444,6 +454,9 @@ func (r *Room) playerSendCard(p *player.Player, from sendcard_from, sendcard uno
 		}
 	default:
 		return uno_pb.Errors_Unexpected.Enum()
+	}
+	if oColor != uno_pb.CardColor_Black {
+		sendcard.FeatureCard.Color = oColor
 	}
 	r.addCardToCardPool(SendCard{
 		SenderId: p.GetId(),
