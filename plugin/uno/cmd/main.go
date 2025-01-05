@@ -13,5 +13,10 @@ func main() {
 			logger.Fatalln(err)
 		}
 	}()
+	go func() {
+		if err := api.HTTPServe(); err != nil {
+			logger.Fatalln(err)
+		}
+	}()
 	select {}
 }
