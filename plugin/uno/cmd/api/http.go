@@ -12,6 +12,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func HTTPServe() error {
@@ -37,7 +38,7 @@ func HTTPServe() error {
 	if gRPCport <= 0 || gRPCport > 65535 {
 		return errors.New("gRPC服务监听端口范围不正确")
 	}
-	conn, err := grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport))
+	conn, err := grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
