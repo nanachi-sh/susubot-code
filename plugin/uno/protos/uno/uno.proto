@@ -18,7 +18,11 @@ service uno {
             get: "/room"
         };
     }
-    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
+    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse) {
+        option (google.api.http) = {
+            get: "/room/{RoomHash}"
+        };
+    }
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
     rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
     rpc StartRoom (StartRoomRequest) returns (BasicResponse);
