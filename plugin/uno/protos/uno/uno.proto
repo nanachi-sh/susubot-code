@@ -9,32 +9,55 @@ option go_package = "protos/uno";
 service uno {
     rpc CreateRoom (Empty) returns (CreateRoomResponse) {
         option (google.api.http) = {
-            post: "/v1/room"
+            post: "/v1/rooms"
             body: "*"
         };
     }
     rpc GetRooms (Empty) returns (GetRoomsResponse) {
         option (google.api.http) = {
-            get: "/v1/room"
+            get: "/v1/rooms"
         };
     }
     rpc GetRoom (GetRoomRequest) returns (GetRoomResponse) {
         option (google.api.http) = {
-            get: "/v1/room/{RoomHash}"
+            get: "/v1/rooms/{RoomHash}" //获取完整信息(需验证)
+            additional_bindings: {
+                get: "/v1/room/{RoomHash}/simple" //获取基本信息
+            }
         };
     }
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse) {
         option (google.api.http) = {
-            put: "/v1/room/{RoomHash}/join/{PlayerId}/{PlayerName}"
+            put: "/v1/rooms/{RoomHash}/join/{PlayerId}/{PlayerName}" //添加玩家(需验证玩家ID哈希)
         };
     }
-    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
-    rpc StartRoom (StartRoomRequest) returns (BasicResponse);
-    rpc DrawCard (DrawCardRequest) returns (DrawCardResponse);
-    rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse);
+    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse) {
+        option (google.api.http) = {
+            delete: "/v1/rooms/{RoomHash}/delete/{PlayerId}" //删除玩家(需验证玩家ID+桌Hash混合哈希)
+        };
+    }
+    rpc StartRoom (StartRoomRequest) returns (BasicResponse) {
+        option (google.api.http) = {
+            patch: "/v1/rooms/{RoomHash}/start" //开始游戏(需验证混合哈希)，后续桌内操作都需验证混合哈希
+        };
+    }
+    rpc DrawCard (DrawCardRequest) returns (DrawCardResponse) {
+        option (google.api.http) = {
+            get: "/v1/rooms/{RoomHash}/play/DrawCard" //查看当前操作玩家
+            additional_bindings: {get: "/v1/rooms/{RoomHash}/drawCard/{PlayerId}"} //摸牌
+        };
+    }
+    rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse) {
+        option (google.api.http) = {
+            get: "/v1/rooms/{RoomHash}/sendCardAction" //查看当前操作玩家
+            additional_bindings: {patch: "/v1/rooms/{RoomHash}/sendCardAction/{PlayerId}/{Action}"} //不出牌
+            additional_bindings: {patch: "/v1/rooms/{RoomHash}/sendCardAction/{PlayerId}/{Action}/{SendCard}"} //出牌
+        };
+    }
     rpc CallUNO (CallUNORequest) returns (CallUNOResponse);
     rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
     rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
+    rpc RoomEvent (RoomEventRequest) returns (Response);
     // 测试用接口，前端禁止直接调用
     rpc TEST_SetPlayerCard (TEST_SetPlayerCardRequest) returns (BasicResponse);
 }
@@ -202,6 +225,7 @@ message JoinRoomResponse {
 
 message ExitRoomRequest {
     string PlayerId = 1;
+    string RoomHash = 2;
 }
 
 message ExitRoomResponse {
@@ -216,6 +240,7 @@ message StartRoomRequest {
 
 message DrawCardRequest {
     string PlayerId = 1;
+    string RoomHash = 2;
 }
 
 message DrawCardResponse {
@@ -244,6 +269,7 @@ message SendCardActionRequest {
     string PlayerId = 1;
     Card SendCard = 2;
     SendCardActions Action = 3;
+    string RoomHash = 4;
 }
 
 message SendCardActionResponse {
@@ -289,6 +315,21 @@ message IndicateUNOResponse {
     optional Errors err = 1;
     bool IndicateOK = 2;
     optional PlayerInfo Punished = 3;
+}
+
+message RoomEventRequest {
+    string RoomHash = 1;
+    string PlayerId = 2;
+}
+
+message RoomEventResponse {
+    message GameFinishEvent {
+        repeated PlayerInfo Players = 1;
+        PlayerInfo Winner = 2;
+    }
+
+    optional Errors err = 1;
+    optional GameFinishEvent GameFinish = 2;
 }
 
 message TEST_SetPlayerCardRequest {
