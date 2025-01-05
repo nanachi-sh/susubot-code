@@ -2,22 +2,11 @@ syntax = "proto3";
 
 package susubot.plugin.uno;
 
-import "google/api/annotations.proto";
-
 option go_package = "protos/uno";
 
 service uno {
-    rpc CreateRoom (Empty) returns (CreateRoomResponse) {
-        option (google.api.http) = {
-            post: "/room"
-            body: "*"
-        };
-    }
-    rpc GetRooms (Empty) returns (GetRoomsResponse) {
-        option (google.api.http) = {
-            get: "/room"
-        };
-    }
+    rpc CreateRoom (Empty) returns (CreateRoomResponse);
+    rpc GetRooms (Empty) returns (GetRoomsResponse);
     rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
     rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
