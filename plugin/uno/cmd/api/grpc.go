@@ -185,32 +185,32 @@ func (*unoService) ExitRoom(ctx context.Context, req *uno_pb.ExitRoomRequest) (*
 	}
 }
 
-func (*unoService) StartRoom(ctx context.Context, req *uno_pb.StartRoomRequest) (*uno_pb.BasicResponse, error) {
-	type d struct {
-		data *uno_pb.BasicResponse
-		err  error
-	}
-	ch := make(chan *d, 1)
-	go func() {
-		ret := new(d)
-		defer func() { ch <- ret }()
-		resp := uno.StartRoom(req)
-		if resp == nil {
-			ret.data = &uno_pb.BasicResponse{}
-		} else {
-			ret.data = resp
-		}
-	}()
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case x := <-ch:
-		if x.err != nil {
-			return nil, x.err
-		}
-		return x.data, nil
-	}
-}
+// func (*unoService) StartRoom(ctx context.Context, req *uno_pb.StartRoomRequest) (*uno_pb.BasicResponse, error) {
+// 	type d struct {
+// 		data *uno_pb.BasicResponse
+// 		err  error
+// 	}
+// 	ch := make(chan *d, 1)
+// 	go func() {
+// 		ret := new(d)
+// 		defer func() { ch <- ret }()
+// 		resp := uno.StartRoom(req)
+// 		if resp == nil {
+// 			ret.data = &uno_pb.BasicResponse{}
+// 		} else {
+// 			ret.data = resp
+// 		}
+// 	}()
+// 	select {
+// 	case <-ctx.Done():
+// 		return nil, ctx.Err()
+// 	case x := <-ch:
+// 		if x.err != nil {
+// 			return nil, x.err
+// 		}
+// 		return x.data, nil
+// 	}
+// }
 
 func (*unoService) DrawCard(ctx context.Context, req *uno_pb.DrawCardRequest) (*uno_pb.DrawCardResponse, error) {
 	type d struct {
