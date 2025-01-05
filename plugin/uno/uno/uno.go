@@ -110,40 +110,40 @@ func ExitRoom(req *uno_pb.ExitRoomRequest) *uno_pb.ExitRoomResponse {
 	}
 }
 
-func StartRoom(req *uno_pb.StartRoomRequest) *uno_pb.BasicResponse {
-	switch {
-	case req.RoomHash != nil:
-		r, ok := getRoom(*req.RoomHash)
-		if !ok {
-			return &uno_pb.BasicResponse{
-				Err: uno_pb.Errors_Unexpected.Enum(),
-			}
-		}
-		if serr := r.Start(); serr != nil {
-			return &uno_pb.BasicResponse{Err: serr}
-		}
-		return &uno_pb.BasicResponse{}
-	case req.PlayerId != nil:
-		p, ok := getPlayerFromRooms(*req.PlayerId)
-		if !ok {
-			return &uno_pb.BasicResponse{
-				Err: uno_pb.Errors_PlayerNoExistAnyRoom.Enum(),
-			}
-		}
-		r, ok := getRoom(p.GetRoomHash())
-		if !ok {
-			return &uno_pb.BasicResponse{
-				Err: uno_pb.Errors_Unexpected.Enum(),
-			}
-		}
-		if serr := r.Start(); serr != nil {
-			return &uno_pb.BasicResponse{Err: serr}
-		}
-		return &uno_pb.BasicResponse{}
-	default:
-		return &uno_pb.BasicResponse{Err: uno_pb.Errors_Unexpected.Enum()}
-	}
-}
+// func StartRoom(req *uno_pb.StartRoomRequest) *uno_pb.BasicResponse {
+// 	switch {
+// 	case req.RoomHash != nil:
+// 		r, ok := getRoom(*req.RoomHash)
+// 		if !ok {
+// 			return &uno_pb.BasicResponse{
+// 				Err: uno_pb.Errors_Unexpected.Enum(),
+// 			}
+// 		}
+// 		if serr := r.Start(); serr != nil {
+// 			return &uno_pb.BasicResponse{Err: serr}
+// 		}
+// 		return &uno_pb.BasicResponse{}
+// 	case req.PlayerId != nil:
+// 		p, ok := getPlayerFromRooms(*req.PlayerId)
+// 		if !ok {
+// 			return &uno_pb.BasicResponse{
+// 				Err: uno_pb.Errors_PlayerNoExistAnyRoom.Enum(),
+// 			}
+// 		}
+// 		r, ok := getRoom(p.GetRoomHash())
+// 		if !ok {
+// 			return &uno_pb.BasicResponse{
+// 				Err: uno_pb.Errors_Unexpected.Enum(),
+// 			}
+// 		}
+// 		if serr := r.Start(); serr != nil {
+// 			return &uno_pb.BasicResponse{Err: serr}
+// 		}
+// 		return &uno_pb.BasicResponse{}
+// 	default:
+// 		return &uno_pb.BasicResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+// 	}
+// }
 
 func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 	p, ok := getPlayerFromRooms(req.PlayerId)
@@ -206,52 +206,52 @@ func DrawCard(req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
 	}
 }
 
-func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionResponse {
-	p, ok := getPlayerFromRooms(req.PlayerId)
-	if !ok {
-		return &uno_pb.SendCardActionResponse{
-			Err: uno_pb.Errors_PlayerNoExistAnyRoom.Enum(),
-		}
-	}
-	r, ok := getRoom(p.GetRoomHash())
-	if !ok {
-		return &uno_pb.SendCardActionResponse{
-			Err: uno_pb.Errors_Unexpected.Enum(),
-		}
-	}
-	if req.Action == uno_pb.SendCardActions_Send && req.SendCard == nil {
-		return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
-	}
-	sc := uno_pb.Card{}
-	if req.SendCard != nil {
-		sc = *req.SendCard
-	}
-	next, e, serr := r.SendCardAction(p, sc, req.Action)
-	if serr != nil {
-		return &uno_pb.SendCardActionResponse{Err: serr}
-	}
-	resp := new(uno_pb.SendCardActionResponse)
-	if next != nil {
-		resp.NextOperator = next.FormatToProtoBuf()
-		if req.Action == uno_pb.SendCardActions_Send {
-			cs := []*uno_pb.Card{}
-			for _, v := range p.GetCards() {
-				cs = append(cs, &v)
-			}
-			resp.SenderCard = cs
-		}
-	}
-	if e != nil {
-		if e.GameFinish {
-			if !deleteRoom(r) {
-				return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
-			}
-			resp.GameFinish = e.GameFinish
-			resp.GameFinishE = e.GameFinishE
-		}
-	}
-	return resp
-}
+// func SendCardAction(req *uno_pb.SendCardActionRequest) *uno_pb.SendCardActionResponse {
+// 	p, ok := getPlayerFromRooms(req.PlayerId)
+// 	if !ok {
+// 		return &uno_pb.SendCardActionResponse{
+// 			Err: uno_pb.Errors_PlayerNoExistAnyRoom.Enum(),
+// 		}
+// 	}
+// 	r, ok := getRoom(p.GetRoomHash())
+// 	if !ok {
+// 		return &uno_pb.SendCardActionResponse{
+// 			Err: uno_pb.Errors_Unexpected.Enum(),
+// 		}
+// 	}
+// 	if req.Action == uno_pb.SendCardActions_Send && req.SendCard == nil {
+// 		return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+// 	}
+// 	sc := uno_pb.Card{}
+// 	if req.SendCard != nil {
+// 		sc = *req.SendCard
+// 	}
+// 	next, e, serr := r.SendCardAction(p, sc, req.Action)
+// 	if serr != nil {
+// 		return &uno_pb.SendCardActionResponse{Err: serr}
+// 	}
+// 	resp := new(uno_pb.SendCardActionResponse)
+// 	if next != nil {
+// 		resp.NextOperator = next.FormatToProtoBuf()
+// 		if req.Action == uno_pb.SendCardActions_Send {
+// 			cs := []*uno_pb.Card{}
+// 			for _, v := range p.GetCards() {
+// 				cs = append(cs, &v)
+// 			}
+// 			resp.SenderCard = cs
+// 		}
+// 	}
+// 	if e != nil {
+// 		if e.GameFinish {
+// 			if !deleteRoom(r) {
+// 				return &uno_pb.SendCardActionResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+// 			}
+// 			resp.GameFinish = e.GameFinish
+// 			resp.GameFinishE = e.GameFinishE
+// 		}
+// 	}
+// 	return resp
+// }
 
 func CallUNO(req *uno_pb.CallUNORequest) *uno_pb.CallUNOResponse {
 	p, ok := getPlayerFromRooms(req.PlayerId)

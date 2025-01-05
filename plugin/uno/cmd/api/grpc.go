@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	uno_pb "github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno"
@@ -38,6 +39,15 @@ func GRPCServe() error {
 	gs := grpc.NewServer()
 	uno_pb.RegisterUnoServer(gs, new(unoService))
 	return gs.Serve(l)
+}
+
+func (*unoService) RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStreamingServer[uno_pb.RoomEventResponse]) error {
+	for {
+		time.Sleep(time.Second * 5)
+		stream.Send(&uno_pb.RoomEventResponse{
+			Err: uno_pb.Errors_Unexpected.Enum(),
+		})
+	}
 }
 
 func (*unoService) CreateRoom(ctx context.Context, _ *uno_pb.Empty) (*uno_pb.CreateRoomResponse, error) {
@@ -229,32 +239,32 @@ func (*unoService) DrawCard(ctx context.Context, req *uno_pb.DrawCardRequest) (*
 	}
 }
 
-func (*unoService) SendCardAction(ctx context.Context, req *uno_pb.SendCardActionRequest) (*uno_pb.SendCardActionResponse, error) {
-	type d struct {
-		data *uno_pb.SendCardActionResponse
-		err  error
-	}
-	ch := make(chan *d, 1)
-	go func() {
-		ret := new(d)
-		defer func() { ch <- ret }()
-		resp := uno.SendCardAction(req)
-		if resp == nil {
-			ret.data = &uno_pb.SendCardActionResponse{}
-		} else {
-			ret.data = resp
-		}
-	}()
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case x := <-ch:
-		if x.err != nil {
-			return nil, x.err
-		}
-		return x.data, nil
-	}
-}
+// func (*unoService) SendCard(ctx context.Context, req *uno_pb.SendCardActionRequest) (*uno_pb.SendCardActionResponse, error) {
+// 	type d struct {
+// 		data *uno_pb.SendCardResponse
+// 		err  error
+// 	}
+// 	ch := make(chan *d, 1)
+// 	go func() {
+// 		ret := new(d)
+// 		defer func() { ch <- ret }()
+// 		resp := uno.SendCardAction(req)
+// 		if resp == nil {
+// 			ret.data = &uno_pb.SendCardResponse{}
+// 		} else {
+// 			ret.data = resp
+// 		}
+// 	}()
+// 	select {
+// 	case <-ctx.Done():
+// 		return nil, ctx.Err()
+// 	case x := <-ch:
+// 		if x.err != nil {
+// 			return nil, x.err
+// 		}
+// 		return x.data, nil
+// 	}
+// }
 
 func (*unoService) CallUNO(ctx context.Context, req *uno_pb.CallUNORequest) (*uno_pb.CallUNOResponse, error) {
 	type d struct {

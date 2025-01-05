@@ -15,49 +15,57 @@ service uno {
     }
     rpc GetRooms (Empty) returns (GetRoomsResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms"
+            get: "/v1/rooms" //获取所有桌的基本信息
         };
     }
     rpc GetRoom (GetRoomRequest) returns (GetRoomResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms/{RoomHash}" //获取完整信息(需验证)
+            get: "/v1/rooms/{RoomHash}" //获取基本信息
             additional_bindings: {
-                get: "/v1/room/{RoomHash}/simple" //获取基本信息
+                get: "/v1/rooms/{RoomHash}/full" //获取完整信息(需验证)
             }
         };
     }
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse) {
         option (google.api.http) = {
-            put: "/v1/rooms/{RoomHash}/join/{PlayerId}/{PlayerName}" //添加玩家(需验证玩家ID哈希)
+            put: "/v1/rooms/{RoomHash}/players/{PlayerId}/{PlayerName}" //添加玩家(需验证玩家ID哈希)
         };
     }
     rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse) {
         option (google.api.http) = {
-            delete: "/v1/rooms/{RoomHash}/delete/{PlayerId}" //删除玩家(需验证玩家ID+桌Hash混合哈希)
+            delete: "/v1/rooms/{RoomHash}/players/{PlayerId}" //删除玩家(需验证玩家ID+桌Hash混合哈希)
         };
     }
     rpc StartRoom (StartRoomRequest) returns (BasicResponse) {
         option (google.api.http) = {
-            patch: "/v1/rooms/{RoomHash}/start" //开始游戏(需验证混合哈希)，后续桌内操作都需验证混合哈希
+            patch: "/v1/rooms/{RoomHash}/play" //开始游戏(需验证混合哈希)，后续桌内操作都需验证混合哈希
         };
     }
     rpc DrawCard (DrawCardRequest) returns (DrawCardResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms/{RoomHash}/play/DrawCard" //查看当前操作玩家
-            additional_bindings: {get: "/v1/rooms/{RoomHash}/drawCard/{PlayerId}"} //摸牌
+            patch: "/v1/rooms/{RoomHash}/play/DrawCard/{PlayerId}" //获取牌
         };
     }
-    rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse) {
+    rpc SendCard (SendCardRequest) returns (SendCardResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms/{RoomHash}/sendCardAction" //查看当前操作玩家
-            additional_bindings: {patch: "/v1/rooms/{RoomHash}/sendCardAction/{PlayerId}/{Action}"} //不出牌
-            additional_bindings: {patch: "/v1/rooms/{RoomHash}/sendCardAction/{PlayerId}/{Action}/{SendCard}"} //出牌
+            patch: "/v1/rooms/{RoomHash}/play/SendCard/{PlayerId}/{Card}/{Color}" //出牌
         };
     }
-    rpc CallUNO (CallUNORequest) returns (CallUNOResponse);
+    rpc NoSendCard (NoSendCardRequest) returns (NoSendCardResponse) {
+        option (google.api.http) = {
+            patch: "/v1/rooms/{RoomHash}/play/NoSendCard/{PlayerId}" //不出牌
+        };
+    }
+    rpc CallUNO (CallUNORequest) returns (CallUNOResponse) {
+
+    }
     rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
     rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
-    rpc RoomEvent (RoomEventRequest) returns (Response);
+    rpc RoomEvent (RoomEventRequest) returns (stream RoomEventResponse) {
+        option (google.api.http) = {
+            get: "/v1/rooms/{RoomHash}/event" //获取事件流(需验证混合哈希)
+        };
+    }
     // 测试用接口，前端禁止直接调用
     rpc TEST_SetPlayerCard (TEST_SetPlayerCardRequest) returns (BasicResponse);
 }
@@ -234,8 +242,7 @@ message ExitRoomResponse {
 }
 
 message StartRoomRequest {
-    optional string PlayerId = 1;
-    optional string RoomHash = 2;
+    string RoomHash = 1;
 }
 
 message DrawCardRequest {
@@ -265,14 +272,14 @@ message DrawCardResponse {
     optional SkippedEvent SkippedE = 8; //Skipped == true
 }
 
-message SendCardActionRequest {
+message SendCardRequest {
     string PlayerId = 1;
-    Card SendCard = 2;
-    SendCardActions Action = 3;
+    string Color = 2; //Red, Blue, Yellow, Green
+    string Card = 3; //0-9, Draw two, Wild draw four, Wild, Reverse, Skip
     string RoomHash = 4;
 }
 
-message SendCardActionResponse {
+message SendCardResponse {
     message GameFinishEvent {
         repeated PlayerInfo Players = 1;
         PlayerInfo Winner = 2;
@@ -285,6 +292,15 @@ message SendCardActionResponse {
     bool GameFinish = 5;
 
     optional GameFinishEvent GameFinishE = 3;
+}
+
+message NoSendCardRequest {
+    string PlayerId = 1;
+    string RoomHash = 2;
+}
+
+message NoSendCardResponse {
+    optional Errors err = 1;
 }
 
 message CallUNORequest {
@@ -319,7 +335,6 @@ message IndicateUNOResponse {
 
 message RoomEventRequest {
     string RoomHash = 1;
-    string PlayerId = 2;
 }
 
 message RoomEventResponse {

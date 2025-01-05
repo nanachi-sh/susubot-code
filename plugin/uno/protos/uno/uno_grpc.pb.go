@@ -26,10 +26,12 @@ const (
 	Uno_ExitRoom_FullMethodName           = "/susubot.plugin.uno.uno/ExitRoom"
 	Uno_StartRoom_FullMethodName          = "/susubot.plugin.uno.uno/StartRoom"
 	Uno_DrawCard_FullMethodName           = "/susubot.plugin.uno.uno/DrawCard"
-	Uno_SendCardAction_FullMethodName     = "/susubot.plugin.uno.uno/SendCardAction"
+	Uno_SendCard_FullMethodName           = "/susubot.plugin.uno.uno/SendCard"
+	Uno_NoSendCard_FullMethodName         = "/susubot.plugin.uno.uno/NoSendCard"
 	Uno_CallUNO_FullMethodName            = "/susubot.plugin.uno.uno/CallUNO"
 	Uno_Challenge_FullMethodName          = "/susubot.plugin.uno.uno/Challenge"
 	Uno_IndicateUNO_FullMethodName        = "/susubot.plugin.uno.uno/IndicateUNO"
+	Uno_RoomEvent_FullMethodName          = "/susubot.plugin.uno.uno/RoomEvent"
 	Uno_TEST_SetPlayerCard_FullMethodName = "/susubot.plugin.uno.uno/TEST_SetPlayerCard"
 )
 
@@ -44,10 +46,12 @@ type UnoClient interface {
 	ExitRoom(ctx context.Context, in *ExitRoomRequest, opts ...grpc.CallOption) (*ExitRoomResponse, error)
 	StartRoom(ctx context.Context, in *StartRoomRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 	DrawCard(ctx context.Context, in *DrawCardRequest, opts ...grpc.CallOption) (*DrawCardResponse, error)
-	SendCardAction(ctx context.Context, in *SendCardActionRequest, opts ...grpc.CallOption) (*SendCardActionResponse, error)
+	SendCard(ctx context.Context, in *SendCardRequest, opts ...grpc.CallOption) (*SendCardResponse, error)
+	NoSendCard(ctx context.Context, in *NoSendCardRequest, opts ...grpc.CallOption) (*NoSendCardResponse, error)
 	CallUNO(ctx context.Context, in *CallUNORequest, opts ...grpc.CallOption) (*CallUNOResponse, error)
 	Challenge(ctx context.Context, in *ChallengeRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	IndicateUNO(ctx context.Context, in *IndicateUNORequest, opts ...grpc.CallOption) (*IndicateUNOResponse, error)
+	RoomEvent(ctx context.Context, in *RoomEventRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RoomEventResponse], error)
 	// 测试用接口，前端禁止直接调用
 	TEST_SetPlayerCard(ctx context.Context, in *TEST_SetPlayerCardRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
@@ -130,10 +134,20 @@ func (c *unoClient) DrawCard(ctx context.Context, in *DrawCardRequest, opts ...g
 	return out, nil
 }
 
-func (c *unoClient) SendCardAction(ctx context.Context, in *SendCardActionRequest, opts ...grpc.CallOption) (*SendCardActionResponse, error) {
+func (c *unoClient) SendCard(ctx context.Context, in *SendCardRequest, opts ...grpc.CallOption) (*SendCardResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendCardActionResponse)
-	err := c.cc.Invoke(ctx, Uno_SendCardAction_FullMethodName, in, out, cOpts...)
+	out := new(SendCardResponse)
+	err := c.cc.Invoke(ctx, Uno_SendCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unoClient) NoSendCard(ctx context.Context, in *NoSendCardRequest, opts ...grpc.CallOption) (*NoSendCardResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NoSendCardResponse)
+	err := c.cc.Invoke(ctx, Uno_NoSendCard_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -170,6 +184,25 @@ func (c *unoClient) IndicateUNO(ctx context.Context, in *IndicateUNORequest, opt
 	return out, nil
 }
 
+func (c *unoClient) RoomEvent(ctx context.Context, in *RoomEventRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RoomEventResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Uno_ServiceDesc.Streams[0], Uno_RoomEvent_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[RoomEventRequest, RoomEventResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Uno_RoomEventClient = grpc.ServerStreamingClient[RoomEventResponse]
+
 func (c *unoClient) TEST_SetPlayerCard(ctx context.Context, in *TEST_SetPlayerCardRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
@@ -191,10 +224,12 @@ type UnoServer interface {
 	ExitRoom(context.Context, *ExitRoomRequest) (*ExitRoomResponse, error)
 	StartRoom(context.Context, *StartRoomRequest) (*BasicResponse, error)
 	DrawCard(context.Context, *DrawCardRequest) (*DrawCardResponse, error)
-	SendCardAction(context.Context, *SendCardActionRequest) (*SendCardActionResponse, error)
+	SendCard(context.Context, *SendCardRequest) (*SendCardResponse, error)
+	NoSendCard(context.Context, *NoSendCardRequest) (*NoSendCardResponse, error)
 	CallUNO(context.Context, *CallUNORequest) (*CallUNOResponse, error)
 	Challenge(context.Context, *ChallengeRequest) (*ChallengeResponse, error)
 	IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error)
+	RoomEvent(*RoomEventRequest, grpc.ServerStreamingServer[RoomEventResponse]) error
 	// 测试用接口，前端禁止直接调用
 	TEST_SetPlayerCard(context.Context, *TEST_SetPlayerCardRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedUnoServer()
@@ -228,8 +263,11 @@ func (UnimplementedUnoServer) StartRoom(context.Context, *StartRoomRequest) (*Ba
 func (UnimplementedUnoServer) DrawCard(context.Context, *DrawCardRequest) (*DrawCardResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DrawCard not implemented")
 }
-func (UnimplementedUnoServer) SendCardAction(context.Context, *SendCardActionRequest) (*SendCardActionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendCardAction not implemented")
+func (UnimplementedUnoServer) SendCard(context.Context, *SendCardRequest) (*SendCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendCard not implemented")
+}
+func (UnimplementedUnoServer) NoSendCard(context.Context, *NoSendCardRequest) (*NoSendCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NoSendCard not implemented")
 }
 func (UnimplementedUnoServer) CallUNO(context.Context, *CallUNORequest) (*CallUNOResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CallUNO not implemented")
@@ -239,6 +277,9 @@ func (UnimplementedUnoServer) Challenge(context.Context, *ChallengeRequest) (*Ch
 }
 func (UnimplementedUnoServer) IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IndicateUNO not implemented")
+}
+func (UnimplementedUnoServer) RoomEvent(*RoomEventRequest, grpc.ServerStreamingServer[RoomEventResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method RoomEvent not implemented")
 }
 func (UnimplementedUnoServer) TEST_SetPlayerCard(context.Context, *TEST_SetPlayerCardRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TEST_SetPlayerCard not implemented")
@@ -390,20 +431,38 @@ func _Uno_DrawCard_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Uno_SendCardAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendCardActionRequest)
+func _Uno_SendCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendCardRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnoServer).SendCardAction(ctx, in)
+		return srv.(UnoServer).SendCard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Uno_SendCardAction_FullMethodName,
+		FullMethod: Uno_SendCard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnoServer).SendCardAction(ctx, req.(*SendCardActionRequest))
+		return srv.(UnoServer).SendCard(ctx, req.(*SendCardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Uno_NoSendCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NoSendCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).NoSendCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_NoSendCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).NoSendCard(ctx, req.(*NoSendCardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -462,6 +521,17 @@ func _Uno_IndicateUNO_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Uno_RoomEvent_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RoomEventRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(UnoServer).RoomEvent(m, &grpc.GenericServerStream[RoomEventRequest, RoomEventResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Uno_RoomEventServer = grpc.ServerStreamingServer[RoomEventResponse]
+
 func _Uno_TEST_SetPlayerCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TEST_SetPlayerCardRequest)
 	if err := dec(in); err != nil {
@@ -516,8 +586,12 @@ var Uno_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Uno_DrawCard_Handler,
 		},
 		{
-			MethodName: "SendCardAction",
-			Handler:    _Uno_SendCardAction_Handler,
+			MethodName: "SendCard",
+			Handler:    _Uno_SendCard_Handler,
+		},
+		{
+			MethodName: "NoSendCard",
+			Handler:    _Uno_NoSendCard_Handler,
 		},
 		{
 			MethodName: "CallUNO",
@@ -536,6 +610,12 @@ var Uno_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Uno_TEST_SetPlayerCard_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "RoomEvent",
+			Handler:       _Uno_RoomEvent_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "plugin/uno/protos/uno/uno.proto",
 }

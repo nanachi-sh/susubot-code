@@ -140,15 +140,15 @@ func (r *Room) DrawCard(p *player.Player) (*DrawCardEvent, *uno_pb.Errors) {
 type SendCardEvent struct {
 	GameFinish bool
 
-	GameFinishE *uno_pb.SendCardActionResponse_GameFinishEvent
+	GameFinishE *uno_pb.RoomEventResponse_GameFinishEvent
 }
 
-func (r *Room) gameFinish() *uno_pb.SendCardActionResponse_GameFinishEvent {
+func (r *Room) gameFinish() *uno_pb.RoomEventResponse_GameFinishEvent {
 	ps := []*uno_pb.PlayerInfo{}
 	for _, v := range r.players {
 		ps = append(ps, v.FormatToProtoBuf())
 	}
-	return &uno_pb.SendCardActionResponse_GameFinishEvent{
+	return &uno_pb.RoomEventResponse_GameFinishEvent{
 		Players: ps,
 		Winner:  r.operatorNow.FormatToProtoBuf(),
 	}
