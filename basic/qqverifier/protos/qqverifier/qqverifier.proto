@@ -24,7 +24,7 @@ service qqverifier {
     rpc NewVerify (NewVerifyRequest) returns (NewVerifyResponse) {
         option (google.api.http) = {
             post: "/v1/verify"
-            body: "QQID"
+            body: "*"
         };
     }
     rpc Verify (VerifyRequest) returns (VerifyResponse) {

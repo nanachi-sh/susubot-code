@@ -114,6 +114,7 @@ FOROUT:
 		gfl := resp.CmdEvent.GetFriendList
 		for _, v := range gfl.Friends {
 			if v.UserId == req.QQID {
+				ok = true
 				break FOROUT
 			}
 		}
@@ -123,11 +124,29 @@ FOROUT:
 			Err: qqverifier_pb.Errors_NoFriend.Enum(),
 		}, nil
 	}
+	code := randomString(4, OnlyNumber)
 	hash := hash()
+	reqResp, err := define.RequestC.SendFriendMessage(define.HandlerCtx, &request.SendFriendMessageRequest{
+		FriendId: req.QQID,
+		MessageChain: []*request.MessageChainObject{
+			&request.MessageChainObject{
+				Type: request.MessageChainType_MessageChainType_Text,
+				Text: &request.MessageChain_Text{
+					Text: fmt.Sprintf("你的验证码为: %v", code),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if _, err := define.ConnectorC.Write(define.ConnectorCtx, &connector.WriteRequest{Buf: reqResp.Buf}); err != nil {
+		return nil, err
+	}
 	verifyList = append(verifyList, &verifyinfo{
 		hash:              hash,
 		qqid:              req.QQID,
-		code:              randomString(4, OnlyNumber),
+		code:              code,
 		expiredTime:       time.Now().Add(time.Millisecond * time.Duration(req.Expires)),
 		intervalAfterTime: time.Now().Add(time.Millisecond * time.Duration(req.Interval)),
 		verified:          false,
