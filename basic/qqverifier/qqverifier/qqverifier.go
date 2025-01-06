@@ -189,7 +189,7 @@ func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, er
 	if req.VerifyHash == "" || req.VerifyCode == "" {
 		return nil, errors.New("Hash或Code不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash, false, false)
+	vi, ok := findVerifyFromHash(req.VerifyHash)
 	if !ok {
 		return &qqverifier_pb.VerifyResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
@@ -220,7 +220,7 @@ func Verified(req *qqverifier_pb.VerifiedRequest) (*qqverifier_pb.VerifiedRespon
 	if req.VerifyHash == "" {
 		return nil, errors.New("Hash不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash, false, false)
+	vi, ok := findVerifyFromHash(req.VerifyHash)
 	if !ok {
 		return &qqverifier_pb.VerifiedResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
