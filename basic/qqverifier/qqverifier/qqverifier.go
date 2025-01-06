@@ -31,6 +31,9 @@ type verifyinfo struct {
 }
 
 func (vi *verifyinfo) Expired() bool {
+	fmt.Println("expired")
+	fmt.Println(vi)
+	fmt.Println(vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime))
 	return vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime)
 }
 
@@ -39,6 +42,9 @@ func (vi *verifyinfo) MarkExpired() {
 }
 
 func (vi *verifyinfo) Intervaling() bool {
+	fmt.Println("intervaling")
+	fmt.Println(vi)
+	fmt.Println(vi.intervalAfterTime.UnixNano() > time.Now().UnixNano())
 	return vi.intervalAfterTime.UnixNano() > time.Now().UnixNano()
 }
 
@@ -76,6 +82,9 @@ func findVerifyFromHash(hash string, filterExipred bool) (*verifyinfo, bool) {
 }
 
 func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyResponse, error) {
+	if req.QQID == "" {
+		return nil, errors.New("QQID不能为空")
+	}
 	if vi, ok := findVerifyFromQQId(req.QQID, true); ok {
 		if vi.Intervaling() {
 			return &qqverifier_pb.NewVerifyResponse{
@@ -86,9 +95,6 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 				vi.MarkExpired()
 			}
 		}
-	}
-	if req.QQID == "" {
-		return nil, errors.New("QQID不能为空")
 	}
 	if req.Interval == 0 {
 		req.Interval = 60 * 1000
@@ -137,6 +143,7 @@ FOROUT:
 				break FOROUT
 			}
 		}
+		break
 	}
 	if !ok {
 		return &qqverifier_pb.NewVerifyResponse{
