@@ -51,29 +51,20 @@ func hash() string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
-func findVerifyFromQQId(id string, filterExipred, filterVerified bool) (*verifyinfo, bool) {
-	for _, v := range verifyList {
-		if filterExipred && v.Expired() {
-			continue
-		}
-		if filterVerified && v.verified {
-			continue
-		}
+func findVerifyFromQQId(id string, start int) (*verifyinfo, int, bool) {
+	if start > len(verifyList)-1 || start < 0 {
+		return nil, -1, false
+	}
+	for i, v := range verifyList[start:] {
 		if v.qqid == id {
-			return v, true
+			return v, i, true
 		}
 	}
-	return nil, false
+	return nil, -1, false
 }
 
-func findVerifyFromHash(hash string, filterExipred, filterVerified bool) (*verifyinfo, bool) {
+func findVerifyFromHash(hash string) (*verifyinfo, bool) {
 	for _, v := range verifyList {
-		if filterExipred && v.Expired() {
-			continue
-		}
-		if filterVerified && v.verified {
-			continue
-		}
 		if v.hash == hash {
 			return v, true
 		}
@@ -85,16 +76,22 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 	if req.QQID == "" {
 		return nil, errors.New("QQID不能为空")
 	}
-	if vi, ok := findVerifyFromQQId(req.QQID, true, true); ok {
-		if vi.Intervaling() {
-			return &qqverifier_pb.NewVerifyResponse{
-				Err: qqverifier_pb.Errors_Intervaling.Enum(),
-			}, nil
-		} else {
-			if !vi.Expired() && !vi.verified {
-				vi.MarkExpired()
-			}
+	for n := 0; ; {
+		vi, position, ok := findVerifyFromQQId(req.QQID, n)
+		//无结果，返回
+		if !ok {
+			break
 		}
+		n = position
+		//不是间隔内，下一个
+		if !vi.Intervaling() {
+			continue
+		}
+		// 间隔内，若还未验证，则设为过期
+		if !vi.Expired() && !vi.verified {
+			vi.MarkExpired()
+		}
+		return &qqverifier_pb.NewVerifyResponse{Err: qqverifier_pb.Errors_Intervaling.Enum()}, nil
 	}
 	// if req.Interval == 0 {
 	// 	req.Interval = 60 * 1000
