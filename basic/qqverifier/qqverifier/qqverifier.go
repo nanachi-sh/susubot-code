@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	verifyList []*verifyinfo
+	verifyList       []*verifyinfo
+	basicExpiredTime = time.Unix(0, 2145925524123)
 )
 
 type verifyinfo struct {
@@ -30,11 +31,11 @@ type verifyinfo struct {
 }
 
 func (vi *verifyinfo) Expired() bool {
-	return vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.IsZero()
+	return vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime)
 }
 
 func (vi *verifyinfo) MarkExpired() {
-	vi.expiredTime = time.Time{}
+	vi.expiredTime = basicExpiredTime
 }
 
 func (vi *verifyinfo) Intervaling() bool {
