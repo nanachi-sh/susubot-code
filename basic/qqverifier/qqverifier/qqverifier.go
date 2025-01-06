@@ -61,20 +61,6 @@ func findVerifysFromQQId(id string) []*verifyinfo {
 	return ret
 }
 
-func deleteVerify(hash string) bool {
-	for i, v := range verifyList {
-		if v.hash == hash {
-			if len(verifyList) == 1 {
-				verifyList = []*verifyinfo{}
-			} else {
-				verifyList = append(verifyList[:i], verifyList[i+1:]...)
-			}
-			return true
-		}
-	}
-	return false
-}
-
 func findVerifyFromHash(hash string) (*verifyinfo, bool) {
 	for _, v := range verifyList {
 		if v.hash == hash {
@@ -92,9 +78,7 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 		if !v.Intervaling() {
 			// 超过间隔且还未验证
 			if !v.verified {
-				if !deleteVerify(v.hash) {
-					return nil, errors.New("非预期错误")
-				}
+				v.MarkExpired()
 			}
 			continue
 		}
