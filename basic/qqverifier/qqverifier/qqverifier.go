@@ -68,8 +68,8 @@ func deleteVerify(hash string) bool {
 				verifyList = []*verifyinfo{}
 			} else {
 				verifyList = append(verifyList[:i], verifyList[i+1:]...)
-				return true
 			}
+			return true
 		}
 	}
 	return false
