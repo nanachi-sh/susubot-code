@@ -76,10 +76,6 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 	}
 	for _, v := range findVerifysFromQQId(req.QQID) {
 		if !v.Intervaling() {
-			// 超过间隔且还未验证
-			if !v.verified {
-				v.MarkExpired()
-			}
 			continue
 		}
 		return &qqverifier_pb.NewVerifyResponse{Err: qqverifier_pb.Errors_Intervaling.Enum()}, nil
