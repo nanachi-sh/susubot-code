@@ -1,6 +1,7 @@
 package qqverifier
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -66,6 +67,9 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 				vi.expiredTime = time.Unix(0, 0)
 			}
 		}
+	}
+	if req.QQID == "" {
+		return nil, errors.New("QQID不能为空")
 	}
 	if req.Interval == 0 {
 		req.Interval = 60 * 1000
@@ -134,6 +138,9 @@ FOROUT:
 }
 
 func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, error) {
+	if req.VerifyHash == "" || req.VerifyCode == "" {
+		return nil, errors.New("Hash或Code不能为空")
+	}
 	vi, ok := findVerifyFromHash(req.VerifyHash)
 	if !ok {
 		return &qqverifier_pb.VerifyResponse{
@@ -162,6 +169,9 @@ func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, er
 }
 
 func Verified(req *qqverifier_pb.VerifiedRequest) (*qqverifier_pb.VerifiedResponse, error) {
+	if req.VerifyHash == "" {
+		return nil, errors.New("Hash不能为空")
+	}
 	vi, ok := findVerifyFromHash(req.VerifyHash)
 	if !ok {
 		return &qqverifier_pb.VerifiedResponse{
