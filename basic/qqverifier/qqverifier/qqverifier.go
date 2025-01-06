@@ -51,9 +51,12 @@ func hash() string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
-func findVerifyFromQQId(id string, filterExipred bool) (*verifyinfo, bool) {
+func findVerifyFromQQId(id string, filterExipred, filterVerified bool) (*verifyinfo, bool) {
 	for _, v := range verifyList {
 		if filterExipred && v.Expired() {
+			continue
+		}
+		if filterVerified && v.verified {
 			continue
 		}
 		if v.qqid == id {
@@ -63,9 +66,12 @@ func findVerifyFromQQId(id string, filterExipred bool) (*verifyinfo, bool) {
 	return nil, false
 }
 
-func findVerifyFromHash(hash string, filterExipred bool) (*verifyinfo, bool) {
+func findVerifyFromHash(hash string, filterExipred, filterVerified bool) (*verifyinfo, bool) {
 	for _, v := range verifyList {
 		if filterExipred && v.Expired() {
+			continue
+		}
+		if filterVerified && v.verified {
 			continue
 		}
 		if v.hash == hash {
@@ -79,7 +85,7 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 	if req.QQID == "" {
 		return nil, errors.New("QQID不能为空")
 	}
-	if vi, ok := findVerifyFromQQId(req.QQID, true); ok {
+	if vi, ok := findVerifyFromQQId(req.QQID, true, true); ok {
 		if vi.Intervaling() {
 			return &qqverifier_pb.NewVerifyResponse{
 				Err: qqverifier_pb.Errors_Intervaling.Enum(),
@@ -180,7 +186,7 @@ func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, er
 	if req.VerifyHash == "" || req.VerifyCode == "" {
 		return nil, errors.New("Hash或Code不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash, true)
+	vi, ok := findVerifyFromHash(req.VerifyHash, false, false)
 	if !ok {
 		return &qqverifier_pb.VerifyResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
@@ -211,7 +217,7 @@ func Verified(req *qqverifier_pb.VerifiedRequest) (*qqverifier_pb.VerifiedRespon
 	if req.VerifyHash == "" {
 		return nil, errors.New("Hash不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash, false)
+	vi, ok := findVerifyFromHash(req.VerifyHash, false, false)
 	if !ok {
 		return &qqverifier_pb.VerifiedResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
