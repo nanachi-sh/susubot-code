@@ -31,7 +31,7 @@ type verifyinfo struct {
 }
 
 func (vi *verifyinfo) Expired() bool {
-	return !(vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime))
+	return !(vi.expiredTime.UnixNano() > time.Now().UnixNano()) || vi.expiredTime.Equal(basicExpiredTime)
 }
 
 func (vi *verifyinfo) MarkExpired() {
