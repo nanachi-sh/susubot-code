@@ -82,7 +82,7 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 		if !ok {
 			break
 		}
-		n = position
+		n = position + 1
 		//不是间隔内，下一个
 		if !vi.Intervaling() {
 			continue
