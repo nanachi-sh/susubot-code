@@ -31,10 +31,7 @@ type verifyinfo struct {
 }
 
 func (vi *verifyinfo) Expired() bool {
-	fmt.Println("expired")
-	fmt.Println(vi)
-	fmt.Println(vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime))
-	return vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime)
+	return !(vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.Equal(basicExpiredTime))
 }
 
 func (vi *verifyinfo) MarkExpired() {
@@ -42,10 +39,7 @@ func (vi *verifyinfo) MarkExpired() {
 }
 
 func (vi *verifyinfo) Intervaling() bool {
-	fmt.Println("intervaling")
-	fmt.Println(vi)
-	fmt.Println(vi.intervalAfterTime.UnixNano() > time.Now().UnixNano())
-	return vi.intervalAfterTime.UnixNano() > time.Now().UnixNano()
+	return !(vi.intervalAfterTime.UnixNano() > time.Now().UnixNano())
 }
 
 func hash() string {
