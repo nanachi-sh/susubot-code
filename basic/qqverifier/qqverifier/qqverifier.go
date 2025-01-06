@@ -39,7 +39,7 @@ func (vi *verifyinfo) MarkExpired() {
 }
 
 func (vi *verifyinfo) Intervaling() bool {
-	return !(vi.intervalAfterTime.UnixNano() > time.Now().UnixNano())
+	return vi.intervalAfterTime.UnixNano() > time.Now().UnixNano()
 }
 
 func hash() string {
