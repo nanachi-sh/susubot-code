@@ -29,6 +29,18 @@ type verifyinfo struct {
 	verified          bool
 }
 
+func (vi *verifyinfo) Expired() bool {
+	return vi.expiredTime.UnixNano() > time.Now().UnixNano() || vi.expiredTime.IsZero()
+}
+
+func (vi *verifyinfo) MarkExpired() {
+	vi.expiredTime = time.Time{}
+}
+
+func (vi *verifyinfo) Intervaling() bool {
+	return vi.intervalAfterTime.UnixNano() > time.Now().UnixNano()
+}
+
 func hash() string {
 	buf := make([]byte, 100)
 	for n := 0; n != len(buf); n++ {
@@ -38,8 +50,11 @@ func hash() string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
-func findVerifyFromQQId(id string) (*verifyinfo, bool) {
+func findVerifyFromQQId(id string, filterExipred bool) (*verifyinfo, bool) {
 	for _, v := range verifyList {
+		if filterExipred && v.Expired() {
+			continue
+		}
 		if v.qqid == id {
 			return v, true
 		}
@@ -47,8 +62,11 @@ func findVerifyFromQQId(id string) (*verifyinfo, bool) {
 	return nil, false
 }
 
-func findVerifyFromHash(hash string) (*verifyinfo, bool) {
+func findVerifyFromHash(hash string, filterExipred bool) (*verifyinfo, bool) {
 	for _, v := range verifyList {
+		if filterExipred && v.Expired() {
+			continue
+		}
 		if v.hash == hash {
 			return v, true
 		}
@@ -57,14 +75,14 @@ func findVerifyFromHash(hash string) (*verifyinfo, bool) {
 }
 
 func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyResponse, error) {
-	if vi, ok := findVerifyFromQQId(req.QQID); ok {
-		if vi.intervalAfterTime.UnixNano() > time.Now().UnixNano() {
+	if vi, ok := findVerifyFromQQId(req.QQID, true); ok {
+		if vi.Intervaling() {
 			return &qqverifier_pb.NewVerifyResponse{
 				Err: qqverifier_pb.Errors_Intervaling.Enum(),
 			}, nil
 		} else {
-			if !vi.verified {
-				vi.expiredTime = time.Unix(0, 0)
+			if !vi.Expired() && !vi.verified {
+				vi.MarkExpired()
 			}
 		}
 	}
@@ -160,13 +178,13 @@ func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, er
 	if req.VerifyHash == "" || req.VerifyCode == "" {
 		return nil, errors.New("Hash或Code不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash)
+	vi, ok := findVerifyFromHash(req.VerifyHash, true)
 	if !ok {
 		return &qqverifier_pb.VerifyResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
 		}, nil
 	}
-	if vi.expiredTime.UnixNano() > time.Now().UnixNano() {
+	if vi.Expired() {
 		return &qqverifier_pb.VerifyResponse{
 			Err: qqverifier_pb.Errors_Expired.Enum(),
 		}, nil
@@ -191,13 +209,13 @@ func Verified(req *qqverifier_pb.VerifiedRequest) (*qqverifier_pb.VerifiedRespon
 	if req.VerifyHash == "" {
 		return nil, errors.New("Hash不能为空")
 	}
-	vi, ok := findVerifyFromHash(req.VerifyHash)
+	vi, ok := findVerifyFromHash(req.VerifyHash, false)
 	if !ok {
 		return &qqverifier_pb.VerifiedResponse{
 			Err: qqverifier_pb.Errors_VerifyNoFound.Enum(),
 		}, nil
 	}
-	if vi.expiredTime.UnixNano() > time.Now().UnixNano() {
+	if vi.Expired() {
 		return &qqverifier_pb.VerifiedResponse{
 			Err: qqverifier_pb.Errors_Expired.Enum(),
 		}, nil
