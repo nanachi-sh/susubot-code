@@ -10,7 +10,6 @@ service uno {
     rpc CreateRoom (Empty) returns (CreateRoomResponse) {
         option (google.api.http) = {
             post: "/v1/rooms"
-            body: "*"
         };
     }
     rpc GetRooms (Empty) returns (GetRoomsResponse) {
@@ -20,15 +19,18 @@ service uno {
     }
     rpc GetRoom (GetRoomRequest) returns (GetRoomResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms/{RoomHash}" //获取基本信息
-            additional_bindings: {
-                get: "/v1/rooms/{RoomHash}/full" //获取完整信息(需验证)
-            }
+            get: "/v1/rooms/{RoomHash}" //获取基本信息(若存在验证，则为完整信息)
+        };
+    }
+    rpc GetPlayer (GetPlayerRequest) returns (GetPlayerResponse) {
+        option (google.api.http) = {
+            get: "/v1/rooms/{RoomHash}/players/{PlayerId}"  
         };
     }
     rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse) {
         option (google.api.http) = {
-            put: "/v1/rooms/{RoomHash}/players/{PlayerId}/{PlayerName}" //添加玩家(需验证玩家ID哈希)
+            put: "/v1/rooms/{RoomHash}/players" //添加玩家(需验证玩家ID哈希)
+            body: "PlayerInfo"
         };
     }
     rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse) {
@@ -43,30 +45,42 @@ service uno {
     }
     rpc DrawCard (DrawCardRequest) returns (DrawCardResponse) {
         option (google.api.http) = {
-            patch: "/v1/rooms/{RoomHash}/play/DrawCard/{PlayerId}" //获取牌
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/DrawCard" //摸牌
         };
     }
     rpc SendCard (SendCardRequest) returns (SendCardResponse) {
         option (google.api.http) = {
-            patch: "/v1/rooms/{RoomHash}/play/SendCard/{PlayerId}/{Card}/{Color}" //出牌
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/SendCard" //出牌
+            body: "SendCard"
         };
     }
     rpc NoSendCard (NoSendCardRequest) returns (NoSendCardResponse) {
         option (google.api.http) = {
-            patch: "/v1/rooms/{RoomHash}/play/NoSendCard/{PlayerId}" //不出牌
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/NoSendCard" //不出牌
         };
     }
     rpc CallUNO (CallUNORequest) returns (CallUNOResponse) {
-
-    }
-    rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
-    rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
-    rpc RoomEvent (RoomEventRequest) returns (stream RoomEventResponse) {
         option (google.api.http) = {
-            get: "/v1/rooms/{RoomHash}/event" //获取事件流(需验证混合哈希)
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/CallUNO" //报UNO
         };
     }
-    // 测试用接口，前端禁止直接调用
+    rpc Challenge (ChallengeRequest) returns (ChallengeResponse) {
+        option (google.api.http) = {
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/Challenge" //挑战Wild draw four
+        };
+    }
+    rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse) {
+        option (google.api.http) = {
+            patch: "/v1/rooms/{RoomHash}/players/{PlayerId}/play/IndicateUNO" //指出未报UNO
+            body: "TargetId"
+        };
+    }
+    rpc RoomEvent (RoomEventRequest) returns (stream RoomEventResponse) {
+        option (google.api.http) = {
+            get: "/v1/rooms/{RoomHash}/play/event" //获取游戏事件流(需验证混合哈希)
+        };
+    }
+    // 测试用接口，前端禁止直接调用，全部需验证
     rpc TEST_SetPlayerCard (TEST_SetPlayerCardRequest) returns (BasicResponse);
 }
 
@@ -175,6 +189,8 @@ message FeatureCard {
 message PlayerAccountInfo {
     string Id = 1;
     string Name = 2;
+    int32 WinCount = 3;
+    int32 LoseCount = 4;
 }
 
 message PlayerRoomInfo {
@@ -188,7 +204,15 @@ message PlayerInfo {
     optional PlayerRoomInfo PlayerRoomInfo = 2;
 }
 
-message Room {
+message RoomSimple {
+    string Hash = 1;
+    Stage Stage = 2;
+    optional PlayerAccountInfo OperatorNow = 3;
+    repeated PlayerAccountInfo Players = 4;
+    optional PlayerAccountInfo Banker = 5;
+}
+
+message RoomExtra {
     string Hash = 1;
     Stage Stage = 2;
     optional PlayerInfo Banker = 3;
@@ -213,22 +237,33 @@ message GetRoomRequest {
 
 message GetRoomResponse {
     optional Errors err = 1;
-    Room Info = 2;
+    optional RoomSimple Simple = 2;
+    optional RoomExtra Extra = 3;
+}
+
+message GetPlayerRequest {
+    string RoomHash = 1;
+    string PlayerId = 2;
+}
+
+message GetPlayerResponse {
+    optional Errors err = 1;
+    optional PlayerAccountInfo Simple = 2;
+    optional PlayerInfo Extra = 3;
 }
 
 message GetRoomsResponse {
-    repeated Room Infos = 1;
+    repeated RoomSimple Rooms = 1;
 }
 
 message JoinRoomRequest {
-    string PlayerId = 1;
-    string PlayerName = 2;
-    string RoomHash = 3;
+    PlayerAccountInfo PlayerInfo = 1;
+    string RoomHash = 2;
 }
 
 message JoinRoomResponse {
     optional Errors err = 1;
-    repeated PlayerInfo Players = 2;
+    repeated PlayerAccountInfo Players = 2;
 }
 
 message ExitRoomRequest {
@@ -238,7 +273,7 @@ message ExitRoomRequest {
 
 message ExitRoomResponse {
     optional Errors err = 1;
-    repeated PlayerInfo Players = 2;
+    repeated PlayerAccountInfo Players = 2;
 }
 
 message StartRoomRequest {
@@ -251,47 +286,28 @@ message DrawCardRequest {
 }
 
 message DrawCardResponse {
-    message IntoSendCardEvent {
-        repeated PlayerInfo Players = 1;
-        PlayerInfo Banker = 2; //
-        Card LeadCard = 3; //引牌    
+    message DrawCard_ElectingBanker {
+        Card ElectBankerCard = 1;
     }
-    message SkippedEvent {
-        PlayerInfo NextOperator = 1;
+    message DrawCard_SendingCard {
+        repeated Card PlayerCard = 1;
+        Card DrawCard = 2;
     }
-
     optional Errors err = 1;
-    optional Card ElectBankerCard = 2; //仅抽庄家时
-    repeated Card PlayerCard = 3; //仅出牌阶段时
-    optional Card DrawCard = 9; //仅出牌阶段时
-    Stage Stage = 4;
-
-    bool IntoSendCard = 6;
-    optional IntoSendCardEvent IntoSendCardE = 7;
-    bool Skipped = 5; //玩家被Draw two等牌跳过回合
-    optional SkippedEvent SkippedE = 8; //Skipped == true
+    optional DrawCard_ElectingBanker ElectingBanker = 2;
+    optional DrawCard_SendingCard SendingCard = 3;
 }
 
 message SendCardRequest {
     string PlayerId = 1;
-    string Color = 2; //Red, Blue, Yellow, Green
-    string Card = 3; //0-9, Draw two, Wild draw four, Wild, Reverse, Skip
-    string RoomHash = 4;
+    string RoomHash = 2;
+    Card SendCard = 3;
 }
 
 message SendCardResponse {
-    message GameFinishEvent {
-        repeated PlayerInfo Players = 1;
-        PlayerInfo Winner = 2;
-    }
-
     optional Errors err = 1;
-    PlayerInfo NextOperator = 2;
-    repeated Card SenderCard = 4;
-
-    bool GameFinish = 5;
-
-    optional GameFinishEvent GameFinishE = 3;
+    optional PlayerAccountInfo NextOperator = 2;
+    repeated Card SenderCards = 3;
 }
 
 message NoSendCardRequest {
@@ -301,36 +317,38 @@ message NoSendCardRequest {
 
 message NoSendCardResponse {
     optional Errors err = 1;
+    optional PlayerAccountInfo NextOperator = 2;
 }
 
 message CallUNORequest {
     string PlayerId = 1;
+    string RoomHash = 2;
 }
 
 message CallUNOResponse {
     optional Errors err = 1;
-    repeated Card PlayerCard = 2;
+    repeated Card PlayerCard = 2; //被罚牌时有效
 }
 
 message ChallengeRequest {
     string PlayerId = 1;
+    string RoomHash = 2;
 }
 
 message ChallengeResponse {
     optional Errors err = 1;
-    bool Win = 2;
-    optional PlayerInfo LastPlayer = 3;
+    bool IsWin = 2;
 }
 
 message IndicateUNORequest {
-    // string PlayerId = 1;
+    string PlayerId = 1;
     string TargetId = 2;
+    string RoomHash = 3;
 }
 
 message IndicateUNOResponse {
     optional Errors err = 1;
-    bool IndicateOK = 2;
-    optional PlayerInfo Punished = 3;
+    bool IndicateSuccessed = 2;
 }
 
 message RoomEventRequest {
@@ -338,13 +356,27 @@ message RoomEventRequest {
 }
 
 message RoomEventResponse {
-    message GameFinishEvent {
-        repeated PlayerInfo Players = 1;
-        PlayerInfo Winner = 2;
+    message SendCard_GameFinishEvent { //游戏结束事件
+        repeated PlayerAccountInfo Players = 1;
+        PlayerAccountInfo Winner = 2;
+    }
+    message DrawCard_IntoSendCardEvent { //进入出牌阶段事件
+        repeated PlayerAccountInfo Players = 1;
+        PlayerAccountInfo Banker = 2; //
+        Card LeadCard = 3; //引牌    
+    }
+    message DrawCard_SkippedEvent { //玩家被跳过事件
+        PlayerAccountInfo NextOperator = 1;
+    }
+    message IndicateUNO_SuccessEvent { //指出未报UNO成功事件
+        PlayerAccountInfo Punished = 1;
     }
 
     optional Errors err = 1;
-    optional GameFinishEvent GameFinish = 2;
+    optional SendCard_GameFinishEvent SendCard_GameFinish = 2;
+    optional DrawCard_IntoSendCardEvent DrawCard_IntoSendCard = 3;
+    optional DrawCard_SkippedEvent DrawCard_Skipped = 4;
+    optional IndicateUNO_SuccessEvent IndicateUNO_Success = 5;
 }
 
 message TEST_SetPlayerCardRequest {

@@ -1,6 +1,7 @@
 package uno
 
 import (
+	"github.com/nanachi-sh/susubot-code/plugin/uno/db"
 	uno_pb "github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno/player"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno/room"
@@ -10,7 +11,9 @@ var (
 	rooms []*room.Room
 )
 
+// 仅允许正式玩家创建
 func CreateRoom() *uno_pb.CreateRoomResponse {
+	db.GetUser()
 	newRoom := room.New()
 	rooms = append(rooms, newRoom)
 	return &uno_pb.CreateRoomResponse{

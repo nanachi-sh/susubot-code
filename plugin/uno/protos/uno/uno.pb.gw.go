@@ -40,9 +40,6 @@ func request_Uno_CreateRoom_0(ctx context.Context, marshaler runtime.Marshaler, 
 		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := client.CreateRoom(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -52,9 +49,6 @@ func local_request_Uno_CreateRoom_0(ctx context.Context, marshaler runtime.Marsh
 		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := server.CreateRoom(ctx, &protoReq)
 	return msg, metadata, err
 }
@@ -113,45 +107,9 @@ func local_request_Uno_GetRoom_0(ctx context.Context, marshaler runtime.Marshale
 	return msg, metadata, err
 }
 
-func request_Uno_GetRoom_1(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Uno_GetPlayer_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetRoomRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["RoomHash"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
-	}
-	protoReq.RoomHash, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
-	}
-	msg, err := client.GetRoom(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_Uno_GetRoom_1(ctx context.Context, marshaler runtime.Marshaler, server UnoServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq GetRoomRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["RoomHash"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
-	}
-	protoReq.RoomHash, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
-	}
-	msg, err := server.GetRoom(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-func request_Uno_JoinRoom_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq JoinRoomRequest
+		protoReq GetPlayerRequest
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -171,13 +129,52 @@ func request_Uno_JoinRoom_0(ctx context.Context, marshaler runtime.Marshaler, cl
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
 	}
-	val, ok = pathParams["PlayerName"]
+	msg, err := client.GetPlayer(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Uno_GetPlayer_0(ctx context.Context, marshaler runtime.Marshaler, server UnoServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetPlayerRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["RoomHash"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerName")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
 	}
-	protoReq.PlayerName, err = runtime.String(val)
+	protoReq.RoomHash, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerName", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := server.GetPlayer(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Uno_JoinRoom_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq JoinRoomRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.PlayerInfo); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
 	}
 	msg, err := client.JoinRoom(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -189,6 +186,9 @@ func local_request_Uno_JoinRoom_0(ctx context.Context, marshaler runtime.Marshal
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.PlayerInfo); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	val, ok := pathParams["RoomHash"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
@@ -196,22 +196,6 @@ func local_request_Uno_JoinRoom_0(ctx context.Context, marshaler runtime.Marshal
 	protoReq.RoomHash, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
-	}
-	val, ok = pathParams["PlayerId"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
-	}
-	protoReq.PlayerId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
-	}
-	val, ok = pathParams["PlayerName"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerName")
-	}
-	protoReq.PlayerName, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerName", err)
 	}
 	msg, err := server.JoinRoom(ctx, &protoReq)
 	return msg, metadata, err
@@ -363,6 +347,9 @@ func request_Uno_SendCard_0(ctx context.Context, marshaler runtime.Marshaler, cl
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.SendCard); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	val, ok := pathParams["RoomHash"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
@@ -378,22 +365,6 @@ func request_Uno_SendCard_0(ctx context.Context, marshaler runtime.Marshaler, cl
 	protoReq.PlayerId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
-	}
-	val, ok = pathParams["Card"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Card")
-	}
-	protoReq.Card, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Card", err)
-	}
-	val, ok = pathParams["Color"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Color")
-	}
-	protoReq.Color, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Color", err)
 	}
 	msg, err := client.SendCard(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -405,6 +376,9 @@ func local_request_Uno_SendCard_0(ctx context.Context, marshaler runtime.Marshal
 		metadata runtime.ServerMetadata
 		err      error
 	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.SendCard); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	val, ok := pathParams["RoomHash"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
@@ -420,22 +394,6 @@ func local_request_Uno_SendCard_0(ctx context.Context, marshaler runtime.Marshal
 	protoReq.PlayerId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
-	}
-	val, ok = pathParams["Card"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Card")
-	}
-	protoReq.Card, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Card", err)
-	}
-	val, ok = pathParams["Color"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Color")
-	}
-	protoReq.Color, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Color", err)
 	}
 	msg, err := server.SendCard(ctx, &protoReq)
 	return msg, metadata, err
@@ -490,6 +448,168 @@ func local_request_Uno_NoSendCard_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
 	}
 	msg, err := server.NoSendCard(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Uno_CallUNO_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CallUNORequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := client.CallUNO(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Uno_CallUNO_0(ctx context.Context, marshaler runtime.Marshaler, server UnoServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CallUNORequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := server.CallUNO(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Uno_Challenge_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ChallengeRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := client.Challenge(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Uno_Challenge_0(ctx context.Context, marshaler runtime.Marshaler, server UnoServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ChallengeRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := server.Challenge(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_Uno_IndicateUNO_0(ctx context.Context, marshaler runtime.Marshaler, client UnoClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq IndicateUNORequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.TargetId); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := client.IndicateUNO(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_Uno_IndicateUNO_0(ctx context.Context, marshaler runtime.Marshaler, server UnoServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq IndicateUNORequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq.TargetId); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["RoomHash"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "RoomHash")
+	}
+	protoReq.RoomHash, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "RoomHash", err)
+	}
+	val, ok = pathParams["PlayerId"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PlayerId")
+	}
+	protoReq.PlayerId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PlayerId", err)
+	}
+	msg, err := server.IndicateUNO(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -585,25 +705,25 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 		}
 		forward_Uno_GetRoom_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_Uno_GetRoom_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_Uno_GetPlayer_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/GetRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/full"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/GetPlayer", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Uno_GetRoom_1(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Uno_GetPlayer_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_Uno_GetRoom_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Uno_GetPlayer_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPut, pattern_Uno_JoinRoom_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -611,7 +731,7 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/JoinRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/{PlayerName}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/JoinRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -671,7 +791,7 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/DrawCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/DrawCard/{PlayerId}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/DrawCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/DrawCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -691,7 +811,7 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/SendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/SendCard/{PlayerId}/{Card}/{Color}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/SendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/SendCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -711,7 +831,7 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/NoSendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/NoSendCard/{PlayerId}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/NoSendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/NoSendCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -724,6 +844,66 @@ func RegisterUnoHandlerServer(ctx context.Context, mux *runtime.ServeMux, server
 			return
 		}
 		forward_Uno_NoSendCard_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_Uno_CallUNO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/CallUNO", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/CallUNO"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Uno_CallUNO_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_CallUNO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_Uno_Challenge_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/Challenge", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/Challenge"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Uno_Challenge_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_Challenge_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_Uno_IndicateUNO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/susubot.plugin.uno.Uno/IndicateUNO", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/IndicateUNO"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Uno_IndicateUNO_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_IndicateUNO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	mux.Handle(http.MethodGet, pattern_Uno_RoomEvent_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
@@ -823,28 +1003,28 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 		}
 		forward_Uno_GetRoom_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_Uno_GetRoom_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_Uno_GetPlayer_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/GetRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/full"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/GetPlayer", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Uno_GetRoom_1(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Uno_GetPlayer_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_Uno_GetRoom_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Uno_GetPlayer_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPut, pattern_Uno_JoinRoom_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/JoinRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/{PlayerName}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/JoinRoom", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -895,7 +1075,7 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/DrawCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/DrawCard/{PlayerId}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/DrawCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/DrawCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -912,7 +1092,7 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/SendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/SendCard/{PlayerId}/{Card}/{Color}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/SendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/SendCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -929,7 +1109,7 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/NoSendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/NoSendCard/{PlayerId}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/NoSendCard", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/NoSendCard"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -942,11 +1122,62 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 		}
 		forward_Uno_NoSendCard_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodPatch, pattern_Uno_CallUNO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/CallUNO", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/CallUNO"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Uno_CallUNO_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_CallUNO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_Uno_Challenge_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/Challenge", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/Challenge"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Uno_Challenge_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_Challenge_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_Uno_IndicateUNO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/IndicateUNO", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/players/{PlayerId}/play/IndicateUNO"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Uno_IndicateUNO_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_Uno_IndicateUNO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_Uno_RoomEvent_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/RoomEvent", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/event"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/susubot.plugin.uno.Uno/RoomEvent", runtime.WithHTTPPathPattern("/v1/rooms/{RoomHash}/play/event"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -963,29 +1194,35 @@ func RegisterUnoHandlerClient(ctx context.Context, mux *runtime.ServeMux, client
 }
 
 var (
-	pattern_Uno_CreateRoom_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "rooms"}, ""))
-	pattern_Uno_GetRooms_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "rooms"}, ""))
-	pattern_Uno_GetRoom_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "rooms", "RoomHash"}, ""))
-	pattern_Uno_GetRoom_1    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "rooms", "RoomHash", "full"}, ""))
-	pattern_Uno_JoinRoom_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "PlayerName"}, ""))
-	pattern_Uno_ExitRoom_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId"}, ""))
-	pattern_Uno_StartRoom_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "rooms", "RoomHash", "play"}, ""))
-	pattern_Uno_DrawCard_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"v1", "rooms", "RoomHash", "play", "DrawCard", "PlayerId"}, ""))
-	pattern_Uno_SendCard_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 1, 0, 4, 1, 5, 6, 1, 0, 4, 1, 5, 7}, []string{"v1", "rooms", "RoomHash", "play", "SendCard", "PlayerId", "Card", "Color"}, ""))
-	pattern_Uno_NoSendCard_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"v1", "rooms", "RoomHash", "play", "NoSendCard", "PlayerId"}, ""))
-	pattern_Uno_RoomEvent_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "rooms", "RoomHash", "event"}, ""))
+	pattern_Uno_CreateRoom_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "rooms"}, ""))
+	pattern_Uno_GetRooms_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "rooms"}, ""))
+	pattern_Uno_GetRoom_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "rooms", "RoomHash"}, ""))
+	pattern_Uno_GetPlayer_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId"}, ""))
+	pattern_Uno_JoinRoom_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "rooms", "RoomHash", "players"}, ""))
+	pattern_Uno_ExitRoom_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId"}, ""))
+	pattern_Uno_StartRoom_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "rooms", "RoomHash", "play"}, ""))
+	pattern_Uno_DrawCard_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "DrawCard"}, ""))
+	pattern_Uno_SendCard_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "SendCard"}, ""))
+	pattern_Uno_NoSendCard_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "NoSendCard"}, ""))
+	pattern_Uno_CallUNO_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "CallUNO"}, ""))
+	pattern_Uno_Challenge_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "Challenge"}, ""))
+	pattern_Uno_IndicateUNO_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"v1", "rooms", "RoomHash", "players", "PlayerId", "play", "IndicateUNO"}, ""))
+	pattern_Uno_RoomEvent_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "rooms", "RoomHash", "play", "event"}, ""))
 )
 
 var (
-	forward_Uno_CreateRoom_0 = runtime.ForwardResponseMessage
-	forward_Uno_GetRooms_0   = runtime.ForwardResponseMessage
-	forward_Uno_GetRoom_0    = runtime.ForwardResponseMessage
-	forward_Uno_GetRoom_1    = runtime.ForwardResponseMessage
-	forward_Uno_JoinRoom_0   = runtime.ForwardResponseMessage
-	forward_Uno_ExitRoom_0   = runtime.ForwardResponseMessage
-	forward_Uno_StartRoom_0  = runtime.ForwardResponseMessage
-	forward_Uno_DrawCard_0   = runtime.ForwardResponseMessage
-	forward_Uno_SendCard_0   = runtime.ForwardResponseMessage
-	forward_Uno_NoSendCard_0 = runtime.ForwardResponseMessage
-	forward_Uno_RoomEvent_0  = runtime.ForwardResponseStream
+	forward_Uno_CreateRoom_0  = runtime.ForwardResponseMessage
+	forward_Uno_GetRooms_0    = runtime.ForwardResponseMessage
+	forward_Uno_GetRoom_0     = runtime.ForwardResponseMessage
+	forward_Uno_GetPlayer_0   = runtime.ForwardResponseMessage
+	forward_Uno_JoinRoom_0    = runtime.ForwardResponseMessage
+	forward_Uno_ExitRoom_0    = runtime.ForwardResponseMessage
+	forward_Uno_StartRoom_0   = runtime.ForwardResponseMessage
+	forward_Uno_DrawCard_0    = runtime.ForwardResponseMessage
+	forward_Uno_SendCard_0    = runtime.ForwardResponseMessage
+	forward_Uno_NoSendCard_0  = runtime.ForwardResponseMessage
+	forward_Uno_CallUNO_0     = runtime.ForwardResponseMessage
+	forward_Uno_Challenge_0   = runtime.ForwardResponseMessage
+	forward_Uno_IndicateUNO_0 = runtime.ForwardResponseMessage
+	forward_Uno_RoomEvent_0   = runtime.ForwardResponseStream
 )

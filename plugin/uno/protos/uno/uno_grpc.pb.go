@@ -22,6 +22,7 @@ const (
 	Uno_CreateRoom_FullMethodName         = "/susubot.plugin.uno.uno/CreateRoom"
 	Uno_GetRooms_FullMethodName           = "/susubot.plugin.uno.uno/GetRooms"
 	Uno_GetRoom_FullMethodName            = "/susubot.plugin.uno.uno/GetRoom"
+	Uno_GetPlayer_FullMethodName          = "/susubot.plugin.uno.uno/GetPlayer"
 	Uno_JoinRoom_FullMethodName           = "/susubot.plugin.uno.uno/JoinRoom"
 	Uno_ExitRoom_FullMethodName           = "/susubot.plugin.uno.uno/ExitRoom"
 	Uno_StartRoom_FullMethodName          = "/susubot.plugin.uno.uno/StartRoom"
@@ -42,6 +43,7 @@ type UnoClient interface {
 	CreateRoom(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*CreateRoomResponse, error)
 	GetRooms(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetRoomsResponse, error)
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*GetRoomResponse, error)
+	GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error)
 	JoinRoom(ctx context.Context, in *JoinRoomRequest, opts ...grpc.CallOption) (*JoinRoomResponse, error)
 	ExitRoom(ctx context.Context, in *ExitRoomRequest, opts ...grpc.CallOption) (*ExitRoomResponse, error)
 	StartRoom(ctx context.Context, in *StartRoomRequest, opts ...grpc.CallOption) (*BasicResponse, error)
@@ -52,7 +54,7 @@ type UnoClient interface {
 	Challenge(ctx context.Context, in *ChallengeRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	IndicateUNO(ctx context.Context, in *IndicateUNORequest, opts ...grpc.CallOption) (*IndicateUNOResponse, error)
 	RoomEvent(ctx context.Context, in *RoomEventRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RoomEventResponse], error)
-	// 测试用接口，前端禁止直接调用
+	// 测试用接口，前端禁止直接调用，全部需验证
 	TEST_SetPlayerCard(ctx context.Context, in *TEST_SetPlayerCardRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
 
@@ -88,6 +90,16 @@ func (c *unoClient) GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grp
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetRoomResponse)
 	err := c.cc.Invoke(ctx, Uno_GetRoom_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unoClient) GetPlayer(ctx context.Context, in *GetPlayerRequest, opts ...grpc.CallOption) (*GetPlayerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPlayerResponse)
+	err := c.cc.Invoke(ctx, Uno_GetPlayer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +232,7 @@ type UnoServer interface {
 	CreateRoom(context.Context, *Empty) (*CreateRoomResponse, error)
 	GetRooms(context.Context, *Empty) (*GetRoomsResponse, error)
 	GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error)
+	GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error)
 	JoinRoom(context.Context, *JoinRoomRequest) (*JoinRoomResponse, error)
 	ExitRoom(context.Context, *ExitRoomRequest) (*ExitRoomResponse, error)
 	StartRoom(context.Context, *StartRoomRequest) (*BasicResponse, error)
@@ -230,7 +243,7 @@ type UnoServer interface {
 	Challenge(context.Context, *ChallengeRequest) (*ChallengeResponse, error)
 	IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error)
 	RoomEvent(*RoomEventRequest, grpc.ServerStreamingServer[RoomEventResponse]) error
-	// 测试用接口，前端禁止直接调用
+	// 测试用接口，前端禁止直接调用，全部需验证
 	TEST_SetPlayerCard(context.Context, *TEST_SetPlayerCardRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedUnoServer()
 }
@@ -250,6 +263,9 @@ func (UnimplementedUnoServer) GetRooms(context.Context, *Empty) (*GetRoomsRespon
 }
 func (UnimplementedUnoServer) GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoom not implemented")
+}
+func (UnimplementedUnoServer) GetPlayer(context.Context, *GetPlayerRequest) (*GetPlayerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayer not implemented")
 }
 func (UnimplementedUnoServer) JoinRoom(context.Context, *JoinRoomRequest) (*JoinRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinRoom not implemented")
@@ -355,6 +371,24 @@ func _Uno_GetRoom_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UnoServer).GetRoom(ctx, req.(*GetRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Uno_GetPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlayerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).GetPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_GetPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).GetPlayer(ctx, req.(*GetPlayerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -568,6 +602,10 @@ var Uno_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRoom",
 			Handler:    _Uno_GetRoom_Handler,
+		},
+		{
+			MethodName: "GetPlayer",
+			Handler:    _Uno_GetPlayer_Handler,
 		},
 		{
 			MethodName: "JoinRoom",
