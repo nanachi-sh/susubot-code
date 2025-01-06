@@ -80,17 +80,11 @@ func NewVerify(req *qqverifier_pb.NewVerifyRequest) (*qqverifier_pb.NewVerifyRes
 		}
 		return &qqverifier_pb.NewVerifyResponse{Err: qqverifier_pb.Errors_Intervaling.Enum()}, nil
 	}
-	// if req.Interval == 0 {
-	// 	req.Interval = 60 * 1000
-	// }
-	// if req.Expires == 0 {
-	// 	req.Expires = 300 * 1000
-	// }
 	if req.Interval == 0 {
-		req.Interval = 6 * 1000
+		req.Interval = 60 * 1000
 	}
 	if req.Expires == 0 {
-		req.Expires = 30 * 1000
+		req.Expires = 300 * 1000
 	}
 	echo := randomString(6, Mixed)
 	resp, err := define.RequestC.GetFriendList(define.HandlerCtx, &request.BasicRequest{
