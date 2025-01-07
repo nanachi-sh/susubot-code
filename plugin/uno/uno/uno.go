@@ -85,6 +85,9 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 }
 
 func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomResponse, error) {
+	if req.RoomHash == "" || req.PlayerInfo == nil || (req.PlayerInfo.Id == "" || req.PlayerInfo.Name == "") {
+		return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}, nil
+	}
 	isTemp := CheckTempUser(req.PlayerInfo.Id)
 	isPrivilege := CheckPrivilegeUser(cs)
 	isNormal, err := CheckNormalUserFromSource(cs)
@@ -138,6 +141,9 @@ func GetRooms() *uno_pb.GetRoomsResponse {
 }
 
 func GetRoom(cs []*http.Cookie, req *uno_pb.GetRoomRequest) *uno_pb.GetRoomResponse {
+	if req.RoomHash == "" {
+		return &uno_pb.GetRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	isPrivilege := CheckPrivilegeUser(cs)
 	if r, ok := getRoom(req.RoomHash); !ok {
 		return &uno_pb.GetRoomResponse{
@@ -153,6 +159,9 @@ func GetRoom(cs []*http.Cookie, req *uno_pb.GetRoomRequest) *uno_pb.GetRoomRespo
 }
 
 func ExitRoom(cs []*http.Cookie, req *uno_pb.ExitRoomRequest) *uno_pb.ExitRoomResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.ExitRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.ExitRoomResponse{
@@ -189,6 +198,9 @@ func ExitRoom(cs []*http.Cookie, req *uno_pb.ExitRoomRequest) *uno_pb.ExitRoomRe
 }
 
 func StartRoom(cs []*http.Cookie, req *uno_pb.StartRoomRequest) *uno_pb.BasicResponse {
+	if req.RoomHash == "" {
+		return &uno_pb.BasicResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.BasicResponse{Err: uno_pb.Errors_NoFoundPlayerHash.Enum()}
@@ -209,6 +221,9 @@ func StartRoom(cs []*http.Cookie, req *uno_pb.StartRoomRequest) *uno_pb.BasicRes
 }
 
 func DrawCard(cs []*http.Cookie, req *uno_pb.DrawCardRequest) *uno_pb.DrawCardResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.DrawCardResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.DrawCardResponse{Err: uno_pb.Errors_NoFoundPlayerHash.Enum()}
@@ -272,7 +287,7 @@ func DrawCard(cs []*http.Cookie, req *uno_pb.DrawCardRequest) *uno_pb.DrawCardRe
 }
 
 func SendCard(cs []*http.Cookie, req *uno_pb.SendCardRequest) *uno_pb.SendCardResponse {
-	if req.SendCard == nil {
+	if req.PlayerId == "" || req.RoomHash == "" || req.SendCard == nil {
 		return &uno_pb.SendCardResponse{Err: uno_pb.Errors_Unexpected.Enum()}
 	}
 	playerHash, ok := GetPlayerHash(cs)
@@ -322,6 +337,9 @@ func SendCard(cs []*http.Cookie, req *uno_pb.SendCardRequest) *uno_pb.SendCardRe
 }
 
 func NoSendCard(cs []*http.Cookie, req *uno_pb.NoSendCardRequest) *uno_pb.NoSendCardResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.NoSendCardResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.NoSendCardResponse{Err: uno_pb.Errors_NoFoundPlayerHash.Enum()}
@@ -365,6 +383,9 @@ func NoSendCard(cs []*http.Cookie, req *uno_pb.NoSendCardRequest) *uno_pb.NoSend
 }
 
 func CallUNO(cs []*http.Cookie, req *uno_pb.CallUNORequest) *uno_pb.CallUNOResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.CallUNOResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.CallUNOResponse{
@@ -400,6 +421,9 @@ func CallUNO(cs []*http.Cookie, req *uno_pb.CallUNORequest) *uno_pb.CallUNORespo
 }
 
 func Challenge(cs []*http.Cookie, req *uno_pb.ChallengeRequest) *uno_pb.ChallengeResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.ChallengeResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	playerHash, ok := GetPlayerHash(cs)
 	if !ok {
 		return &uno_pb.ChallengeResponse{
@@ -443,6 +467,9 @@ func Challenge(cs []*http.Cookie, req *uno_pb.ChallengeRequest) *uno_pb.Challeng
 }
 
 func IndicateUNO(cs []*http.Cookie, req *uno_pb.IndicateUNORequest) *uno_pb.IndicateUNOResponse {
+	if req.PlayerId == "" || req.RoomHash == "" || req.TargetId == "" {
+		return &uno_pb.IndicateUNOResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
 	tp, ok := getPlayerFromRooms(req.TargetId)
 	if !ok {
 		return &uno_pb.IndicateUNOResponse{
