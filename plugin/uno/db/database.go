@@ -46,8 +46,8 @@ func initDB() error {
 		Id TEXT NOT NULL UNIQUE,
 		Name TEXT NOT NULL,
 		Password TEXT NOT NULL,
-		SEED1 INTEGER NOT NULL,
-		SEED2 INTEGER NOT NULL,
+		SEED1 TEXT NOT NULL,
+		SEED2 TEXT NOT NULL,
 		Source TEXT NOT NULL REFERENCES SourceEnum(Source),
 		Hash TEXT NOT NULL UNIQUE
 	);`); err != nil {
@@ -138,13 +138,21 @@ func FindUser(userid, userhash string) (*UserInfo, error) {
 	}
 	row := database.QueryRow(fmt.Sprintf(`SELECT * FROM Players WHERE %v="%v";`, key, value))
 	var (
-		name         string
-		s            uno_pb.Source
-		hash         string
-		seed1, seed2 uint64
-		passwordHASH string
+		name               string
+		s                  uno_pb.Source
+		hash               string
+		seed1str, seed2str string
+		passwordHASH       string
 	)
-	if err := row.Scan(&ignore, &name, &passwordHASH, &seed1, &seed2, &s, &hash); err != nil {
+	if err := row.Scan(&ignore, &name, &passwordHASH, &seed1str, &seed2str, &s, &hash); err != nil {
+		return nil, err
+	}
+	seed1, err := strconv.ParseUint(seed1str, 10, 0)
+	if err != nil {
+		return nil, err
+	}
+	seed2, err := strconv.ParseUint(seed2str, 10, 0)
+	if err != nil {
 		return nil, err
 	}
 	return &UserInfo{
