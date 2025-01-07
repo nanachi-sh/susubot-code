@@ -63,16 +63,17 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 	if !ok {
 		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
 	}
-	fmt.Println(uhash)
-	isNormal, err := CheckNormalUserFromSource(uhash)
-	if err != nil {
-		if err == sql.ErrNoRows {
+	if !CheckPrivilegeUser(uhash) {
+		isNormal, err := CheckNormalUserFromSource(uhash)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
+			}
+			return nil, err
+		}
+		if !isNormal && !CheckPrivilegeUser(uhash) {
 			return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 		}
-		return nil, err
-	}
-	if !isNormal && !CheckPrivilegeUser(uhash) {
-		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 	}
 	newRoom := room.New()
 	rooms = append(rooms, newRoom)
