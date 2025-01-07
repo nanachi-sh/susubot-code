@@ -7,6 +7,7 @@ import (
 type Player struct {
 	id   string
 	name string
+	hash string
 
 	roomhash        string
 	cards           []uno_pb.Card
@@ -31,6 +32,7 @@ func New(pi *uno_pb.PlayerInfo) *Player {
 	}
 	if pi.PlayerRoomInfo != nil {
 		p.roomhash = pi.PlayerRoomInfo.RoomHash
+		p.hash = pi.PlayerRoomInfo.Hash
 	}
 	return p
 }
@@ -45,6 +47,10 @@ func (p *Player) GetName() string {
 
 func (p *Player) GetCards() []uno_pb.Card {
 	return p.cards
+}
+
+func (p *Player) GetHash() string {
+	return p.hash
 }
 
 func (p *Player) GetRoomHash() string {

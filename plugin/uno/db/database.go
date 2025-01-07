@@ -45,8 +45,9 @@ func initDB() error {
 	if _, err := db.Exec(`CREATE TABLE Players (
 		Id TEXT NOT NULL UNIQUE,
 		Name TEXT NOT NULL,
-		WinCount INT NOT NULL DEFAULT 0,
-		LoseCount INT NOT NULL DEFAULT 0,
+		Password TEXT NOT NULL,
+		SEED1 INTEGER NOT NULL,
+		SEED2 INTEGER NOT NULL,
 		Source TEXT NOT NULL REFERENCES SourceEnum(Source),
 		Hash TEXT NOT NULL UNIQUE
 	);`); err != nil {
@@ -83,22 +84,17 @@ func init() {
 	database = db
 }
 
-type Source int
-
-const (
-	Source_QQ = iota
-)
-
-func CreateUser(userid, username string, source Source) error {
+func CreateUser(userid, username string, source uno_pb.Source) error {
 	sourceStr := ""
 	switch source {
 	default:
 		return errors.New("Source有误")
-	case Source_QQ:
+	case uno_pb.Source_QQ:
 		sourceStr = "QQ"
 	}
-	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v" )`, userid, username, sourceStr, hash(userid))
-	if _, err := database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Source, Hash) VALUES %v;`, values)); err != nil {
+	ss, pwd := generatePassword(userid, username)
+	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v", "%v", %v, %v )`, userid, username, sourceStr, hash(userid), pwd, ss[0], ss[1])
+	if _, err := database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Source, Hash, Password, SEED1, SEED2) VALUES %v;`, values)); err != nil {
 		return err
 	}
 	return nil
@@ -109,10 +105,22 @@ func hash(id string) string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
+func generatePassword(id, name string) ([2]uint64, string) {
+	s1, s2 := rand.Uint64(), rand.Uint64()
+	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name)
+	return [2]uint64{s1, s2}, fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
+}
+
+func CalcPassword(s1, s2 uint64, id, name string) string {
+	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name)
+	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
+}
+
 type UserInfo struct {
-	AI   *uno_pb.PlayerAccountInfo
-	Hash string
-	S    Source
+	AI    *uno_pb.PlayerAccountInfo
+	Hash  string
+	S     uno_pb.Source
+	SEEDs [2]uint64
 }
 
 func FindUser(userid, userhash string) (*UserInfo, error) {
@@ -126,20 +134,19 @@ func FindUser(userid, userhash string) (*UserInfo, error) {
 	}
 	row := database.QueryRow(fmt.Sprintf(`SELECT * FROM Players WHERE Id="%v";`, key))
 	var (
-		name                string
-		wincount, losecount int
-		s                   Source
-		hash                string
+		name         string
+		s            uno_pb.Source
+		hash         string
+		seed1, seed2 uint64
+		passwordHASH string
 	)
-	if err := row.Scan(&ignore, &name, &wincount, &losecount, &s, &hash); err != nil {
+	if err := row.Scan(&ignore, &name, &passwordHASH, &seed1, &seed2, &s, &hash); err != nil {
 		return nil, err
 	}
 	return &UserInfo{
 		AI: &uno_pb.PlayerAccountInfo{
-			Id:        userid,
-			Name:      name,
-			WinCount:  int32(wincount),
-			LoseCount: int32(losecount),
+			Id:   userid,
+			Name: name,
 		},
 		Hash: hash,
 		S:    s,

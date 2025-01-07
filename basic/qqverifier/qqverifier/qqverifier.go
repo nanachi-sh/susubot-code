@@ -193,7 +193,8 @@ func Verify(req *qqverifier_pb.VerifyRequest) (*qqverifier_pb.VerifyResponse, er
 	}
 	vi.verified = true
 	return &qqverifier_pb.VerifyResponse{
-		Result: qqverifier_pb.Result_Verified.Enum(),
+		Result:   qqverifier_pb.Result_Verified.Enum(),
+		VarifyId: vi.qqid,
 	}, nil
 }
 
@@ -218,7 +219,8 @@ func Verified(req *qqverifier_pb.VerifiedRequest) (*qqverifier_pb.VerifiedRespon
 		}, nil
 	}
 	return &qqverifier_pb.VerifiedResponse{
-		Result: qqverifier_pb.Result_Verified.Enum(),
+		Result:   qqverifier_pb.Result_Verified.Enum(),
+		VarifyId: vi.qqid,
 	}, nil
 }
 

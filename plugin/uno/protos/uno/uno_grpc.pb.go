@@ -33,6 +33,8 @@ const (
 	Uno_Challenge_FullMethodName          = "/susubot.plugin.uno.uno/Challenge"
 	Uno_IndicateUNO_FullMethodName        = "/susubot.plugin.uno.uno/IndicateUNO"
 	Uno_RoomEvent_FullMethodName          = "/susubot.plugin.uno.uno/RoomEvent"
+	Uno_CreateUser_FullMethodName         = "/susubot.plugin.uno.uno/CreateUser"
+	Uno_GetUser_FullMethodName            = "/susubot.plugin.uno.uno/GetUser"
 	Uno_TEST_SetPlayerCard_FullMethodName = "/susubot.plugin.uno.uno/TEST_SetPlayerCard"
 )
 
@@ -54,6 +56,8 @@ type UnoClient interface {
 	Challenge(ctx context.Context, in *ChallengeRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	IndicateUNO(ctx context.Context, in *IndicateUNORequest, opts ...grpc.CallOption) (*IndicateUNOResponse, error)
 	RoomEvent(ctx context.Context, in *RoomEventRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RoomEventResponse], error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*BasicResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// 测试用接口，前端禁止直接调用，全部需验证
 	TEST_SetPlayerCard(ctx context.Context, in *TEST_SetPlayerCardRequest, opts ...grpc.CallOption) (*BasicResponse, error)
 }
@@ -215,6 +219,26 @@ func (c *unoClient) RoomEvent(ctx context.Context, in *RoomEventRequest, opts ..
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Uno_RoomEventClient = grpc.ServerStreamingClient[RoomEventResponse]
 
+func (c *unoClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BasicResponse)
+	err := c.cc.Invoke(ctx, Uno_CreateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unoClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, Uno_GetUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *unoClient) TEST_SetPlayerCard(ctx context.Context, in *TEST_SetPlayerCardRequest, opts ...grpc.CallOption) (*BasicResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BasicResponse)
@@ -243,6 +267,8 @@ type UnoServer interface {
 	Challenge(context.Context, *ChallengeRequest) (*ChallengeResponse, error)
 	IndicateUNO(context.Context, *IndicateUNORequest) (*IndicateUNOResponse, error)
 	RoomEvent(*RoomEventRequest, grpc.ServerStreamingServer[RoomEventResponse]) error
+	CreateUser(context.Context, *CreateUserRequest) (*BasicResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// 测试用接口，前端禁止直接调用，全部需验证
 	TEST_SetPlayerCard(context.Context, *TEST_SetPlayerCardRequest) (*BasicResponse, error)
 	mustEmbedUnimplementedUnoServer()
@@ -296,6 +322,12 @@ func (UnimplementedUnoServer) IndicateUNO(context.Context, *IndicateUNORequest) 
 }
 func (UnimplementedUnoServer) RoomEvent(*RoomEventRequest, grpc.ServerStreamingServer[RoomEventResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method RoomEvent not implemented")
+}
+func (UnimplementedUnoServer) CreateUser(context.Context, *CreateUserRequest) (*BasicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedUnoServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUnoServer) TEST_SetPlayerCard(context.Context, *TEST_SetPlayerCardRequest) (*BasicResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TEST_SetPlayerCard not implemented")
@@ -566,6 +598,42 @@ func _Uno_RoomEvent_Handler(srv interface{}, stream grpc.ServerStream) error {
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Uno_RoomEventServer = grpc.ServerStreamingServer[RoomEventResponse]
 
+func _Uno_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).CreateUser(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Uno_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnoServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Uno_GetUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnoServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Uno_TEST_SetPlayerCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TEST_SetPlayerCardRequest)
 	if err := dec(in); err != nil {
@@ -642,6 +710,14 @@ var Uno_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IndicateUNO",
 			Handler:    _Uno_IndicateUNO_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _Uno_CreateUser_Handler,
+		},
+		{
+			MethodName: "GetUser",
+			Handler:    _Uno_GetUser_Handler,
 		},
 		{
 			MethodName: "TEST_SetPlayerCard",

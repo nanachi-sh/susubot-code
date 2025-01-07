@@ -66,7 +66,7 @@ func New() *Room {
 	}
 }
 
-func (r *Room) Join(ai *uno_pb.PlayerAccountInfo) *uno_pb.Errors {
+func (r *Room) Join(ai *uno_pb.PlayerAccountInfo, playerHash string) *uno_pb.Errors {
 	if r.stage != uno_pb.Stage_WaitingStart {
 		return uno_pb.Errors_RoomStarted.Enum()
 	}
@@ -80,6 +80,7 @@ func (r *Room) Join(ai *uno_pb.PlayerAccountInfo) *uno_pb.Errors {
 		PlayerAccountInfo: ai,
 		PlayerRoomInfo: &uno_pb.PlayerRoomInfo{
 			RoomHash: r.hash,
+			Hash:     playerHash,
 			Cards:    []*uno_pb.Card{},
 		},
 	})
@@ -119,8 +120,8 @@ type DrawCardEvent struct {
 	IntoSendCard bool
 	Skipped      bool
 
-	IntoSendCardE *uno_pb.DrawCardResponse_IntoSendCardEvent
-	SkippedE      *uno_pb.DrawCardResponse_SkippedEvent
+	IntoSendCardE *uno_pb.RoomEventResponse_DrawCard_IntoSendCardEvent
+	SkippedE      *uno_pb.RoomEventResponse_DrawCard_SkippedEvent
 }
 
 func (r *Room) DrawCard(p *player.Player) (*DrawCardEvent, *uno_pb.Errors) {
@@ -529,15 +530,15 @@ func (r *Room) drawCard_ElectingBanker(p *player.Player) (*DrawCardEvent, *uno_p
 	}
 	if len(r.getTakeElectBankerPlayers()) == len(r.players) {
 		r.startSendCard()
-		ps := []*uno_pb.PlayerInfo{}
+		ps := []*uno_pb.PlayerAccountInfo{}
 		for _, v := range r.players {
-			ps = append(ps, v.FormatToProtoBuf())
+			ps = append(ps, v.FormatToProtoBuf().PlayerAccountInfo)
 		}
 		return &DrawCardEvent{
 			IntoSendCard: true,
-			IntoSendCardE: &uno_pb.DrawCardResponse_IntoSendCardEvent{
+			IntoSendCardE: &uno_pb.RoomEventResponse_DrawCard_IntoSendCardEvent{
 				Players:  ps,
-				Banker:   r.banker.FormatToProtoBuf(),
+				Banker:   r.banker.FormatToProtoBuf().PlayerAccountInfo,
 				LeadCard: &r.GetLastCard().SendCard,
 			},
 		}, nil
@@ -600,8 +601,8 @@ func (r *Room) drawCard_SendingCard(p *player.Player) (*DrawCardEvent, *uno_pb.E
 		r.operatorNow = next
 		return &DrawCardEvent{
 			Skipped: true,
-			SkippedE: &uno_pb.DrawCardResponse_SkippedEvent{
-				NextOperator: r.operatorNow.FormatToProtoBuf(),
+			SkippedE: &uno_pb.RoomEventResponse_DrawCard_SkippedEvent{
+				NextOperator: r.operatorNow.FormatToProtoBuf().PlayerAccountInfo,
 			},
 		}, nil
 	} else if p.GetDrawCard() != nil { //已抽过一张牌
@@ -910,8 +911,17 @@ func (r *Room) GetPlayers() []*player.Player {
 }
 
 func (r *Room) GetPlayer(id string) (*player.Player, bool) {
-	for _, v := range r.GetPlayers() {
+	for _, v := range r.players {
 		if v.GetId() == id {
+			return v, true
+		}
+	}
+	return nil, false
+}
+
+func (r *Room) GetPlayerFromHash(playerHash string) (*player.Player, bool) {
+	for _, v := range r.players {
+		if v.GetHash() == playerHash {
 			return v, true
 		}
 	}
@@ -952,7 +962,7 @@ func (r *Room) addCardToCardPool(sendcard SendCard) {
 	r.cardPool = append(r.cardPool, &sendcard)
 }
 
-func (r *Room) FormatToProtoBuf() *uno_pb.Room {
+func (r *Room) FormatToProtoBufExtra() *uno_pb.RoomExtra {
 	ch := []*uno_pb.Card{}
 	cp := []*uno_pb.SendCard{}
 	ps := []*uno_pb.PlayerInfo{}
@@ -979,7 +989,7 @@ func (r *Room) FormatToProtoBuf() *uno_pb.Room {
 	for _, v := range r.players {
 		ps = append(ps, v.FormatToProtoBuf())
 	}
-	ur := &uno_pb.Room{
+	ur := &uno_pb.RoomExtra{
 		Hash:        r.hash,
 		Stage:       r.stage,
 		Banker:      nil,
@@ -993,6 +1003,49 @@ func (r *Room) FormatToProtoBuf() *uno_pb.Room {
 	}
 	if r.operatorNow != nil {
 		ur.OperatorNow = r.operatorNow.FormatToProtoBuf()
+	}
+	return ur
+}
+
+func (r *Room) FormatToProtoBufSimple() *uno_pb.RoomSimple {
+	ch := []*uno_pb.Card{}
+	cp := []*uno_pb.SendCard{}
+	ps := []*uno_pb.PlayerAccountInfo{}
+	for _, v := range r.cardHeap {
+		ch = append(ch, &v)
+	}
+	for _, v := range r.cardPool {
+		var wdfstate *uno_pb.WildDrawFourStatus
+		if v.wildDrawFourStatus != nil {
+			switch *v.wildDrawFourStatus {
+			case wildDrawFourStatus_challengedLose:
+				wdfstate = uno_pb.WildDrawFourStatus_ChallengedLose.Enum()
+			case wildDrawFourStatus_challengerLose:
+				wdfstate = uno_pb.WildDrawFourStatus_ChallengerLose.Enum()
+			}
+		}
+		cp = append(cp, &uno_pb.SendCard{
+			SenderId:           v.SenderId,
+			SendCard:           &v.SendCard,
+			WildDrawFourStatus: wdfstate,
+			FeatureEffected:    v.featureEffected,
+		})
+	}
+	for _, v := range r.players {
+		ps = append(ps, v.FormatToProtoBuf().PlayerAccountInfo)
+	}
+	ur := &uno_pb.RoomSimple{
+		Hash:        r.hash,
+		Stage:       r.stage,
+		Banker:      nil,
+		OperatorNow: nil,
+		Players:     ps,
+	}
+	if r.banker != nil {
+		ur.Banker = r.banker.FormatToProtoBuf().PlayerAccountInfo
+	}
+	if r.operatorNow != nil {
+		ur.OperatorNow = r.operatorNow.FormatToProtoBuf().PlayerAccountInfo
 	}
 	return ur
 }
