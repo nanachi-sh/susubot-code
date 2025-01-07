@@ -15,29 +15,19 @@ const (
 )
 
 // 检查是否为特权用户
-func CheckPrivilegeUser(cs []*http.Cookie) bool {
-	for _, v := range cs {
-		if v.Name == key_accountHash {
-			return v.Value == define.PrivilegeUserHash
-		}
-	}
-	return false
+func CheckPrivilegeUser(uhash string) bool {
+	return define.PrivilegeUserHash == uhash
 }
 
 // 检查是否为已定义来源的用户
-func CheckNormalUserFromSource(cs []*http.Cookie) (bool, error) {
-	for _, v := range cs {
-		if v.Name == key_accountHash {
-			if _, err := db.FindUser("", v.Value); err != nil {
-				if err == sql.ErrNoRows {
-					return false, nil
-				}
-				return false, err
-			}
-			return true, nil
+func CheckNormalUserFromSource(uhash string) (bool, error) {
+	if _, err := db.FindUser("", uhash); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
 		}
+		return false, err
 	}
-	return false, nil
+	return true, nil
 }
 
 // 检查是否为临时玩家
@@ -53,6 +43,16 @@ func CheckTempUser(id string) bool {
 func GetPlayerHash(cs []*http.Cookie) (string, bool) {
 	for _, v := range cs {
 		if v.Name == key_playerHash {
+			return v.Value, true
+		}
+	}
+	return "", false
+}
+
+// 获取用户哈希
+func GetUserHash(cs []*http.Cookie) (string, bool) {
+	for _, v := range cs {
+		if v.Name == key_accountHash {
 			return v.Value, true
 		}
 	}
