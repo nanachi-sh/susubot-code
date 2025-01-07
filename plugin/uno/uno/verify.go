@@ -1,7 +1,6 @@
 package uno
 
 import (
-	"database/sql"
 	"net/http"
 	"regexp"
 
@@ -22,9 +21,6 @@ func CheckPrivilegeUser(uhash string) bool {
 // 检查是否为已定义来源的用户
 func CheckNormalUserFromSource(uhash string) (bool, error) {
 	if _, err := db.FindUser("", uhash); err != nil {
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
 		return false, err
 	}
 	return true, nil
