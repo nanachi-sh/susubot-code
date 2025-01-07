@@ -105,6 +105,7 @@ func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomR
 			if err != sql.ErrNoRows {
 				return nil, err
 			}
+			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 		}
 		if !isPrivilege && !isNormal {
 			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_AbnormalAccount.Enum()}, nil
