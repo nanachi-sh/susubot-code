@@ -11,6 +11,7 @@ import (
 	qqverifier_pb "github.com/nanachi-sh/susubot-code/basic/qqverifier/protos/qqverifier"
 	"github.com/nanachi-sh/susubot-code/basic/qqverifier/qqverifier"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type qqverifierService struct{ qqverifier_pb.QqverifierServer }
@@ -76,6 +77,12 @@ func (*qqverifierService) Verified(ctx context.Context, req *qqverifier_pb.Verif
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			ret.err = errors.New("从context获取metadata失败")
+		}
+		cookies := md.Get("cookie")
+		fmt.Println(cookies)
 		resp, err := qqverifier.Verified(req)
 		if err != nil {
 			ret.err = err

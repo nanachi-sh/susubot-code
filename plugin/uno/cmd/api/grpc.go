@@ -12,6 +12,7 @@ import (
 	uno_pb "github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type (
@@ -50,6 +51,7 @@ func (*unoService) RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStr
 	}
 }
 
+// 仅允许正式玩家创建
 func (*unoService) CreateRoom(ctx context.Context, _ *uno_pb.Empty) (*uno_pb.CreateRoomResponse, error) {
 	type d struct {
 		data *uno_pb.CreateRoomResponse
@@ -59,6 +61,15 @@ func (*unoService) CreateRoom(ctx context.Context, _ *uno_pb.Empty) (*uno_pb.Cre
 	go func() {
 		ret := new(d)
 		defer func() { ch <- ret }()
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			ret.err = errors.New("从context获取metadata失败")
+		}
+		cookies := md.Get("cookie")
+		fmt.Println(cookies)
+		if len(cookies) == 0 {
+			ret.err = errors.New("")
+		}
 		resp := uno.CreateRoom()
 		if resp == nil {
 			ret.data = &uno_pb.CreateRoomResponse{}
