@@ -81,8 +81,9 @@ func (*qqverifierService) Verified(ctx context.Context, req *qqverifier_pb.Verif
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := md.Get("cookie")
-		fmt.Println(cookies)
+		for _, v := range md {
+			fmt.Println(v)
+		}
 		resp, err := qqverifier.Verified(req)
 		if err != nil {
 			ret.err = err
