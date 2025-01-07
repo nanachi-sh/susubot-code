@@ -93,7 +93,7 @@ func CreateUser(userid, username, password string, source uno_pb.Source) error {
 		sourceStr = "QQ"
 	}
 	ss, pwd := generatePassword(userid, username, password)
-	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v", "%v", %v, %v )`, userid, username, sourceStr, hash(userid), pwd, ss[0], ss[1])
+	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v", "%v", "%v", "%v" )`, userid, username, sourceStr, hash(userid), pwd, ss[0], ss[1])
 	if _, err := database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Source, Hash, Password, SEED1, SEED2) VALUES %v;`, values)); err != nil {
 		return err
 	}
