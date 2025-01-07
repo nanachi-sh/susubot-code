@@ -125,14 +125,17 @@ type UserInfo struct {
 
 func FindUser(userid, userhash string) (*UserInfo, error) {
 	key := ""
+	value := ""
 	if userid != "" {
-		key = userid
+		key = "Id"
+		value = userid
 	} else if userhash != "" {
-		key = userhash
+		key = "Hash"
+		value = userhash
 	} else {
 		return nil, errors.New("UserId和UserHash都为空")
 	}
-	row := database.QueryRow(fmt.Sprintf(`SELECT * FROM Players WHERE Id="%v";`, key))
+	row := database.QueryRow(fmt.Sprintf(`SELECT * FROM Players WHERE %v="%v";`, key, value))
 	var (
 		name         string
 		s            uno_pb.Source
