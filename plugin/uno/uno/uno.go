@@ -556,10 +556,7 @@ func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.Basic
 	if req.UserInfo == nil || (req.UserInfo.Id == "" || req.UserInfo.Name == "") || req.Password == "" {
 		return nil, errors.New("请求存在空参数")
 	}
-	uhash, ok := GetUserHash(cs)
-	if !ok {
-		return &uno_pb.BasicResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
-	}
+	uhash, _ := GetUserHash(cs)
 	if CheckPrivilegeUser(uhash) {
 		// 特权用户无需验证
 		if err := db.CreateUser(req.UserInfo.Id, req.UserInfo.Name, req.Password, req.Source); err != nil {
