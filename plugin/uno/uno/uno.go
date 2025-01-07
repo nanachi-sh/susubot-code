@@ -101,16 +101,19 @@ func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomR
 		if !ok {
 			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
 		}
-		isPrivilege := CheckPrivilegeUser(uhash)
-		isNormal, err := CheckNormalUserFromSource(uhash)
-		if err != nil {
-			if err != sql.ErrNoRows {
-				return nil, err
+		if CheckPrivilegeUser(uhash) {
+
+		} else {
+			isNormal, err := CheckNormalUserFromSource(uhash)
+			if err != nil {
+				if err != sql.ErrNoRows {
+					return nil, err
+				}
+				return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 			}
-			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
-		}
-		if !isPrivilege && !isNormal {
-			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_AbnormalAccount.Enum()}, nil
+			if !isNormal {
+				return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_AbnormalAccount.Enum()}, nil
+			}
 		}
 	}
 	r, ok := getRoom(req.RoomHash)
