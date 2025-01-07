@@ -82,13 +82,13 @@ service uno {
     }
     rpc CreateUser (CreateUserRequest) returns (BasicResponse) {
         option (google.api.http) = {
-            put: "/v1/users"
+            post: "/v1/users"
             body: "*"
         };
     }
     rpc GetUser (GetUserRequest) returns (GetUserResponse) {
         option (google.api.http) = {
-            patch: "/v1/users/{UserId}"
+            patch: "/v1/users/{UserId}/verify"
             body: "*"
         };
     }
