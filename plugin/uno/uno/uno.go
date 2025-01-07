@@ -63,6 +63,7 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 	if !ok {
 		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
 	}
+	fmt.Println(uhash)
 	isNormal, err := CheckNormalUserFromSource(uhash)
 	if err != nil {
 		if err == sql.ErrNoRows {
