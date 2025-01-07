@@ -59,14 +59,18 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 	if len(cs) == 0 {
 		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
 	}
-	isNormal, err := CheckNormalUserFromSource(cs)
+	uhash, ok := GetUserHash(cs)
+	if !ok {
+		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
+	}
+	isNormal, err := CheckNormalUserFromSource(uhash)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 		}
 		return nil, err
 	}
-	if !isNormal && !CheckPrivilegeUser(cs) {
+	if !isNormal && !CheckPrivilegeUser(uhash) {
 		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 	}
 	newRoom := room.New()
@@ -150,7 +154,11 @@ func GetRoom(cs []*http.Cookie, req *uno_pb.GetRoomRequest) *uno_pb.GetRoomRespo
 	if req.RoomHash == "" {
 		return &uno_pb.GetRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}
 	}
-	isPrivilege := CheckPrivilegeUser(cs)
+	uhash, ok := GetUserHash(cs)
+	if !ok {
+		return &uno_pb.GetRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}
+	}
+	isPrivilege := CheckPrivilegeUser(uhash)
 	if r, ok := getRoom(req.RoomHash); !ok {
 		return &uno_pb.GetRoomResponse{
 			Err: uno_pb.Errors_RoomNoExist.Enum(),
@@ -519,7 +527,11 @@ func deleteRoom(r *room.Room) bool {
 }
 
 func TEST_SetPlayerCard(cs []*http.Cookie, req *uno_pb.TEST_SetPlayerCardRequest) *uno_pb.BasicResponse {
-	if !CheckPrivilegeUser(cs) {
+	uhash, ok := GetUserHash(cs)
+	if !ok {
+		return &uno_pb.BasicResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}
+	}
+	if !CheckPrivilegeUser(uhash) {
 		return &uno_pb.BasicResponse{Err: uno_pb.Errors_NoPrivilegeAccount.Enum()}
 	}
 	p, ok := getPlayerFromRooms(req.PlayerId)
@@ -541,7 +553,11 @@ func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.Basic
 	if req.UserInfo == nil || (req.UserInfo.Id == "" || req.UserInfo.Name == "") {
 		return nil, errors.New("Id或名字不能为空")
 	}
-	if CheckPrivilegeUser(cs) {
+	uhash, ok := GetUserHash(cs)
+	if !ok {
+		return &uno_pb.BasicResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
+	}
+	if CheckPrivilegeUser(uhash) {
 		// 特权用户无需验证
 		if err := db.CreateUser(req.UserInfo.Id, req.UserInfo.Name, req.Source); err != nil {
 			return nil, err
