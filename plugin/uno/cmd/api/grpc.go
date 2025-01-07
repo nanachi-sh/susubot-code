@@ -137,7 +137,7 @@ func (*unoService) GetUser(ctx context.Context, req *uno_pb.GetUserRequest) (*un
 			ret.err = errors.New("从context获取metadata失败")
 		}
 		cookies := GetCookies(md)
-		resp, err := uno.CreateRoom(cookies)
+		resp, err := uno.GetUser(cookies, req)
 		if err != nil {
 			ret.err = err
 			return
