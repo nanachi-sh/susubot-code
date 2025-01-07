@@ -590,6 +590,10 @@ func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.Basic
 			if req.UserInfo.Id != resp.VarifyId {
 				return nil, errors.New("验证请求的QQID与申请请求的QQID不符")
 			}
+			if err := db.CreateUser(req.UserInfo.Id, req.UserInfo.Name, req.Password, req.Source); err != nil {
+				return nil, err
+			}
+			return &uno_pb.BasicResponse{}, nil
 		}
 	}
 	return nil, errors.New("非预期错误")
