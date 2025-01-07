@@ -82,13 +82,14 @@ service uno {
     }
     rpc CreateUser (CreateUserRequest) returns (BasicResponse) {
         option (google.api.http) = {
-            put: "/v1/users" //获取游戏事件流(需验证混合哈希)
+            put: "/v1/users"
+            body: "*"
         };
     }
     rpc GetUser (GetUserRequest) returns (GetUserResponse) {
         option (google.api.http) = {
-            patch: "/v1/users/{UserId}/verify/{VerifyHash}"
-            body: "VerifySource"
+            patch: "/v1/users/{UserId}/verify"
+            body: "*"
         };
     }
     // 测试用接口，前端禁止直接调用，全部需验证
@@ -136,6 +137,9 @@ enum Errors {
     PlayerHashNE = 30; //玩家哈希与桌内玩家哈希不同
     NoValidPlayerHash = 31; //无有效玩家哈希Cookie
     NoPrivilegeAccount = 32; //非特权用户
+    AccountExist = 33; //账号已存在
+    AccountNoExist = 34; //账号不存在
+    PasswordWrong = 35; //密码不正确
 }
 
 enum CardColor {
@@ -408,21 +412,36 @@ enum Source {
     QQ = 0;
 }
 
+enum VerifyMethod {
+    Password = 0;
+    VerifyCode = 1;
+}
+
 message CreateUserRequest {
     PlayerAccountInfo UserInfo = 1;
     Source Source = 2;
     string VerifyHash = 3;
+    string Password = 4;
 }
 
 message GetUserRequest {
-    string VerifyHash = 1;
-    Source VerifySource = 2;
-    string UserId = 3;
+    message MethodPassword {
+        string Password = 1;
+    }
+    message MethodVerifyCode {
+        Source VerifySource = 1;
+        string VerifyHash = 2;
+    }
+    VerifyMethod method = 1;
+    optional MethodPassword Password = 2;
+    optional MethodVerifyCode VerifyCode = 3;
+    string UserId = 4;
 }
 
 message GetUserResponse {
     PlayerAccountInfo UserInfo = 1;
     string UserHash = 2;
+    optional Errors err = 3;
 }
 
 message TEST_SetPlayerCardRequest {

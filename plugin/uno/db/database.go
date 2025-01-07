@@ -84,7 +84,7 @@ func init() {
 	database = db
 }
 
-func CreateUser(userid, username string, source uno_pb.Source) error {
+func CreateUser(userid, username, password string, source uno_pb.Source) error {
 	sourceStr := ""
 	switch source {
 	default:
@@ -92,7 +92,7 @@ func CreateUser(userid, username string, source uno_pb.Source) error {
 	case uno_pb.Source_QQ:
 		sourceStr = "QQ"
 	}
-	ss, pwd := generatePassword(userid, username)
+	ss, pwd := generatePassword(userid, username, password)
 	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v", "%v", %v, %v )`, userid, username, sourceStr, hash(userid), pwd, ss[0], ss[1])
 	if _, err := database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Source, Hash, Password, SEED1, SEED2) VALUES %v;`, values)); err != nil {
 		return err
@@ -105,22 +105,23 @@ func hash(id string) string {
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
-func generatePassword(id, name string) ([2]uint64, string) {
+func generatePassword(id, name, password string) ([2]uint64, string) {
 	s1, s2 := rand.Uint64(), rand.Uint64()
-	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name)
+	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name+password)
 	return [2]uint64{s1, s2}, fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
-func CalcPassword(s1, s2 uint64, id, name string) string {
-	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name)
+func CalcPassword(s1, s2 uint64, id, name, password string) string {
+	h1, h2 := murmur3.SeedStringSum128(s1, s2, id+name+password)
 	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
 type UserInfo struct {
-	AI    *uno_pb.PlayerAccountInfo
-	Hash  string
-	S     uno_pb.Source
-	SEEDs [2]uint64
+	AI       *uno_pb.PlayerAccountInfo
+	Hash     string
+	S        uno_pb.Source
+	SEEDs    [2]uint64
+	Password string
 }
 
 func FindUser(userid, userhash string) (*UserInfo, error) {
@@ -147,11 +148,10 @@ func FindUser(userid, userhash string) (*UserInfo, error) {
 		return nil, err
 	}
 	return &UserInfo{
-		AI: &uno_pb.PlayerAccountInfo{
-			Id:   userid,
-			Name: name,
-		},
-		Hash: hash,
-		S:    s,
+		AI:       &uno_pb.PlayerAccountInfo{Id: userid, Name: name},
+		Hash:     hash,
+		S:        s,
+		SEEDs:    [2]uint64{seed1, seed2},
+		Password: passwordHASH,
 	}, nil
 }

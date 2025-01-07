@@ -87,6 +87,78 @@ func GRPCServe() error {
 	return gs.Serve(l)
 }
 
+func (*unoService) CreateUser(ctx context.Context, req *uno_pb.CreateUserRequest) (*uno_pb.BasicResponse, error) {
+	type d struct {
+		data *uno_pb.BasicResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			ret.err = errors.New("从context获取metadata失败")
+		}
+		cookies := GetCookies(md)
+		resp, err := uno.CreateUser(cookies, req)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		if resp == nil {
+			ret.data = &uno_pb.BasicResponse{}
+		} else {
+			ret.data = resp
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
+func (*unoService) GetUser(ctx context.Context, req *uno_pb.GetUserRequest) (*uno_pb.GetUserResponse, error) {
+	type d struct {
+		data *uno_pb.GetUserResponse
+		err  error
+	}
+	ch := make(chan *d, 1)
+	go func() {
+		ret := new(d)
+		defer func() { ch <- ret }()
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			ret.err = errors.New("从context获取metadata失败")
+		}
+		cookies := GetCookies(md)
+		resp, err := uno.CreateRoom(cookies)
+		if err != nil {
+			ret.err = err
+			return
+		}
+		if resp == nil {
+			ret.data = &uno_pb.GetUserResponse{}
+		} else {
+			ret.data = resp
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case x := <-ch:
+		if x.err != nil {
+			return nil, x.err
+		}
+		return x.data, nil
+	}
+}
+
 func (*unoService) RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStreamingServer[uno_pb.RoomEventResponse]) error {
 	resp, err := uno.RoomEvent(req, stream)
 	if err != nil {

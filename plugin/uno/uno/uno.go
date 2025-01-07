@@ -553,8 +553,8 @@ func TEST_SetPlayerCard(cs []*http.Cookie, req *uno_pb.TEST_SetPlayerCardRequest
 }
 
 func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.BasicResponse, error) {
-	if req.UserInfo == nil || (req.UserInfo.Id == "" || req.UserInfo.Name == "") {
-		return nil, errors.New("Id或名字不能为空")
+	if req.UserInfo == nil || (req.UserInfo.Id == "" || req.UserInfo.Name == "") || req.Password == "" {
+		return nil, errors.New("请求存在空参数")
 	}
 	uhash, ok := GetUserHash(cs)
 	if !ok {
@@ -562,7 +562,7 @@ func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.Basic
 	}
 	if CheckPrivilegeUser(uhash) {
 		// 特权用户无需验证
-		if err := db.CreateUser(req.UserInfo.Id, req.UserInfo.Name, req.Source); err != nil {
+		if err := db.CreateUser(req.UserInfo.Id, req.UserInfo.Name, req.Password, req.Source); err != nil {
 			return nil, err
 		}
 	} else {
@@ -596,6 +596,73 @@ func CreateUser(cs []*http.Cookie, req *uno_pb.CreateUserRequest) (*uno_pb.Basic
 		}
 	}
 	return nil, errors.New("非预期错误")
+}
+
+func GetUser(cs []*http.Cookie, req *uno_pb.GetUserRequest) (*uno_pb.GetUserResponse, error) {
+	if req.UserId == "" {
+		return nil, errors.New("请求存在空参数")
+	}
+	ui, err := db.FindUser(req.UserId, "")
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &uno_pb.GetUserResponse{Err: uno_pb.Errors_AccountNoExist.Enum()}, nil
+		}
+		return nil, err
+	}
+	switch req.Method {
+	case uno_pb.VerifyMethod_Password:
+		if req.Password == nil || req.Password.Password == "" {
+			return nil, errors.New("请求存在空参数")
+		}
+		password := db.CalcPassword(ui.SEEDs[0], ui.SEEDs[1], ui.AI.Id, ui.AI.Name, req.Password.Password)
+		if ui.Password != password {
+			return &uno_pb.GetUserResponse{
+				Err: uno_pb.Errors_PasswordWrong.Enum(),
+			}, nil
+		}
+		return &uno_pb.GetUserResponse{
+			UserInfo: ui.AI,
+			UserHash: ui.Hash,
+		}, nil
+	case uno_pb.VerifyMethod_VerifyCode:
+		if req.VerifyCode == nil || (req.VerifyCode.VerifyHash == "") {
+			return nil, errors.New("请求存在空参数")
+		}
+		vc := req.VerifyCode
+		switch vc.VerifySource {
+		case uno_pb.Source_QQ:
+			resp, err := define.QQVerifierC.Verified(define.QQVerifierCtx, &uno.VerifiedRequest{
+				VerifyHash: vc.VerifyHash,
+			})
+			if err != nil {
+				return nil, err
+			}
+			if resp.Err != nil {
+				switch *resp.Err {
+				case uno.Errors_VerifyNoFound:
+					return nil, errors.New("验证哈希不正确")
+				case uno.Errors_Expired:
+					return nil, errors.New("验证请求已过期")
+				case uno.Errors_UnVerified:
+					return nil, errors.New("还未验证")
+				}
+			}
+			if *resp.Result != uno.Result_Verified {
+				return nil, errors.New("还未验证")
+			}
+			if req.UserId != resp.VarifyId {
+				return nil, errors.New("验证请求的QQID与申请请求的QQID不符")
+			}
+			return &uno_pb.GetUserResponse{
+				UserInfo: ui.AI,
+				UserHash: ui.Hash,
+			}, nil
+		default:
+			return nil, errors.New("未定义源")
+		}
+	default:
+		return nil, errors.New("未定义方法")
+	}
 }
 
 func RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStreamingServer[uno_pb.RoomEventResponse]) (*uno_pb.RoomEventResponse, error) {
