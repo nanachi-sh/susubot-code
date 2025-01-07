@@ -81,8 +81,8 @@ func (*qqverifierService) Verified(ctx context.Context, req *qqverifier_pb.Verif
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		for _, v := range md {
-			fmt.Println(v)
+		for k, v := range md {
+			fmt.Println(k, v)
 		}
 		resp, err := qqverifier.Verified(req)
 		if err != nil {
