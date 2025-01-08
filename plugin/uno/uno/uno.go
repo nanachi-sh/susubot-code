@@ -71,7 +71,7 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 			}
 			return nil, err
 		}
-		if !isNormal && !CheckPrivilegeUser(uhash) {
+		if !isNormal {
 			return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
 		}
 	}
@@ -102,7 +102,6 @@ func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomR
 			return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
 		}
 		if CheckPrivilegeUser(uhash) {
-
 		} else {
 			isNormal, err := CheckNormalUserFromSource(uhash)
 			if err != nil {
