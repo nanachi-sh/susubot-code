@@ -89,7 +89,7 @@ func GRPCServe() error {
 
 func (*unoService) GetPlayer(ctx context.Context, req *uno_pb.GetPlayerRequest) (*uno_pb.GetPlayerResponse, error) {
 	type d struct {
-		data *uno_pb.BasicResponse
+		data *uno_pb.GetPlayerResponse
 		err  error
 	}
 	ch := make(chan *d, 1)
@@ -101,13 +101,9 @@ func (*unoService) GetPlayer(ctx context.Context, req *uno_pb.GetPlayerRequest) 
 			ret.err = errors.New("从context获取metadata失败")
 		}
 		cookies := GetCookies(md)
-		resp, err := uno.CreateUser(cookies, req)
-		if err != nil {
-			ret.err = err
-			return
-		}
+		resp := uno.GetPlayer(cookies, req)
 		if resp == nil {
-			ret.data = &uno_pb.BasicResponse{}
+			ret.data = &uno_pb.GetPlayerResponse{}
 		} else {
 			ret.data = resp
 		}
