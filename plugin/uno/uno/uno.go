@@ -673,6 +673,33 @@ func GetUser(cs []*http.Cookie, req *uno_pb.GetUserRequest) (*uno_pb.GetUserResp
 	}
 }
 
+func GetPlayer(cs []*http.Cookie, req *uno_pb.GetPlayerRequest) *uno_pb.GetPlayerResponse {
+	if req.PlayerId == "" || req.RoomHash == "" {
+		return &uno_pb.GetPlayerResponse{Err: uno_pb.Errors_Unexpected.Enum()}
+	}
+	playerHash, ok := GetPlayerHash(cs)
+	if !ok {
+		return &uno_pb.GetPlayerResponse{Err: uno_pb.Errors_NoFoundPlayerHash.Enum()}
+	}
+	r, ok := getRoom(req.RoomHash)
+	if !ok {
+		return &uno_pb.GetPlayerResponse{Err: uno_pb.Errors_RoomNoExist.Enum()}
+	}
+	p, ok := r.GetPlayer(req.PlayerId)
+	if !ok {
+		return &uno_pb.GetPlayerResponse{Err: uno_pb.Errors_RoomNoExistPlayer.Enum()}
+	}
+	if p.GetHash() == playerHash {
+		return &uno_pb.GetPlayerResponse{
+			Extra: p.FormatToProtoBuf(),
+		}
+	} else {
+		return &uno_pb.GetPlayerResponse{
+			Simple: p.FormatToProtoBuf().PlayerAccountInfo,
+		}
+	}
+}
+
 func RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStreamingServer[uno_pb.RoomEventResponse]) (*uno_pb.RoomEventResponse, error) {
 	if req.PlayerHash == "" {
 		return &uno_pb.RoomEventResponse{Err: uno_pb.Errors_NoFoundPlayerHash.Enum()}, nil
