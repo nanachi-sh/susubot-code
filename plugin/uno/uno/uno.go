@@ -91,7 +91,7 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 }
 
 func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomResponse, error) {
-	if req.RoomHash == "" || req.PlayerInfo == nil || (req.PlayerInfo.Id == "" || req.PlayerInfo.Name == "") {
+	if req.RoomHash == "" {
 		return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}, nil
 	}
 	isTemp := CheckTempUser(req.PlayerInfo.Id)
@@ -113,7 +113,15 @@ func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomR
 			if !isNormal {
 				return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_AbnormalAccount.Enum()}, nil
 			}
+			ui, err := db.FindUser("", uhash)
+			if err != nil {
+				return nil, err
+			}
+			req.PlayerInfo = ui.AI
 		}
+	}
+	if req.PlayerInfo == nil || (req.PlayerInfo.Id == "" || req.PlayerInfo.Name == "") {
+		return &uno_pb.JoinRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}, nil
 	}
 	r, ok := getRoom(req.RoomHash)
 	if !ok {
