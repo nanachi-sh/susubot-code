@@ -280,7 +280,7 @@ message GetRoomsResponse {
 }
 
 message JoinRoomRequest {
-    PlayerAccountInfo PlayerInfo = 1;
+    optional PlayerAccountInfo PlayerInfo = 1;
     string RoomHash = 2;
 }
 
