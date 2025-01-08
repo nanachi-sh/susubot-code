@@ -159,17 +159,13 @@ func GetRoom(cs []*http.Cookie, req *uno_pb.GetRoomRequest) *uno_pb.GetRoomRespo
 	if req.RoomHash == "" {
 		return &uno_pb.GetRoomResponse{Err: uno_pb.Errors_Unexpected.Enum()}
 	}
-	uhash, ok := GetUserHash(cs)
-	if !ok {
-		return &uno_pb.GetRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}
-	}
-	isPrivilege := CheckPrivilegeUser(uhash)
+	uhash, _ := GetUserHash(cs)
 	if r, ok := getRoom(req.RoomHash); !ok {
 		return &uno_pb.GetRoomResponse{
 			Err: uno_pb.Errors_RoomNoExist.Enum(),
 		}
 	} else {
-		if isPrivilege {
+		if CheckPrivilegeUser(uhash) {
 			return &uno_pb.GetRoomResponse{Extra: r.FormatToProtoBufExtra()}
 		} else {
 			return &uno_pb.GetRoomResponse{Simple: r.FormatToProtoBufSimple()}
