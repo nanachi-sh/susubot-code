@@ -2701,6 +2701,12 @@ func uno(message *response_pb.Response_Message, text string) {
 			logger.Println(err)
 			return
 		}
+		if resp.Err != nil {
+			switch e := *resp.Err; e {
+			default:
+				logger.Printf("未处理异常：%v\n", e.String())
+			}
+		}
 		hash := resp.RoomHash
 		id := ""
 		for {
