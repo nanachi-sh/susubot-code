@@ -221,9 +221,19 @@ message PlayerRoomInfo {
     string Hash = 4;
 }
 
+message PlayerRoomInfoSimple {
+    string RoomHash = 1;
+    int32 CardLength = 2;
+}
+
 message PlayerInfo {
     PlayerAccountInfo PlayerAccountInfo = 1;
     optional PlayerRoomInfo PlayerRoomInfo = 2;
+}
+
+message PlayerInfoSimple {
+    PlayerAccountInfo PlayerAccountInfo = 1;
+    PlayerRoomInfoSimple PlayerRoomInfo = 2;
 }
 
 message RoomSimple {
@@ -271,7 +281,7 @@ message GetPlayerRequest {
 
 message GetPlayerResponse {
     optional Errors err = 1;
-    optional PlayerAccountInfo Simple = 2;
+    optional PlayerInfoSimple Simple = 2;
     optional PlayerInfo Extra = 3;
 }
 
@@ -393,9 +403,6 @@ message RoomEventResponse {
     message DrawCard_SkippedEvent { //玩家被跳过事件
         PlayerAccountInfo NextOperator = 1;
     }
-    message IndicateUNO_SuccessEvent { //指出未报UNO成功事件
-        PlayerAccountInfo Punished = 1;
-    }
     message HandCardUpdateEvent { //某玩家手牌更新
         PlayerAccountInfo Updated = 1;
     }
@@ -404,8 +411,7 @@ message RoomEventResponse {
     optional GameFinishEvent GameFinish = 2;
     optional DrawCard_IntoSendCardEvent DrawCard_IntoSendCard = 3;
     optional DrawCard_SkippedEvent DrawCard_Skipped = 4;
-    optional IndicateUNO_SuccessEvent IndicateUNO_Success = 5;
-    optional HandCardUpdateEvent HandCardUpdate = 6;
+    optional HandCardUpdateEvent HandCardUpdate = 5;
 }
 
 enum Source {

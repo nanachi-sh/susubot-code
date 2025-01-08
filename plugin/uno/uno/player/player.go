@@ -223,3 +223,23 @@ func (p *Player) FormatToProtoBuf() *uno_pb.PlayerInfo {
 	}
 	return pi
 }
+
+func (p *Player) FormatToProtoBufSimple() *uno_pb.PlayerInfoSimple {
+	pi := &uno_pb.PlayerInfoSimple{
+		PlayerAccountInfo: &uno_pb.PlayerAccountInfo{
+			Id:   p.id,
+			Name: p.name,
+		},
+	}
+	if p.roomhash != "" {
+		cards := []*uno_pb.Card{}
+		for _, v := range p.cards {
+			cards = append(cards, &v)
+		}
+		pi.PlayerRoomInfo = &uno_pb.PlayerRoomInfoSimple{
+			RoomHash:   p.roomhash,
+			CardLength: int32(len(cards)),
+		}
+	}
+	return pi
+}

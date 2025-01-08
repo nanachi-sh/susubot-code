@@ -9,6 +9,7 @@ import (
 	"image/draw"
 	"image/png"
 	"math/rand"
+	"net/http"
 	"os"
 	"regexp"
 	"sort"
@@ -38,6 +39,7 @@ var (
 
 	uno_rooms        = make(map[string]*roomUNO)
 	uno_player2room  = make(map[string]*roomUNO)
+	uno_playerinfo   = make(map[string]*playerinfoUNO)
 	uno_playerStatus = make(map[string]struct{})
 	uno_privilegeCtx context.Context
 )
@@ -53,8 +55,15 @@ type roomSI struct {
 }
 
 type roomUNO struct {
-	hash string
-	id   string
+	groupid string
+	hash    string
+	id      string
+}
+
+type playerinfoUNO struct {
+	roomHash  string
+	hash      string
+	playerCtx context.Context
 }
 
 func Start() {
@@ -90,7 +99,7 @@ func Start() {
 			}
 		}
 	}
-	if rs, err := define.UnoC.GetRooms(define.UnoCtx, &uno_pb.Empty{}); err != nil {
+	if rs, err := define.UnoC.GetRooms(uno_privilegeCtx, &uno_pb.Empty{}); err != nil {
 		logger.Println(err)
 	} else {
 		for _, v := range rs.Rooms {
@@ -2348,9 +2357,17 @@ func init() {
 		13: "小王",
 		14: "大王",
 	}
+	cs, err := http.ParseCookie(fmt.Sprintf("account_hash=%v", define.PrivilegeUserHash))
+	if err != nil {
+		logger.Fatalln(err)
+	}
 	md, ok := metadata.FromOutgoingContext(define.UnoCtx)
 	if ok {
-		md.Append("account_hash", define.PrivilegeUserHash)
+		md.Append("Cookie", fmt.Sprintf("%v=%v", cs[0].Name, cs[0].Value))
+		uno_privilegeCtx = metadata.NewOutgoingContext(define.UnoCtx, md)
+	} else {
+		md := metadata.New(map[string]string{})
+		md.Append("Cookie", fmt.Sprintf("%v=%v", cs[0].Name, cs[0].Value))
 		uno_privilegeCtx = metadata.NewOutgoingContext(define.UnoCtx, md)
 	}
 }
@@ -2418,6 +2435,208 @@ func uno_adjust(action unoAction, text string) string {
 	}
 }
 
+func (unoR *roomUNO) listenEvent() {
+	stream, err := define.UnoC.RoomEvent(uno_privilegeCtx, &uno_pb.RoomEventRequest{
+		RoomHash:   unoR.hash,
+		PlayerHash: define.PrivilegeUserHash,
+	})
+	if err != nil {
+		logger.Println(err)
+		return
+	}
+	for close := false; close; {
+		resp, err := stream.Recv()
+		if err != nil {
+			logger.Println(err)
+			return
+		}
+		if resp.DrawCard_IntoSendCard != nil {
+			e := resp.DrawCard_IntoSendCard
+			if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: fmt.Sprintf("%v(%v)当上了庄家", e.Banker.Name, e.Banker.Id),
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				continue
+			}
+			for _, v := range e.Players {
+				resp, err := define.UnoC.GetPlayer(uno_privilegeCtx, &uno_pb.GetPlayerRequest{
+					RoomHash: unoR.hash,
+					PlayerId: v.Id,
+				})
+				if err != nil {
+					logger.Println(err)
+					continue
+				}
+				if resp.Err != nil {
+					switch e := *resp.Err; e {
+					default:
+						logger.Printf("未处理错误类型：%v\n", e.String())
+					}
+					continue
+				}
+				p := resp.Extra
+				cs := []uno_pb.Card{}
+				for _, v := range p.PlayerRoomInfo.Cards {
+					cs = append(cs, *v)
+				}
+				img, err := uno_generateCardsImage(cs, uno_defaultColumn)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				buf, err := image2Buf(img)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				if err := sendMessageToFriend(p.PlayerAccountInfo.Id, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Image,
+						Image: &request_pb.MessageChain_Image{
+							Buf: buf,
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
+			}
+			img, err := uno_getCardImage(*e.LeadCard, nil)
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			buf, err := image2Buf(img)
+			if err != nil {
+				logger.Println(err)
+				return
+			}
+			if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Image,
+					Image: &request_pb.MessageChain_Image{
+						Buf: buf,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: "引牌为",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: e.Banker.Id,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 轮到你出牌了",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		if resp.DrawCard_Skipped != nil {
+			e := resp.DrawCard_Skipped
+			if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: e.NextOperator.Id,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 轮到你出牌了",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+		}
+		if resp.GameFinish != nil {
+			close = true
+			for {
+				rhash := ""
+				delete(uno_rooms, unoR.hash)
+				for k, v := range uno_player2room {
+					// 删除在桌内的玩家
+					if v.hash == rhash {
+						delete(uno_player2room, k)
+					}
+				}
+				break
+			}
+			e := resp.GameFinish
+			winner := e.Winner
+			if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: fmt.Sprintf("游戏结束，%v(%v)获胜", winner.PlayerAccountInfo.Name, winner.PlayerAccountInfo.Id),
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			for _, v := range e.Players {
+				if v.PlayerAccountInfo.Id == winner.PlayerAccountInfo.Id {
+					continue
+				}
+				cs := []uno_pb.Card{}
+				for _, v := range v.PlayerRoomInfo.Cards {
+					cs = append(cs, *v)
+				}
+				img, err := uno_generateCardsImage(cs, -1)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				buf, err := image2Buf(img)
+				if err != nil {
+					logger.Println(err)
+					return
+				}
+				if err := sendMessageToGroup(unoR.groupid, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type:  request_pb.MessageChainType_MessageChainType_Image,
+						Image: &request_pb.MessageChain_Image{Buf: buf},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: fmt.Sprintf("%v(%v)剩余牌", v.PlayerAccountInfo.Name, v.PlayerAccountInfo.Id),
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
+			}
+			return
+		}
+	}
+}
+
 func uno(message *response_pb.Response_Message, text string) {
 	if *message.Type != response_pb.MessageType_MessageType_Group {
 		return
@@ -2477,7 +2696,7 @@ func uno(message *response_pb.Response_Message, text string) {
 	text = uno_adjust(action, text)
 	switch action {
 	case uno_CreateRoom:
-		resp, err := define.UnoC.CreateRoom(define.UnoCtx, &uno_pb.Empty{})
+		resp, err := define.UnoC.CreateRoom(uno_privilegeCtx, &uno_pb.Empty{})
 		if err != nil {
 			logger.Println(err)
 			return
@@ -2490,8 +2709,9 @@ func uno(message *response_pb.Response_Message, text string) {
 				continue
 			} else {
 				uno_rooms[id] = &roomUNO{
-					hash: hash,
-					id:   id,
+					groupid: group.GroupId,
+					hash:    hash,
+					id:      id,
 				}
 				break
 			}
@@ -2514,8 +2734,30 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 	case uno_ExitRoom:
-		resp, err := define.UnoC.ExitRoom(define.UnoCtx, &uno_pb.ExitRoomRequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.ExitRoom(pi.playerCtx, &uno_pb.ExitRoomRequest{
 			PlayerId: senderid,
+			RoomHash: pi.roomHash,
 		})
 		if err != nil {
 			logger.Println(err)
@@ -2564,7 +2806,8 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		delete(twoonone_player2room, senderid)
+		delete(uno_playerinfo, senderid)
+		delete(uno_player2room, senderid)
 		if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_At,
@@ -2583,8 +2826,29 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 	case uno_StartRoom:
-		resp, err := define.UnoC.StartRoom(define.UnoCtx, &uno_pb.StartRoomRequest{
-			PlayerId: &senderid,
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.StartRoom(pi.playerCtx, &uno_pb.StartRoomRequest{
+			RoomHash: pi.roomHash,
 		})
 		if err != nil {
 			logger.Println(err)
@@ -2693,9 +2957,30 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 	case uno_SendCard_NoSend:
-		resp, err := define.UnoC.SendCardAction(define.UnoCtx, &uno_pb.SendCardActionRequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.NoSendCard(pi.playerCtx, &uno_pb.NoSendCardRequest{
 			PlayerId: senderid,
-			Action:   uno_pb.SendCardActions_NoSend,
+			RoomHash: pi.roomHash,
 		})
 		if err != nil {
 			logger.Println(err)
@@ -2802,7 +3087,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_At,
 				At: &request_pb.MessageChain_At{
-					TargetId: resp.NextOperator.PlayerAccountInfo.Id,
+					TargetId: resp.NextOperator.Id,
 				},
 			},
 			&request_pb.MessageChainObject{
@@ -2837,10 +3122,31 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		resp, err := define.UnoC.SendCardAction(define.UnoCtx, &uno_pb.SendCardActionRequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.SendCard(pi.playerCtx, &uno_pb.SendCardRequest{
 			PlayerId: senderid,
+			RoomHash: pi.roomHash,
 			SendCard: &card,
-			Action:   uno_pb.SendCardActions_Send,
 		})
 		if err != nil {
 			logger.Println(err)
@@ -2997,74 +3303,6 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		if resp.GameFinish {
-			for {
-				rhash := ""
-				for k, v := range uno_player2room {
-					if k == senderid {
-						rhash = v.hash
-						// 删除桌
-						delete(uno_rooms, v.id)
-						break
-					}
-				}
-				for k, v := range uno_player2room {
-					// 删除在桌内的玩家
-					if v.hash == rhash {
-						delete(uno_player2room, k)
-					}
-				}
-				break
-			}
-			e := resp.GameFinishE
-			winner := e.Winner
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: fmt.Sprintf("游戏结束，%v(%v)获胜", winner.PlayerAccountInfo.Name, winner.PlayerAccountInfo.Id),
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			for _, v := range e.Players {
-				if v.PlayerAccountInfo.Id == winner.PlayerAccountInfo.Id {
-					continue
-				}
-				cs := []uno_pb.Card{}
-				for _, v := range v.PlayerRoomInfo.Cards {
-					cs = append(cs, *v)
-				}
-				img, err := uno_generateCardsImage(cs, -1)
-				if err != nil {
-					logger.Println(err)
-					return
-				}
-				buf, err := image2Buf(img)
-				if err != nil {
-					logger.Println(err)
-					return
-				}
-				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-					&request_pb.MessageChainObject{
-						Type:  request_pb.MessageChainType_MessageChainType_Image,
-						Image: &request_pb.MessageChain_Image{Buf: buf},
-					},
-					&request_pb.MessageChainObject{
-						Type: request_pb.MessageChainType_MessageChainType_Text,
-						Text: &request_pb.MessageChain_Text{
-							Text: fmt.Sprintf("%v(%v)剩余牌", v.PlayerAccountInfo.Name, v.PlayerAccountInfo.Id),
-						},
-					},
-				}); err != nil {
-					logger.Println(err)
-					return
-				}
-			}
-			return
-		}
 		extra := ""
 		if card.FeatureCard != nil {
 			switch card.FeatureCard.FeatureCard {
@@ -3101,7 +3339,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_Text,
 				Text: &request_pb.MessageChain_Text{
-					Text: fmt.Sprintf("%v(%v)出了%v，他还剩下 %v 张牌", sendername, senderid, extra, len(resp.SenderCard)),
+					Text: fmt.Sprintf("%v(%v)出了%v，他还剩下 %v 张牌", sendername, senderid, extra, len(resp.SenderCards)),
 				},
 			},
 		}); err != nil {
@@ -3109,7 +3347,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 		cs := []uno_pb.Card{}
-		for _, v := range resp.SenderCard {
+		for _, v := range resp.SenderCards {
 			cs = append(cs, *v)
 		}
 		img, err = uno_generateCardsImage(cs, uno_defaultColumn)
@@ -3137,7 +3375,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			&request_pb.MessageChainObject{
 				Type: request_pb.MessageChainType_MessageChainType_At,
 				At: &request_pb.MessageChain_At{
-					TargetId: resp.NextOperator.PlayerAccountInfo.Id,
+					TargetId: resp.NextOperator.Id,
 				},
 			},
 			&request_pb.MessageChainObject{
@@ -3254,14 +3492,27 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		resp, err := define.UnoC.JoinRoom(define.UnoCtx, &uno_pb.JoinRoomRequest{
-			PlayerId:   senderid,
-			PlayerName: sendername,
-			RoomHash:   r.hash,
+		resp, err := define.UnoC.JoinRoom(uno_privilegeCtx, &uno_pb.JoinRoomRequest{
+			PlayerInfo: &uno_pb.PlayerAccountInfo{
+				Id:   senderid,
+				Name: sendername,
+			},
+			RoomHash: r.hash,
 		})
 		if err != nil {
 			logger.Println(err)
 			return
+		}
+		md, ok := metadata.FromOutgoingContext(define.UnoCtx)
+		if !ok {
+			md = metadata.New(map[string]string{})
+		}
+		md.Append("Cookie", fmt.Sprintf("player_hash=%v", resp.VerifyHash))
+		pctx := metadata.NewOutgoingContext(define.UnoCtx, md)
+		uno_playerinfo[senderid] = &playerinfoUNO{
+			roomHash:  r.hash,
+			hash:      resp.VerifyHash,
+			playerCtx: pctx,
 		}
 		if resp.Err != nil {
 			switch e := *resp.Err; e {
@@ -3433,7 +3684,28 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 		}
 	case uno_DrawCard:
-		resp, err := define.UnoC.DrawCard(define.UnoCtx, &uno_pb.DrawCardRequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.DrawCard(pi.playerCtx, &uno_pb.DrawCardRequest{
 			PlayerId: senderid,
 		})
 		if err != nil {
@@ -3555,9 +3827,10 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		if resp.IntoSendCard {
-			e := resp.IntoSendCardE
-			img, err := uno_getCardImage(*resp.ElectBankerCard, nil)
+		switch {
+		case resp.ElectingBanker != nil:
+			eb := resp.ElectingBanker
+			img, err := uno_getCardImage(*eb.ElectBankerCard, nil)
 			if err != nil {
 				logger.Println(err)
 				return
@@ -3590,152 +3863,14 @@ func uno(message *response_pb.Response_Message, text string) {
 				logger.Println(err)
 				return
 			}
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: fmt.Sprintf("%v(%v)当上了庄家", e.Banker.PlayerAccountInfo.Name, e.Banker.PlayerAccountInfo.Id),
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			for _, v := range e.Players {
-				cs := []uno_pb.Card{}
-				for _, v := range v.PlayerRoomInfo.Cards {
-					cs = append(cs, *v)
-				}
-				img, err := uno_generateCardsImage(cs, uno_defaultColumn)
-				if err != nil {
-					logger.Println(err)
-					return
-				}
-				buf, err := image2Buf(img)
-				if err != nil {
-					logger.Println(err)
-					return
-				}
-				if err := sendMessageToFriend(v.PlayerAccountInfo.Id, []*request_pb.MessageChainObject{
-					&request_pb.MessageChainObject{
-						Type: request_pb.MessageChainType_MessageChainType_Image,
-						Image: &request_pb.MessageChain_Image{
-							Buf: buf,
-						},
-					},
-				}); err != nil {
-					logger.Println(err)
-					return
-				}
-			}
-			img, err = uno_getCardImage(*e.LeadCard, nil)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			buf, err = image2Buf(img)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Image,
-					Image: &request_pb.MessageChain_Image{
-						Buf: buf,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: "引牌为",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_At,
-					At: &request_pb.MessageChain_At{
-						TargetId: e.Banker.PlayerAccountInfo.Id,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: " 轮到你出牌了",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			return
-		}
-		if resp.Skipped {
-			e := resp.SkippedE
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_At,
-					At: &request_pb.MessageChain_At{
-						TargetId: e.NextOperator.PlayerAccountInfo.Id,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: " 轮到你出牌了",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-		}
-		switch resp.Stage {
-		case uno_pb.Stage_ElectingBanker:
-			img, err := uno_getCardImage(*resp.ElectBankerCard, nil)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			buf, err := image2Buf(img)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Image,
-					Image: &request_pb.MessageChain_Image{
-						Buf: buf,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_At,
-					At: &request_pb.MessageChain_At{
-						TargetId: senderid,
-					},
-				},
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Text,
-					Text: &request_pb.MessageChain_Text{
-						Text: " 你抽到了",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-		case uno_pb.Stage_SendingCard:
+		case resp.SendingCard != nil:
+			sc := resp.SendingCard
 			cs := []uno_pb.Card{}
-			for _, v := range resp.PlayerCard {
+			for _, v := range sc.PlayerCard {
 				cs = append(cs, *v)
 			}
-			if resp.DrawCard != nil {
-				cs = append(cs, *resp.DrawCard)
+			if sc.DrawCard != nil {
+				cs = append(cs, *sc.DrawCard)
 			}
 			img, err := uno_generateCardsImage(cs, uno_defaultColumn)
 			if err != nil {
@@ -3760,7 +3895,28 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 		}
 	case uno_CallUNO:
-		resp, err := define.UnoC.CallUNO(define.UnoCtx, &uno_pb.CallUNORequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 报UNO失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.CallUNO(pi.playerCtx, &uno_pb.CallUNORequest{
 			PlayerId: senderid,
 		})
 		if err != nil {
@@ -3901,7 +4057,28 @@ func uno(message *response_pb.Response_Message, text string) {
 			return
 		}
 	case uno_Challenge:
-		resp, err := define.UnoC.Challenge(define.UnoCtx, &uno_pb.ChallengeRequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.Challenge(pi.playerCtx, &uno_pb.ChallengeRequest{
 			PlayerId: senderid,
 		})
 		if err != nil {
@@ -3987,7 +4164,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		if resp.Win {
+		if resp.IsWin {
 			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_At,
@@ -3999,31 +4176,6 @@ func uno(message *response_pb.Response_Message, text string) {
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
 						Text: " 挑战成功，上一位玩家已被系统罚摸四张",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			cs := []uno_pb.Card{}
-			for _, v := range resp.LastPlayer.PlayerRoomInfo.Cards {
-				cs = append(cs, *v)
-			}
-			img, err := uno_generateCardsImage(cs, uno_defaultColumn)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			buf, err := image2Buf(img)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			if err := sendMessageToFriend(resp.LastPlayer.PlayerAccountInfo.Id, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Image,
-					Image: &request_pb.MessageChain_Image{
-						Buf: buf,
 					},
 				},
 			}); err != nil {
@@ -4077,7 +4229,28 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		resp, err := define.UnoC.IndicateUNO(define.UnoCtx, &uno_pb.IndicateUNORequest{
+		pi, ok := uno_playerinfo[senderid]
+		if !ok {
+			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_At,
+					At: &request_pb.MessageChain_At{
+						TargetId: senderid,
+					},
+				},
+				&request_pb.MessageChainObject{
+					Type: request_pb.MessageChainType_MessageChainType_Text,
+					Text: &request_pb.MessageChain_Text{
+						Text: " 下桌失败，你未在任意桌内",
+					},
+				},
+			}); err != nil {
+				logger.Println(err)
+				return
+			}
+			return
+		}
+		resp, err := define.UnoC.IndicateUNO(pi.playerCtx, &uno_pb.IndicateUNORequest{
 			TargetId: atTarget,
 		})
 		if err != nil {
@@ -4181,7 +4354,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		if resp.IndicateOK {
+		if resp.IndicateSuccessed {
 			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_At,
@@ -4193,31 +4366,6 @@ func uno(message *response_pb.Response_Message, text string) {
 					Type: request_pb.MessageChainType_MessageChainType_Text,
 					Text: &request_pb.MessageChain_Text{
 						Text: " 指出UNO成功，玩家已被系统罚摸两张牌",
-					},
-				},
-			}); err != nil {
-				logger.Println(err)
-				return
-			}
-			cs := []uno_pb.Card{}
-			for _, v := range resp.Punished.PlayerRoomInfo.Cards {
-				cs = append(cs, *v)
-			}
-			img, err := uno_generateCardsImage(cs, uno_defaultColumn)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			buf, err := image2Buf(img)
-			if err != nil {
-				logger.Println(err)
-				return
-			}
-			if err := sendMessageToFriend(resp.Punished.PlayerAccountInfo.Id, []*request_pb.MessageChainObject{
-				&request_pb.MessageChainObject{
-					Type: request_pb.MessageChainType_MessageChainType_Image,
-					Image: &request_pb.MessageChain_Image{
-						Buf: buf,
 					},
 				},
 			}); err != nil {
@@ -4265,14 +4413,14 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		resp, err := define.UnoC.GetRoom(define.UnoCtx, &uno_pb.GetRoomRequest{
+		resp, err := define.UnoC.GetRoom(uno_privilegeCtx, &uno_pb.GetRoomRequest{
 			RoomHash: r.hash,
 		})
 		if err != nil {
 			logger.Println(err)
 			return
 		}
-		if len(resp.Info.CardPool) == 0 {
+		if len(resp.Extra.CardPool) == 0 {
 			if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
 				&request_pb.MessageChainObject{
 					Type: request_pb.MessageChainType_MessageChainType_At,
@@ -4292,7 +4440,7 @@ func uno(message *response_pb.Response_Message, text string) {
 			}
 			return
 		}
-		card := resp.Info.CardPool[len(resp.Info.CardPool)-1]
+		card := resp.Extra.CardPool[len(resp.Extra.CardPool)-1]
 		extra := ""
 		if card.SendCard.FeatureCard != nil {
 			switch card.SendCard.FeatureCard.FeatureCard {
@@ -4351,13 +4499,13 @@ func uno_getRoom(id, hash string) (string, error) {
 	if hash == "" {
 		hash = uno_rooms[id].hash
 	}
-	resp, err := define.UnoC.GetRoom(define.UnoCtx, &uno_pb.GetRoomRequest{
+	resp, err := define.UnoC.GetRoom(uno_privilegeCtx, &uno_pb.GetRoomRequest{
 		RoomHash: hash,
 	})
 	if err != nil {
 		return "", err
 	}
-	ri := resp.Info
+	ri := resp.Extra
 	stageStr := ""
 	switch ri.Stage {
 	case uno_pb.Stage_WaitingStart:
@@ -4367,10 +4515,14 @@ func uno_getRoom(id, hash string) (string, error) {
 	case uno_pb.Stage_SendingCard:
 		stageStr = "出牌中"
 	}
+	ps := []*uno_pb.PlayerAccountInfo{}
+	for _, v := range ri.Players {
+		ps = append(ps, v.PlayerAccountInfo)
+	}
 	return fmt.Sprintf(`id：%v
 	哈希：%v
 	游戏状态：%v
-	玩家列表：%v`, id, ri.Hash, stageStr, "\n"+uno_playersToStr(ri.Players)), nil
+	玩家列表：%v`, id, ri.Hash, stageStr, "\n"+uno_playersToStr(ps)), nil
 }
 
 func uno_playersToStr(x []*uno_pb.PlayerAccountInfo) string {

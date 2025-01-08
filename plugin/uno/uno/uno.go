@@ -516,8 +516,8 @@ func IndicateUNO(cs []*http.Cookie, req *uno_pb.IndicateUNORequest) *uno_pb.Indi
 			return &uno_pb.IndicateUNOResponse{Err: uno_pb.Errors_Unexpected.Enum()}
 		}
 		ge.update(&uno_pb.RoomEventResponse{
-			IndicateUNO_Success: &uno_pb.RoomEventResponse_IndicateUNO_SuccessEvent{
-				Punished: pi.PlayerAccountInfo,
+			HandCardUpdate: &uno_pb.RoomEventResponse_HandCardUpdateEvent{
+				Updated: pi.PlayerAccountInfo,
 			},
 		})
 	}
@@ -694,8 +694,16 @@ func GetPlayer(cs []*http.Cookie, req *uno_pb.GetPlayerRequest) *uno_pb.GetPlaye
 			Extra: p.FormatToProtoBuf(),
 		}
 	} else {
+		uhash, ok := GetUserHash(cs)
+		if ok {
+			if CheckPrivilegeUser(uhash) {
+				return &uno_pb.GetPlayerResponse{
+					Extra: p.FormatToProtoBuf(),
+				}
+			}
+		}
 		return &uno_pb.GetPlayerResponse{
-			Simple: p.FormatToProtoBuf().PlayerAccountInfo,
+			Simple: p.FormatToProtoBufSimple(),
 		}
 	}
 }
@@ -708,8 +716,10 @@ func RoomEvent(req *uno_pb.RoomEventRequest, stream grpc.ServerStreamingServer[u
 	if !ok {
 		return &uno_pb.RoomEventResponse{Err: uno_pb.Errors_RoomNoExist.Enum()}, nil
 	}
-	if _, ok := r.GetPlayerFromHash(req.PlayerHash); !ok {
-		return &uno_pb.RoomEventResponse{Err: uno_pb.Errors_NoValidPlayerHash.Enum()}, nil
+	if !CheckPrivilegeUser(req.PlayerHash) {
+		if _, ok := r.GetPlayerFromHash(req.PlayerHash); !ok {
+			return &uno_pb.RoomEventResponse{Err: uno_pb.Errors_NoValidPlayerHash.Enum()}, nil
+		}
 	}
 	e, ok := findRoomEvent(req.RoomHash)
 	if !ok {
