@@ -139,13 +139,14 @@ func FindUser(userid, userhash string) (*UserInfo, error) {
 	row := database.QueryRow(fmt.Sprintf(`SELECT * FROM Players WHERE %v="%v";`, key, value))
 	var (
 		name               string
+		id                 string
 		sStr               string
 		s                  uno_pb.Source
 		hash               string
 		seed1str, seed2str string
 		passwordHASH       string
 	)
-	if err := row.Scan(&ignore, &name, &passwordHASH, &seed1str, &seed2str, &sStr, &hash); err != nil {
+	if err := row.Scan(&id, &name, &passwordHASH, &seed1str, &seed2str, &sStr, &hash); err != nil {
 		return nil, err
 	}
 	switch sStr {
@@ -161,7 +162,7 @@ func FindUser(userid, userhash string) (*UserInfo, error) {
 		return nil, err
 	}
 	return &UserInfo{
-		AI:       &uno_pb.PlayerAccountInfo{Id: userid, Name: name},
+		AI:       &uno_pb.PlayerAccountInfo{Id: id, Name: name},
 		Hash:     hash,
 		S:        s,
 		SEEDs:    [2]uint64{seed1, seed2},

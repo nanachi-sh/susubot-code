@@ -117,6 +117,7 @@ func JoinRoom(cs []*http.Cookie, req *uno_pb.JoinRoomRequest) (*uno_pb.JoinRoomR
 			if err != nil {
 				return nil, err
 			}
+			fmt.Println(ui)
 			req.PlayerInfo = ui.AI
 		}
 	}
