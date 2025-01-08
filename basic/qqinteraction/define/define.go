@@ -42,6 +42,7 @@ var (
 	TwoOnOneCtx       context.Context
 	UnoC              uno_pb.UnoClient
 	UnoCtx            context.Context
+	PrivilegeUserHash string
 
 	ExternalHost     string
 	ExternalHTTPPort int
@@ -58,7 +59,10 @@ func init() {
 	if err := json.Unmarshal(d, Conf); err != nil {
 		logger.Fatalln(err)
 	}
-
+	PrivilegeUserHash = os.Getenv("PRIVILEGE_USERHASH")
+	if PrivilegeUserHash == "" {
+		logger.Fatalln("UNO Privilege UserHash为空")
+	}
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")

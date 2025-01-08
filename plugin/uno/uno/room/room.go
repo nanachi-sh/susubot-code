@@ -21,6 +21,7 @@ type Room struct {
 	cardHeap          []uno_pb.Card
 	sequenceDirection direction
 	sequencePosition  int
+	seeds             [2]uint64
 }
 
 type direction int
@@ -44,18 +45,21 @@ type SendCard struct {
 	featureEffected    bool
 }
 
-func hash() string {
+func hash() ([2]uint64, string) {
 	buf := make([]byte, 100)
 	for n := 0; n != len(buf); n++ {
 		buf[n] = byte(rand.Intn(256))
 	}
-	h1, h2 := murmur3.SeedSum128(rand.Uint64(), rand.Uint64(), buf)
-	return fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
+	s1, s2 := rand.Uint64(), rand.Uint64()
+	h1, h2 := murmur3.SeedSum128(s1, s2, buf)
+	return [2]uint64{s1, s2}, fmt.Sprintf("%v%v", strconv.FormatUint(h1, 16), strconv.FormatUint(h2, 16))
 }
 
 func New() *Room {
+	seeds, hash := hash()
 	return &Room{
-		hash:              hash(),
+		hash:              hash,
+		seeds:             seeds,
 		players:           []*player.Player{},
 		operatorNow:       nil,
 		stage:             uno_pb.Stage_WaitingStart,
@@ -1048,4 +1052,8 @@ func (r *Room) FormatToProtoBufSimple() *uno_pb.RoomSimple {
 		ur.OperatorNow = r.operatorNow.FormatToProtoBuf().PlayerAccountInfo
 	}
 	return ur
+}
+
+func (r *Room) GetSeeds() [2]uint64 {
+	return r.seeds
 }

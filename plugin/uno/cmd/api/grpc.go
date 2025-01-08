@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	uno_pb "github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno"
@@ -22,48 +21,24 @@ type (
 	}
 )
 
-func GetCookies(md metadata.MD) []*http.Cookie {
+func GetCookies(md metadata.MD) ([]*http.Cookie, error) {
 	csStr := []string{}
 	if s := md.Get("grpcgateway-cookie"); len(s) > 0 {
 		csStr = s
 	} else if s := md.Get("cookie"); len(s) > 0 {
 		csStr = s
 	} else {
-		return nil
+		return nil, nil
 	}
 	cs := []*http.Cookie{}
 	for _, v := range csStr {
-		vS := strings.Split(v, ";")
-		//仅一个Cookie
-		if len(vS) == 1 {
-			vCS := strings.Split(v, "=")
-			//异常Cookie结构
-			if len(vCS) != 2 {
-				return nil
-			}
-			key := strings.TrimSpace(vCS[0])
-			value := strings.TrimSpace(vCS[1])
-			cs = append(cs, &http.Cookie{
-				Name:  key,
-				Value: value,
-			})
-		} else { //多个Cookie
-			for _, vSv := range vS {
-				vSvCS := strings.Split(vSv, "=")
-				//异常Cookie结构
-				if len(vSvCS) != 2 {
-					return nil
-				}
-				key := strings.TrimSpace(vSvCS[0])
-				value := strings.TrimSpace(vSvCS[1])
-				cs = append(cs, &http.Cookie{
-					Name:  key,
-					Value: value,
-				})
-			}
+		c, err := http.ParseCookie(v)
+		if err != nil {
+			return nil, err
 		}
+		cs = append(cs, c...)
 	}
-	return cs
+	return cs, nil
 }
 
 func GRPCServe() error {
@@ -100,7 +75,10 @@ func (*unoService) GetPlayer(ctx context.Context, req *uno_pb.GetPlayerRequest) 
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.GetPlayer(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.GetPlayerResponse{}
@@ -132,7 +110,10 @@ func (*unoService) CreateUser(ctx context.Context, req *uno_pb.CreateUserRequest
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp, err := uno.CreateUser(cookies, req)
 		if err != nil {
 			ret.err = err
@@ -168,7 +149,10 @@ func (*unoService) GetUser(ctx context.Context, req *uno_pb.GetUserRequest) (*un
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp, err := uno.GetUser(cookies, req)
 		if err != nil {
 			ret.err = err
@@ -216,7 +200,10 @@ func (*unoService) CreateRoom(ctx context.Context, _ *uno_pb.Empty) (*uno_pb.Cre
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp, err := uno.CreateRoom(cookies)
 		if err != nil {
 			ret.err = err
@@ -279,7 +266,10 @@ func (*unoService) GetRoom(ctx context.Context, req *uno_pb.GetRoomRequest) (*un
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		//普通或临时玩家则返回桌基本信息
 		resp := uno.GetRoom(cookies, req)
 		if resp == nil {
@@ -312,7 +302,10 @@ func (*unoService) JoinRoom(ctx context.Context, req *uno_pb.JoinRoomRequest) (*
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp, err := uno.JoinRoom(cookies, req)
 		if err != nil {
 			ret.err = err
@@ -348,7 +341,10 @@ func (*unoService) ExitRoom(ctx context.Context, req *uno_pb.ExitRoomRequest) (*
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.ExitRoom(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.ExitRoomResponse{}
@@ -380,7 +376,10 @@ func (*unoService) StartRoom(ctx context.Context, req *uno_pb.StartRoomRequest) 
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.StartRoom(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.BasicResponse{}
@@ -412,7 +411,10 @@ func (*unoService) DrawCard(ctx context.Context, req *uno_pb.DrawCardRequest) (*
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.DrawCard(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.DrawCardResponse{}
@@ -444,7 +446,10 @@ func (*unoService) SendCard(ctx context.Context, req *uno_pb.SendCardRequest) (*
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.SendCard(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.SendCardResponse{}
@@ -476,7 +481,10 @@ func (*unoService) NoSendCard(ctx context.Context, req *uno_pb.NoSendCardRequest
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.NoSendCard(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.NoSendCardResponse{}
@@ -508,7 +516,10 @@ func (*unoService) CallUNO(ctx context.Context, req *uno_pb.CallUNORequest) (*un
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.CallUNO(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.CallUNOResponse{}
@@ -540,7 +551,10 @@ func (*unoService) Challenge(ctx context.Context, req *uno_pb.ChallengeRequest) 
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.Challenge(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.ChallengeResponse{}
@@ -572,7 +586,10 @@ func (*unoService) IndicateUNO(ctx context.Context, req *uno_pb.IndicateUNOReque
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.IndicateUNO(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.IndicateUNOResponse{}
@@ -604,7 +621,10 @@ func (*unoService) TEST_SetPlayerCard(ctx context.Context, req *uno_pb.TEST_SetP
 		if !ok {
 			ret.err = errors.New("从context获取metadata失败")
 		}
-		cookies := GetCookies(md)
+		cookies, err := GetCookies(md)
+		if err != nil {
+			ret.err = err
+		}
 		resp := uno.TEST_SetPlayerCard(cookies, req)
 		if resp == nil {
 			ret.data = &uno_pb.BasicResponse{}

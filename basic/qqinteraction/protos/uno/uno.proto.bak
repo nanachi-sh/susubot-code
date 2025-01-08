@@ -1,0 +1,278 @@
+syntax = "proto3";
+
+package susubot.plugin.uno;
+
+option go_package = "protos/uno";
+
+service uno {
+    rpc CreateRoom (Empty) returns (CreateRoomResponse);
+    rpc GetRooms (Empty) returns (GetRoomsResponse);
+    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
+    rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
+    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
+    rpc StartRoom (StartRoomRequest) returns (BasicResponse);
+    rpc DrawCard (DrawCardRequest) returns (DrawCardResponse);
+    rpc SendCardAction (SendCardActionRequest) returns (SendCardActionResponse);
+    rpc CallUNO (CallUNORequest) returns (CallUNOResponse);
+    rpc Challenge (ChallengeRequest) returns (ChallengeResponse);
+    rpc IndicateUNO (IndicateUNORequest) returns (IndicateUNOResponse);
+    // 测试用接口，前端禁止直接调用
+    rpc TEST_SetPlayerCard (TEST_SetPlayerCardRequest) returns (BasicResponse);
+}
+
+enum Stage {
+    WaitingStart = 0;
+    ElectingBanker = 1;
+    SendingCard = 2;
+}
+
+enum Errors {
+    Unexpected = 0; //意外错误
+    RoomStarted = 1; //房间已开始游戏
+    RoomFull = 2; //房间已满
+    RoomExistPlayer = 3; //玩家已存在房间内
+    RoomNoReachPlayers = 4; //玩家数未达到
+    RoomNoExistPlayer = 5; //玩家不存在房间内
+    PlayerNoOperatorNow = 6; //玩家不是当前操作者
+    PlayerCardNoExist = 7; //玩家卡牌不足
+    PlayerCannotSendCard = 8; //玩家不能出牌
+    SendCardColorORNumberNELastCard = 9; //所出牌颜色或数字与上一张牌不同
+    RoomNoStart = 10; //房间还未开始游戏
+    PlayerAlreadyDrawCard = 11; //玩家已抽过牌
+    PlayerNoDrawCard = 12; //玩家还未抽牌
+    PlayerCannotNoSendCard = 13; //玩家不能不出牌
+    Challenged = 14; //已挑战
+    PlayerCannotCallUNO = 15; //玩家不能喊UNO
+    RoomNoneSendCard = 16; //房间还未出过牌
+    CannotChallenge = 17; //无法挑战
+    RoomNoSendingCard = 18; //房间还未进入出牌阶段
+    PlayerAlreadyCallUNO = 19; //玩家已喊UNO
+    RoomNoExist = 20; //房间不存在
+    PlayerNoExistAnyRoom = 21; //玩家不在任意一个房间内
+    PlayerCannotDrawCard = 22; //玩家不能摸牌
+    PlayerCannotSendCardFromHandCard = 23; //玩家不能从手牌中出牌
+    BlackCardNoSpecifiedColor = 24; //黑牌未指定颜色
+    PlayerIsOperatorNow = 25; //玩家为当前操作者
+}
+
+enum CardColor {
+    Blue = 0;
+    Yellow = 1;
+    Red = 2;
+    Green = 3;
+    Black = 4;
+}
+
+enum CardNumber {
+    Zero = 0;
+    One = 1;
+    Two = 2;
+    Three = 3;
+    Four = 4;
+    Five = 5;
+    Six = 6;
+    Seven = 7;
+    Eight = 8;
+    Nine = 9;
+}
+
+enum FeatureCards {
+    Skip = 0;
+    Reverse = 1;
+    DrawTwo = 2;
+    Wild = 3;
+    WildDrawFour = 4;
+}
+
+enum SendCardActions {
+    Send = 0;
+    NoSend = 1;
+}
+
+enum CardType {
+    Normal = 0;
+    Feature = 1;
+}
+
+enum WildDrawFourStatus {
+    ChallengerLose = 0; //挑战者失败
+    ChallengedLose = 1; //被挑战者失败
+}
+
+message SendCard {
+    string SenderId = 1;
+    Card SendCard = 2;
+    optional WildDrawFourStatus WildDrawFourStatus = 3;
+    bool FeatureEffected = 4;
+}
+
+message Card {
+    optional NormalCard NormalCard = 1;
+    optional FeatureCard FeatureCard = 2;
+    CardType Type = 3;
+}
+
+message NormalCard {
+    CardColor Color = 1;
+    CardNumber Number = 2;
+}
+
+message FeatureCard {
+    CardColor Color = 1;
+    FeatureCards FeatureCard = 2;
+}
+
+message PlayerAccountInfo {
+    string Id = 1;
+    string Name = 2;
+}
+
+message PlayerRoomInfo {
+    string RoomHash = 1;
+    repeated Card Cards = 2;
+    optional Card DrawCard = 3;
+}
+
+message PlayerInfo {
+    PlayerAccountInfo PlayerAccountInfo = 1;
+    optional PlayerRoomInfo PlayerRoomInfo = 2;
+}
+
+message Room {
+    string Hash = 1;
+    Stage Stage = 2;
+    optional PlayerInfo Banker = 3;
+    repeated Card CardHeap = 4;
+    repeated SendCard CardPool = 5;
+    optional PlayerInfo OperatorNow = 6;
+    repeated PlayerInfo Players = 7;
+}
+
+message Empty{}
+message BasicResponse {
+    optional Errors err = 1;
+}
+
+message CreateRoomResponse {
+    string RoomHash = 1;
+}
+
+message GetRoomRequest {
+    string RoomHash = 1;
+}
+
+message GetRoomResponse {
+    optional Errors err = 1;
+    Room Info = 2;
+}
+
+message GetRoomsResponse {
+    repeated Room Infos = 1;
+}
+
+message JoinRoomRequest {
+    string PlayerId = 1;
+    string PlayerName = 2;
+    string RoomHash = 3;
+}
+
+message JoinRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerInfo Players = 2;
+}
+
+message ExitRoomRequest {
+    string PlayerId = 1;
+}
+
+message ExitRoomResponse {
+    optional Errors err = 1;
+    repeated PlayerInfo Players = 2;
+}
+
+message StartRoomRequest {
+    optional string PlayerId = 1;
+    optional string RoomHash = 2;
+}
+
+message DrawCardRequest {
+    string PlayerId = 1;
+}
+
+message DrawCardResponse {
+    message IntoSendCardEvent {
+        repeated PlayerInfo Players = 1;
+        PlayerInfo Banker = 2; //
+        Card LeadCard = 3; //引牌    
+    }
+    message SkippedEvent {
+        PlayerInfo NextOperator = 1;
+    }
+
+    optional Errors err = 1;
+    optional Card ElectBankerCard = 2; //仅抽庄家时
+    repeated Card PlayerCard = 3; //仅出牌阶段时
+    optional Card DrawCard = 9; //仅出牌阶段时
+    Stage Stage = 4;
+
+    bool IntoSendCard = 6;
+    optional IntoSendCardEvent IntoSendCardE = 7;
+    bool Skipped = 5; //玩家被Draw two等牌跳过回合
+    optional SkippedEvent SkippedE = 8; //Skipped == true
+}
+
+message SendCardActionRequest {
+    string PlayerId = 1;
+    Card SendCard = 2;
+    SendCardActions Action = 3;
+}
+
+message SendCardActionResponse {
+    message GameFinishEvent {
+        repeated PlayerInfo Players = 1;
+        PlayerInfo Winner = 2;
+    }
+
+    optional Errors err = 1;
+    PlayerInfo NextOperator = 2;
+    repeated Card SenderCard = 4;
+
+    bool GameFinish = 5;
+
+    optional GameFinishEvent GameFinishE = 3;
+}
+
+message CallUNORequest {
+    string PlayerId = 1;
+}
+
+message CallUNOResponse {
+    optional Errors err = 1;
+    repeated Card PlayerCard = 2;
+}
+
+message ChallengeRequest {
+    string PlayerId = 1;
+}
+
+message ChallengeResponse {
+    optional Errors err = 1;
+    bool Win = 2;
+    optional PlayerInfo LastPlayer = 3;
+}
+
+message IndicateUNORequest {
+    // string PlayerId = 1;
+    string TargetId = 2;
+}
+
+message IndicateUNOResponse {
+    optional Errors err = 1;
+    bool IndicateOK = 2;
+    optional PlayerInfo Punished = 3;
+}
+
+message TEST_SetPlayerCardRequest {
+    string PlayerId = 1;
+    repeated Card Cards = 2;
+}

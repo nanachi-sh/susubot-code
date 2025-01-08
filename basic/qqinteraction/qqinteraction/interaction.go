@@ -26,6 +26,7 @@ import (
 	randomfortune_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomfortune"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/twoonone"
 	uno_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/uno"
+	"google.golang.org/grpc/metadata"
 )
 
 var logger = log.Get()
@@ -38,6 +39,7 @@ var (
 	uno_rooms        = make(map[string]*roomUNO)
 	uno_player2room  = make(map[string]*roomUNO)
 	uno_playerStatus = make(map[string]struct{})
+	uno_privilegeCtx context.Context
 )
 
 const (
@@ -91,7 +93,7 @@ func Start() {
 	if rs, err := define.UnoC.GetRooms(define.UnoCtx, &uno_pb.Empty{}); err != nil {
 		logger.Println(err)
 	} else {
-		for _, v := range rs.Infos {
+		for _, v := range rs.Rooms {
 			var r *roomUNO
 			for {
 				id := randomString(3, OnlyNumber)
@@ -107,7 +109,7 @@ func Start() {
 				}
 			}
 			for _, v2 := range v.Players {
-				uno_player2room[v2.PlayerAccountInfo.Id] = r
+				uno_player2room[v2.Id] = r
 			}
 		}
 	}
@@ -2346,6 +2348,11 @@ func init() {
 		13: "小王",
 		14: "大王",
 	}
+	md, ok := metadata.FromOutgoingContext(define.UnoCtx)
+	if ok {
+		md.Append("account_hash", define.PrivilegeUserHash)
+		uno_privilegeCtx = metadata.NewOutgoingContext(define.UnoCtx, md)
+	}
 }
 
 var (
@@ -4366,10 +4373,10 @@ func uno_getRoom(id, hash string) (string, error) {
 	玩家列表：%v`, id, ri.Hash, stageStr, "\n"+uno_playersToStr(ri.Players)), nil
 }
 
-func uno_playersToStr(x []*uno_pb.PlayerInfo) string {
+func uno_playersToStr(x []*uno_pb.PlayerAccountInfo) string {
 	str := ""
 	for i, v := range x {
-		str += fmt.Sprintf("%v(%v)", v.PlayerAccountInfo.Name, v.PlayerAccountInfo.Id)
+		str += fmt.Sprintf("%v(%v)", v.Name, v.Id)
 		if i != len(x)-1 {
 			str += "\n"
 		}
