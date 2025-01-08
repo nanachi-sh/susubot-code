@@ -2705,7 +2705,26 @@ func uno(message *response_pb.Response_Message, text string) {
 			switch e := *resp.Err; e {
 			default:
 				logger.Printf("未处理异常：%v\n", e.String())
+			case uno_pb.Errors_NoFoundAccountHash, uno_pb.Errors_NoValidAccountHash:
+				if err := sendMessageToGroup(group.GroupId, []*request_pb.MessageChainObject{
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_At,
+						At: &request_pb.MessageChain_At{
+							TargetId: senderid,
+						},
+					},
+					&request_pb.MessageChainObject{
+						Type: request_pb.MessageChainType_MessageChainType_Text,
+						Text: &request_pb.MessageChain_Text{
+							Text: " 开桌失败，特权用户哈希设置有误，请联系苏苏配置",
+						},
+					},
+				}); err != nil {
+					logger.Println(err)
+					return
+				}
 			}
+			return
 		}
 		hash := resp.RoomHash
 		id := ""
