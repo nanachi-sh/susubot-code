@@ -42,8 +42,9 @@ func HTTPServe() error {
 	if err != nil {
 		return err
 	}
-	sMux := runtime.NewServeMux(runtime.WithOutgoingHeaderMatcher(func(s string) (string, bool) {
-		return "Access-Control-Allow-Origin=www.google.com", true
+	sMux := runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(func(s string) (string, bool) {
+		fmt.Println(s)
+		return "", false
 	}))
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
