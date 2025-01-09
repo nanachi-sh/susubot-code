@@ -42,7 +42,9 @@ func HTTPServe() error {
 	if err != nil {
 		return err
 	}
-	sMux := runtime.NewServeMux()
+	sMux := runtime.NewServeMux(runtime.WithOutgoingHeaderMatcher(func(s string) (string, bool) {
+		return "Access-Control-Allow-Origin", true
+	}))
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
 	}
