@@ -53,5 +53,9 @@ func HTTPServe() error {
 	if err != nil {
 		return err
 	}
-	return http.Serve(l, sMux)
+	return http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		fmt.Println(origin)
+		sMux.ServeHTTP(w, r)
+	}))
 }
