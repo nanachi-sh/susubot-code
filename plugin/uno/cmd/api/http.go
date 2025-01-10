@@ -54,6 +54,7 @@ func HTTPServe() error {
 		if r.Header.Get("Origin") != "" {
 			w.Header().Add("Access-Control-Allow-Origin", "http://localhost:8080")
 			w.Header().Add("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, OPTIONS, DELETE")
+			w.Header().Add("Access-Control-Allow-Credentials", "true")
 		}
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusNoContent)
