@@ -51,9 +51,12 @@ func HTTPServe() error {
 		return err
 	}
 	return http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin != "" {
+		if r.Header.Get("Origin") != "" {
 			w.Header().Add("Access-Control-Allow-Origin", "*")
+		}
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
 		}
 		sMux.ServeHTTP(w, r)
 	}))
