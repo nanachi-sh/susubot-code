@@ -59,5 +59,6 @@ func HTTPServe() error {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		sMux.ServeHTTP(w, r)
 	}))
 }
