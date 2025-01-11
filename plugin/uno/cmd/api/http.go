@@ -47,7 +47,11 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 	default:
 		response = v
 	case *uno.GetRoomsResponse:
-		response = v.Rooms
+		if len(v.Rooms) == 0 {
+			response = []struct{}{}
+		} else {
+			response = v.Rooms
+		}
 	case *uno.CreateRoomResponse:
 		if v.Err != nil {
 			message = v.Err.String()
