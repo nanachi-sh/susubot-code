@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -60,9 +61,23 @@ func HTTPServe() error {
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
 	}
-	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port))
-	if err != nil {
-		return err
+	var l net.Listener
+	if define.EnableTLS {
+		cert, err := tls.LoadX509KeyPair(fmt.Sprintf("%v/tls.pem", define.CertsDir), fmt.Sprintf("%v/tls.key", define.CertsDir))
+		if err != nil {
+			return err
+		}
+		l, err = tls.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port), &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		l, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port))
+		if err != nil {
+			return err
+		}
 	}
 	return http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Origin") != "" {
