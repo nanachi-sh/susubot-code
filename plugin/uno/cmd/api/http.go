@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func HTTPServe() error {
@@ -58,10 +59,14 @@ func HTTPServe() error {
 		}
 	}
 	sMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption("application/basicJSON", &runtime.ProtoMarshaller{}),
-		runtime.WithMarshalerOption("application/1", &runtime.JSONPb{}),
-		runtime.WithMarshalerOption("application/2", &runtime.JSONBuiltin{}),
-		runtime.WithMarshalerOption("application/3", &runtime.HTTPBodyMarshaler{}),
+		runtime.WithMarshalerOption("application/basicjson", &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				EmitUnpopulated: true,
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			},
+		}),
 	)
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
