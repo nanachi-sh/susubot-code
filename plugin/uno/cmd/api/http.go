@@ -41,9 +41,8 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 		code     int    = 200
 		message  string = "successful"
 		jwt      string
-		response any
+		response any = "{}"
 	)
-	_ = response
 	switch v := v.(type) {
 	default:
 		response = v
