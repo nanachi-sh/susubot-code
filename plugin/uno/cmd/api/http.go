@@ -13,6 +13,7 @@ import (
 	"github.com/nanachi-sh/susubot-code/plugin/uno/define"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -46,7 +47,11 @@ func HTTPServe() error {
 			return err
 		}
 	} else {
-		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport))
+		cred, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%v/tls.pem", define.CertsDir), "uno.unturned.fun")
+		if err != nil {
+			return err
+		}
+		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(cred))
 		if err != nil {
 			return err
 		}
