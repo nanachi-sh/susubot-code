@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -40,18 +39,14 @@ func GetMarshaler() *marshaler {
 func (m *marshaler) Marshal(v any) ([]byte, error) {
 	fmt.Printf("%T\n", v)
 	switch v := v.(type) {
-	default:
-		return m.JSONPb.Marshal(v)
 	case *uno.GetRoomsResponse:
-		a := struct {
-			A string
-		}{"test"}
-		buf, err := json.Marshal(a)
-		if err != nil {
-			return nil, err
-		}
-		return m.JSONPb.MarshalAppend(buf, v)
+		a := &struct {
+			Key  string
+			Body any
+		}{"test", v}
+		return m.JSONPb.Marshal(a)
 	}
+	return m.JSONPb.Marshal(v)
 }
 
 func HTTPServe() error {
