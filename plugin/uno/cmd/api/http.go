@@ -136,7 +136,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 		code,
 		message,
 		jwt,
-		nil,
+		response,
 	})
 }
 
