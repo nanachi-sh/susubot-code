@@ -37,14 +37,16 @@ func GetMarshaler() *marshaler {
 }
 
 func (m *marshaler) Marshal(v any) ([]byte, error) {
-	fmt.Printf("%T\n", v)
-	fmt.Println(v)
-	// buf, err := m.JSONPb.Marshal(v)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	return m.JSONPb.Marshal(v)
+	buf, err := m.JSONPb.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	switch v := v.(type) {
+	default:
+		return buf, err
+	case *uno.GetPlayerResponse:
+		return m.JSONPb.MarshalAppend([]byte(`TEST=BBB`), v)
+	}
 }
 
 func HTTPServe() error {
