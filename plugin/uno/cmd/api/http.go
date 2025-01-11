@@ -57,7 +57,12 @@ func HTTPServe() error {
 			return err
 		}
 	}
-	sMux := runtime.NewServeMux()
+	sMux := runtime.NewServeMux(
+		runtime.WithMarshalerOption("application/basicJSON", &runtime.ProtoMarshaller{}),
+		runtime.WithMarshalerOption("application/1", &runtime.JSONPb{}),
+		runtime.WithMarshalerOption("application/2", &runtime.JSONBuiltin{}),
+		runtime.WithMarshalerOption("application/3", &runtime.HTTPBodyMarshaler{}),
+	)
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
 	}
