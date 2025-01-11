@@ -131,7 +131,6 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 	case *uno.GetUserResponse:
 	case *uno.BasicResponse:
 	}
-	response = struct{}{}
 	return m.JSONPb.Marshal(&struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
