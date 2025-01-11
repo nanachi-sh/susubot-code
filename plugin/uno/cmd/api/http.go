@@ -43,6 +43,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 		jwt      string
 		response any
 	)
+	_ = response
 	switch v := v.(type) {
 	default:
 		response = v
