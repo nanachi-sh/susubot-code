@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -38,11 +37,13 @@ func GetMarshaler() *marshaler {
 }
 
 func (m *marshaler) Marshal(v any) ([]byte, error) {
-	buf, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(buf))
+	fmt.Printf("%T\n", v)
+	fmt.Println(v)
+	// buf, err := m.JSONPb.Marshal(v)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	return m.JSONPb.Marshal(v)
 }
 
