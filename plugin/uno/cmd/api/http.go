@@ -38,7 +38,11 @@ func GetMarshaler() *marshaler {
 }
 
 func (m *marshaler) Marshal(v any) ([]byte, error) {
-	fmt.Println(json.Marshal(v))
+	buf, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(buf))
 	return m.JSONPb.Marshal(v)
 }
 
