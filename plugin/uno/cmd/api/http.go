@@ -129,7 +129,17 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 			response = v
 		}
 	case *uno.GetUserResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
 	case *uno.BasicResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
 	}
 	return m.JSONPb.Marshal(&struct {
 		Code    int    `json:"code"`
