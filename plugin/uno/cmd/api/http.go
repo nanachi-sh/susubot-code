@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -18,6 +19,28 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 )
+
+type marshaler struct {
+	*runtime.JSONPb
+}
+
+func GetMarshaler() *marshaler {
+	return &marshaler{
+		JSONPb: &runtime.JSONPb{
+			MarshalOptions: protojson.MarshalOptions{
+				EmitUnpopulated: true,
+			},
+			UnmarshalOptions: protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			},
+		},
+	}
+}
+
+func (m *marshaler) Marshal(v any) ([]byte, error) {
+	fmt.Println(json.Marshal(v))
+	return m.JSONPb.Marshal(v)
+}
 
 func HTTPServe() error {
 	portStr := os.Getenv("HTTPAPI_LISTEN_PORT")
@@ -59,14 +82,7 @@ func HTTPServe() error {
 		}
 	}
 	sMux := runtime.NewServeMux(
-		runtime.WithMarshalerOption("application/basicjson", &runtime.JSONPb{
-			MarshalOptions: protojson.MarshalOptions{
-				EmitUnpopulated: true,
-			},
-			UnmarshalOptions: protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			},
-		}),
+		runtime.WithMarshalerOption("application/basicjson", &runtime.HTTPBodyMarshaler{Marshaler: GetMarshaler()}),
 	)
 	if err := uno.RegisterUnoHandler(context.Background(), sMux, conn); err != nil {
 		return err
