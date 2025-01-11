@@ -38,18 +38,94 @@ func GetMarshaler() *marshaler {
 
 func (m *marshaler) Marshal(v any) ([]byte, error) {
 	var (
-		code    int    = 200
-		message string = "successful"
-		jwt     string
+		code     int    = 200
+		message  string = "successful"
+		jwt      string
+		response any
 	)
 	switch v := v.(type) {
+	default:
+		response = v
 	case *uno.GetRoomsResponse:
-		jwt = "TEST.TEST2aaa"
+		response = v.Rooms
 	case *uno.CreateRoomResponse:
 		if v.Err != nil {
-			code = http.StatusUnauthorized
 			message = v.Err.String()
+		} else {
+			response = v
 		}
+	case *uno.GetRoomResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else if v.Extra != nil {
+			response = v.Extra
+		} else {
+			response = v.Simple
+		}
+	case *uno.GetPlayerResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else if v.Extra != nil {
+			response = v.Extra
+		} else {
+			response = v.Simple
+		}
+	case *uno.JoinRoomResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.ExitRoomResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.DrawCardResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.SendCardResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.NoSendCardResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.CallUNOResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.ChallengeResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.IndicateUNOResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.RoomEventResponse:
+		if v.Err != nil {
+			message = v.Err.String()
+		} else {
+			response = v
+		}
+	case *uno.GetUserResponse:
+	case *uno.BasicResponse:
 	}
 	return m.JSONPb.Marshal(&struct {
 		Code    int    `json:"code"`
@@ -60,7 +136,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 		code,
 		message,
 		jwt,
-		v,
+		nil,
 	})
 }
 
