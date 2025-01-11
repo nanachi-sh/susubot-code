@@ -41,6 +41,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("%T\n", v)
 	switch v := v.(type) {
 	default:
 		return buf, err
