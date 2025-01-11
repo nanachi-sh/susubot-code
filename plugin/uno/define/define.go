@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/uno/log"
@@ -15,8 +16,14 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+const (
+	AssetsDir = "/config"
+	CertsDir  = AssetsDir + "/certs"
+)
+
 var (
 	PrivilegeUserHash string
+	EnableTLS         bool
 	GatewayIP         net.IP
 	GRPCClient        *grpc.ClientConn
 	QQVerifierC       qqverifier_pb.QqverifierClient
@@ -33,6 +40,11 @@ func init() {
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")
+	}
+	if b, err := strconv.ParseBool(os.Getenv("ENABLE_TLS")); err != nil {
+		logger.Fatalln("Enable TLS未设置或设置有误")
+	} else {
+		EnableTLS = b
 	}
 	for {
 		if ip := net.ParseIP(gatewayHost); ip != nil { //为IP

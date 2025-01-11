@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -9,9 +10,11 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/nanachi-sh/susubot-code/plugin/uno/define"
 	uno_pb "github.com/nanachi-sh/susubot-code/plugin/uno/protos/uno"
 	"github.com/nanachi-sh/susubot-code/plugin/uno/uno"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -57,7 +60,18 @@ func GRPCServe() error {
 	if err != nil {
 		return err
 	}
-	gs := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+	if define.EnableTLS {
+		cert, err := tls.LoadX509KeyPair(fmt.Sprintf("%v/tls.pem", define.CertsDir), fmt.Sprintf("%v/tls.key", define.CertsDir))
+		if err != nil {
+			return err
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{cert},
+		})
+		opts = append(opts, grpc.Creds(cred))
+	}
+	gs := grpc.NewServer(opts...)
 	uno_pb.RegisterUnoServer(gs, new(unoService))
 	return gs.Serve(l)
 }
