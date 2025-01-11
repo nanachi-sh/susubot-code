@@ -44,7 +44,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 	switch v := v.(type) {
 	default:
 		return buf, err
-	case *uno.GetPlayerResponse:
+	case *uno.GetRoomsResponse:
 		return m.JSONPb.MarshalAppend([]byte(`TEST=BBB`), v)
 	}
 }
