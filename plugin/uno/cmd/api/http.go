@@ -37,16 +37,31 @@ func GetMarshaler() *marshaler {
 }
 
 func (m *marshaler) Marshal(v any) ([]byte, error) {
-	fmt.Printf("%T\n", v)
+	var (
+		code    int    = 200
+		message string = "successful"
+		jwt     string
+	)
 	switch v := v.(type) {
 	case *uno.GetRoomsResponse:
-		a := &struct {
-			Key  string
-			Body any
-		}{"test", v}
-		return m.JSONPb.Marshal(a)
+		jwt = "TEST.TEST2aaa"
+	case *uno.CreateRoomResponse:
+		if v.Err != nil {
+			code = http.StatusUnauthorized
+			message = v.Err.String()
+		}
 	}
-	return m.JSONPb.Marshal(v)
+	return m.JSONPb.Marshal(&struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		JWT     string `json:"jwt,omitempty"`
+		Body    any    `json:"body"`
+	}{
+		code,
+		message,
+		jwt,
+		v,
+	})
 }
 
 func HTTPServe() error {
