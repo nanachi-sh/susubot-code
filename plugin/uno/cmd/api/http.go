@@ -41,7 +41,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 		code     int    = 200
 		message  string = "successful"
 		jwt      string
-		response any = struct{}{}
+		response any
 	)
 	switch v := v.(type) {
 	default:
@@ -127,6 +127,7 @@ func (m *marshaler) Marshal(v any) ([]byte, error) {
 	case *uno.GetUserResponse:
 	case *uno.BasicResponse:
 	}
+	response = struct{}{}
 	return m.JSONPb.Marshal(&struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
