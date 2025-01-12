@@ -87,6 +87,7 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 	})
 	return &uno_pb.CreateRoomResponse{
 		Body: &uno_pb.CreateRoomResponse_RoomHash{RoomHash: newRoom.GetHash()},
+		Test: &uno_pb.CreateRoomResponse_TEST{TEST: "test"},
 	}, nil
 }
 
