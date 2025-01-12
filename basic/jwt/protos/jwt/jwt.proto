@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package susubot.basic.jwt;
+
+import "google/api/annotations.proto";
+
+option go_package = "protos/jwt";
+
+//仅k8s内网可调用
+service jwt {
+    rpc UnoSign (UnoSignRequest) returns (UnoSignResponse) {
+        option (google.api.http) = {
+            post: "/v1/sign/uno"
+            body: "*"
+        };
+    }
+}
+
+message UnoSignRequest {
+    message FromPassword {
+        string Id = 1;
+        string Password = 2; //传入DES加密后的密码
+    }
+    message FromRefreshJWT {
+        string RefreshJWT = 1; //刷新JWT
+        string AccessJWT = 2; //即将过期的访问JWT
+    }
+
+    oneof Body {
+        FromPassword password = 1;
+        FromRefreshJWT jwt = 2;
+    }
+}
+
+message UnoSignResponse {
+    message FromPassword {
+        string RefreshJWT = 1;
+        string AccessJWT = 2;
+    }
+    message FromRefreshJWT {
+        string AccessJWT = 1;
+    }
+
+    oneof Body {
+        FromPassword password = 1;
+        FromRefreshJWT jwt = 2;
+    }
+}

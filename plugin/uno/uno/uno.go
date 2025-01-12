@@ -57,22 +57,22 @@ func playerHash(id string, roomHash string) string {
 
 func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 	if len(cs) == 0 {
-		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
+		return &uno_pb.CreateRoomResponse{Body: &uno_pb.CreateRoomResponse_Err{Err: uno_pb.Errors_NoFoundAccountHash}}, nil
 	}
 	uhash, ok := GetUserHash(cs)
 	if !ok {
-		return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoFoundAccountHash.Enum()}, nil
+		return &uno_pb.CreateRoomResponse{Body: &uno_pb.CreateRoomResponse_Err{Err: uno_pb.Errors_NoFoundAccountHash}}, nil
 	}
 	if !CheckPrivilegeUser(uhash) {
 		isNormal, err := CheckNormalUserFromSource(uhash)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
+				return &uno_pb.CreateRoomResponse{Body: &uno_pb.CreateRoomResponse_Err{Err: uno_pb.Errors_NoValidAccountHash}}, nil
 			}
 			return nil, err
 		}
 		if !isNormal {
-			return &uno_pb.CreateRoomResponse{Err: uno_pb.Errors_NoValidAccountHash.Enum()}, nil
+			return &uno_pb.CreateRoomResponse{Body: &uno_pb.CreateRoomResponse_Err{Err: uno_pb.Errors_NoValidAccountHash}}, nil
 		}
 	}
 	newRoom := room.New()
@@ -86,7 +86,7 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 		wait:     sync.RWMutex{},
 	})
 	return &uno_pb.CreateRoomResponse{
-		RoomHash: newRoom.GetHash(),
+		Body: &uno_pb.CreateRoomResponse_RoomHash{RoomHash: newRoom.GetHash()},
 	}, nil
 }
 
