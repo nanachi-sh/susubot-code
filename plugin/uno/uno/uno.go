@@ -86,10 +86,12 @@ func CreateRoom(cs []*http.Cookie) (*uno_pb.CreateRoomResponse, error) {
 		wait:     sync.RWMutex{},
 	})
 	return &uno_pb.CreateRoomResponse{
-		Body: &uno_pb.CreateRoomResponse_Test{Test: &uno_pb.CreateRoomResponse_TEST1{
-			A: "1231232",
-			B: 12312000,
-		}},
+		Body: &uno_pb.CreateRoomResponse_Test{
+			Test: &uno_pb.CreateRoomResponse_TEST1{
+				A: "test",
+				B: 123,
+			},
+		},
 	}, nil
 }
 
