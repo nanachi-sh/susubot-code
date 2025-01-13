@@ -100,8 +100,8 @@ type Uno_UserInfo struct {
 func Uno_CreateUser(userid, username, password string) error {
 	salt := generateSalt()
 	passwordEncrypt := encryptPassword(password, salt)
-	values := fmt.Sprintf(`( "%v", "%v", "%v" )`, userid, username, passwordEncrypt)
-	if _, err := uno_database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Password) VALUES %v;`, values)); err != nil {
+	values := fmt.Sprintf(`( "%v", "%v", "%v", "%v" )`, userid, username, passwordEncrypt, salt)
+	if _, err := uno_database.Exec(fmt.Sprintf(`INSERT INTO Players (Id, Name, Password, Salt) VALUES %v;`, values)); err != nil {
 		return err
 	}
 	return nil
