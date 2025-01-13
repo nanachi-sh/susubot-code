@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package susubot.basic.jwt;
+
+option go_package = "protos/jwt";
+
+service database {
+    rpc Uno_CreateUser (Uno_CreateUserRequest) returns (Uno_CreateUserResponse);
+    rpc Uno_GetUser (Uno_GetUserRequest) returns (Uno_GetUserResponse);
+    rpc Uno_VerifyUser (Uno_VerifyUserRequest) returns (Uno_VerifyUserResponse);
+    rpc Uno_UpdateUser (Uno_UpdateUserRequest) returns (Uno_UpdateUserResponse);
+    rpc Uno_ChangePassword (Uno_ChangePasswordRequest) returns (Uno_ChangePasswordResponse);
+}
+
+enum Errors {
+    EMPTY = 0;
+    UserExist = 1; //用户已存在
+    UserNoExist = 2; //用户不存在
+    UserPasswordWrong = 3; //用户密码错误
+    ValueError = 4; //存在错误参数
+    Undefined = 5; //未定义错误
+}
+
+message Uno_UserInfo {
+    string Id = 1;
+    string Name = 2;
+    int32 WinCount = 3;
+    int32 LoseCount = 4;
+}
+
+message Uno_CreateUserRequest {
+    string Id = 1;
+    string Name = 2;
+    string Password = 3; //明文
+}
+
+message Uno_CreateUserResponse {
+    oneof Body {
+        Errors err = 1;
+        bool ok = 2;
+    }
+}
+
+message Uno_GetUserRequest {
+    string Id = 1;
+}
+
+message Uno_GetUserResponse {
+    oneof Body {
+        Errors err = 1;
+        Uno_UserInfo userinfo = 2;
+    }
+}
+
+message Uno_VerifyUserRequest {
+    string Id = 1;
+    string Password = 2;
+}
+
+message Uno_VerifyUserResponse {
+    oneof Body {
+        Errors err = 1;
+        bool ok = 2;
+    }
+}
+
+message Uno_UpdateUserRequest {
+    Uno_UserInfo userinfo = 1;
+}
+
+message Uno_UpdateUserResponse {
+    oneof Body {
+        Errors err = 1;
+        bool ok = 2;
+    }
+}
+
+message Uno_ChangePasswordRequest {
+    string Id = 1;
+    string OldPassword = 2; //明文
+    string NewPassword = 3; //明文
+}
+
+message Uno_ChangePasswordResponse {
+    oneof Body {
+        Errors err = 1;
+        bool ok = 2;
+    }
+}

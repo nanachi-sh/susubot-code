@@ -260,15 +260,8 @@ message BasicResponse {
 }
 
 message CreateRoomResponse {
-    message TEST1 {
-        string a = 1;
-        int32 b = 2;
-    }
-
-    oneof Body {
-        Errors err = 1;
-        TEST1 test = 2;
-    }
+    optional Errors err = 1;
+    string RoomHash = 2;
 }
 
 message GetRoomRequest {
