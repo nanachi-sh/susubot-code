@@ -1,6 +1,7 @@
 package db
 
 import (
+	"crypto/sha1"
 	"database/sql"
 	"fmt"
 	"math/rand"
@@ -80,7 +81,7 @@ func generateSalt() string {
 }
 
 func encryptPassword(password, salt string) string {
-	return fmt.Sprintf("%x", password+salt)
+	return fmt.Sprintf("%x", sha1.Sum([]byte(password+salt)))
 }
 
 // 数据库中顺序：
