@@ -4,7 +4,7 @@
 // - protoc             v5.28.2
 // source: basic/database/protos/database/database.proto
 
-package jwt
+package database
 
 import (
 	context "context"
@@ -19,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Database_Uno_CreateUser_FullMethodName     = "/susubot.basic.jwt.database/Uno_CreateUser"
-	Database_Uno_GetUser_FullMethodName        = "/susubot.basic.jwt.database/Uno_GetUser"
-	Database_Uno_VerifyUser_FullMethodName     = "/susubot.basic.jwt.database/Uno_VerifyUser"
-	Database_Uno_UpdateUser_FullMethodName     = "/susubot.basic.jwt.database/Uno_UpdateUser"
-	Database_Uno_ChangePassword_FullMethodName = "/susubot.basic.jwt.database/Uno_ChangePassword"
+	Database_Uno_CreateUser_FullMethodName     = "/susubot.basic.database.database/Uno_CreateUser"
+	Database_Uno_GetUser_FullMethodName        = "/susubot.basic.database.database/Uno_GetUser"
+	Database_Uno_VerifyUser_FullMethodName     = "/susubot.basic.database.database/Uno_VerifyUser"
+	Database_Uno_UpdateUser_FullMethodName     = "/susubot.basic.database.database/Uno_UpdateUser"
+	Database_Uno_ChangePassword_FullMethodName = "/susubot.basic.database.database/Uno_ChangePassword"
 )
 
 // DatabaseClient is the client API for Database service.
@@ -244,7 +244,7 @@ func _Database_Uno_ChangePassword_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Database_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "susubot.basic.jwt.database",
+	ServiceName: "susubot.basic.database.database",
 	HandlerType: (*DatabaseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

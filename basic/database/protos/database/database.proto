@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package susubot.basic.jwt;
+package susubot.basic.database;
 
-option go_package = "protos/jwt";
+option go_package = "protos/database";
 
 service database {
     rpc Uno_CreateUser (Uno_CreateUserRequest) returns (Uno_CreateUserResponse);
