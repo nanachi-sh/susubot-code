@@ -22,7 +22,7 @@ func Uno_CreateUser(req *database_pb.Uno_CreateUserRequest) *database_pb.Uno_Cre
 		}
 	}
 	if err := db.Uno_CreateUser(req.Id, req.Name, req.Password); err != nil {
-		switch (err.(*sqlite3.Error)).Code {
+		switch (err.(sqlite3.Error)).Code {
 		case sqlite3.ErrConstraint:
 			return &database_pb.Uno_CreateUserResponse{
 				Body: &database_pb.Uno_CreateUserResponse_Err{

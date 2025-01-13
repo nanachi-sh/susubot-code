@@ -33,7 +33,7 @@ func initDB() error {
 		Password TEXT NOT NULL,
 		Salt TEXT NOT NULL,
 		WinCount INTEGER NOT NULL DEFAULT 0,
-		LoseCount INTEGER NOT NULL DEFAULT 0,
+		LoseCount INTEGER NOT NULL DEFAULT 0
 	);`); err != nil {
 		return err
 	}
