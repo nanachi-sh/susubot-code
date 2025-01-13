@@ -126,6 +126,8 @@ func Uno_GetUser(userid string) (Uno_UserInfo, error) {
 		Name:      name,
 		WinCount:  wincount,
 		LoseCount: losecount,
+		password:  password,
+		salt:      salt,
 	}, nil
 }
 
@@ -138,8 +140,6 @@ func Uno_VerifyUser(userid string, password string) (bool, error) {
 }
 
 func uno_VerifyUser(ui Uno_UserInfo, password string) bool {
-	fmt.Println(encryptPassword(password, ui.salt))
-	fmt.Println(ui.password)
 	return encryptPassword(password, ui.salt) == ui.password
 }
 
