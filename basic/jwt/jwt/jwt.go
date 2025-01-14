@@ -178,7 +178,7 @@ func Uno_Sign(req *jwt_pb.Uno_SignRequest) *jwt_pb.Uno_SignResponse {
 		// 计算有效时间
 		dur := exp.Sub(iat.Time)
 		// 计算至少需达到的时间，至少为 dur - dur/near
-		after := iat.Add(dur - time.Duration(float64(dur)/uno_access_nearExpired))
+		after := iat.Add(dur - time.Duration(float64(dur)*uno_access_nearExpired))
 		// 判断
 		fmt.Println(iat.UnixMilli())
 		fmt.Println(exp.UnixMilli())
