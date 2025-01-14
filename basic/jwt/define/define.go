@@ -31,7 +31,7 @@ var (
 
 const (
 	ConfigDir = "/config"
-	CertDir   = ConfigDir + "/cert"
+	CertDir   = ConfigDir + "/certs"
 )
 
 func init() {
