@@ -14,6 +14,7 @@ import (
 	"github.com/nanachi-sh/susubot-code/basic/qqverifier/define"
 	qqverifier_pb "github.com/nanachi-sh/susubot-code/basic/qqverifier/protos/qqverifier"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -40,9 +41,21 @@ func HTTPServe() error {
 	if gRPCport <= 0 || gRPCport > 65535 {
 		return errors.New("gRPC服务监听端口范围不正确")
 	}
-	conn, err := grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return err
+	var conn *grpc.ClientConn
+	if !define.EnableTLS {
+		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			return err
+		}
+	} else {
+		cred, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%v/tls.pem", define.CertsDir), "jwt.api.unturned.fun")
+		if err != nil {
+			return err
+		}
+		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(cred))
+		if err != nil {
+			return err
+		}
 	}
 	sMux := runtime.NewServeMux()
 	if err := qqverifier_pb.RegisterQqverifierHandler(context.Background(), sMux, conn); err != nil {

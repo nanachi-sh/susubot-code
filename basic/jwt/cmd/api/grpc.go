@@ -2,15 +2,18 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
 	"os"
 	"strconv"
 
+	"github.com/nanachi-sh/susubot-code/basic/jwt/define"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/jwt"
 	jwt_pb "github.com/nanachi-sh/susubot-code/basic/jwt/protos/jwt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type jwtService struct{ jwt_pb.JwtServer }
@@ -31,7 +34,18 @@ func GRPCServe() error {
 	if err != nil {
 		return err
 	}
-	gs := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+	if define.EnableTLS {
+		cert, err := tls.LoadX509KeyPair(fmt.Sprintf("%v/tls.pem", define.CertDir), fmt.Sprintf("%v/tls.key", define.CertDir))
+		if err != nil {
+			return err
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{cert},
+		})
+		opts = append(opts, grpc.Creds(cred))
+	}
+	gs := grpc.NewServer(opts...)
 	jwt_pb.RegisterJwtServer(gs, new(jwtService))
 	return gs.Serve(l)
 }
