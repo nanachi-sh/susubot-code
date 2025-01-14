@@ -157,6 +157,12 @@ func Uno_Sign(req *jwt_pb.Uno_SignRequest) *jwt_pb.Uno_SignResponse {
 						Err: jwt_pb.Errors_JWTExpired,
 					},
 				}
+			case jwtgo.ErrTokenMalformed, jwtgo.ErrSignatureInvalid:
+				return &jwt_pb.Uno_SignResponse{
+					Body: &jwt_pb.Uno_SignResponse_Err{
+						Err: jwt_pb.Errors_JWTError,
+					},
+				}
 			}
 		}
 		accessBody, err := jwt.Uno_Unmarshal_AccessJWT(fromjwt.AccessJWT)
