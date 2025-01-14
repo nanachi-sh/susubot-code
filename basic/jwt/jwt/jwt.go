@@ -179,7 +179,7 @@ func Uno_Sign(req *jwt_pb.Uno_SignRequest) *jwt_pb.Uno_SignResponse {
 		// 计算至少需达到的时间，至少为 dur - dur/near
 		after := iat.Add(dur - time.Duration(float64(dur)/uno_access_nearExpired))
 		// 判断
-		if after.Sub(time.Now()) <= 0 { //已达到更新阈值
+		if time.Until(after) <= 0 { //已达到更新阈值
 			// 验证更新JWT
 			if err := jwt.Uno_Verify(fromjwt.RefreshJWT); err != nil {
 				switch err {
