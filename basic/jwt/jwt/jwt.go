@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -316,6 +317,14 @@ func Uno_Register(req *jwt_pb.Uno_RegisterRequest) *jwt_pb.Uno_RegisterResponse 
 	req.Id = id
 	// 解密密码
 	passwordPlain := uno_decryptPassword(req.Password)
+	fmt.Println(passwordPlain)
+	if passwordPlain == "" {
+		return &jwt_pb.Uno_RegisterResponse{
+			Body: &jwt_pb.Uno_RegisterResponse_Err{
+				Err: jwt_pb.Errors_Undefined,
+			},
+		}
+	}
 	// 确认验证结果
 	switch src {
 	default:
