@@ -14,7 +14,6 @@ import (
 	"github.com/nanachi-sh/susubot-code/basic/jwt/define"
 	jwt_pb "github.com/nanachi-sh/susubot-code/basic/jwt/protos/jwt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -42,20 +41,9 @@ func HTTPServe() error {
 		return errors.New("gRPC服务监听端口范围不正确")
 	}
 	var conn *grpc.ClientConn
-	if !define.EnableTLS {
-		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			return err
-		}
-	} else {
-		cred, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%v/tls.pem", define.CertDir), "jwt.api.unturned.fun")
-		if err != nil {
-			return err
-		}
-		conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(cred))
-		if err != nil {
-			return err
-		}
+	conn, err = grpc.NewClient(fmt.Sprintf("localhost:%v", gRPCport), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
 	}
 	sMux := runtime.NewServeMux()
 	if err := jwt_pb.RegisterJwtHandler(context.Background(), sMux, conn); err != nil {
