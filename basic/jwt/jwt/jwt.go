@@ -297,6 +297,7 @@ func uno_decryptPassword(pwd string) string {
 		Des().
 		CBC().
 		PKCS7Padding().
+		Decrypt().
 		ToString()
 }
 
