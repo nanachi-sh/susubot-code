@@ -343,7 +343,7 @@ func Uno_Register(req *jwt_pb.Uno_RegisterRequest) *jwt_pb.Uno_RegisterResponse 
 				}
 			}
 		}
-		if resp.VarifyId != req.Id {
+		if "qq"+resp.VarifyId != req.Id {
 			return &jwt_pb.Uno_RegisterResponse{
 				Body: &jwt_pb.Uno_RegisterResponse_Err{Err: jwt_pb.Errors_UserVerifyError},
 			}
