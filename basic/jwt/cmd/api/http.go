@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -11,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/nanachi-sh/susubot-code/basic/jwt/define"
 	jwt_pb "github.com/nanachi-sh/susubot-code/basic/jwt/protos/jwt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -49,23 +47,9 @@ func HTTPServe() error {
 	if err := jwt_pb.RegisterJwtHandler(context.Background(), sMux, conn); err != nil {
 		return err
 	}
-	var l net.Listener
-	if define.EnableTLS {
-		cert, err := tls.LoadX509KeyPair(fmt.Sprintf("%v/tls.pem", define.CertDir), fmt.Sprintf("%v/tls.key", define.CertDir))
-		if err != nil {
-			return err
-		}
-		l, err = tls.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port), &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		})
-		if err != nil {
-			return err
-		}
-	} else {
-		l, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port))
-		if err != nil {
-			return err
-		}
+	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%v", port))
+	if err != nil {
+		return err
 	}
 	return http.Serve(l, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Origin") != "" {

@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/basic/jwt/log"
@@ -18,7 +17,6 @@ import (
 )
 
 var (
-	EnableTLS     bool
 	GatewayIP     net.IP
 	GRPCClient    *grpc.ClientConn
 	DatabaseC     database_pb.DatabaseClient
@@ -38,11 +36,6 @@ func init() {
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")
-	}
-	if b, err := strconv.ParseBool(os.Getenv("ENABLE_TLS")); err != nil {
-		logger.Fatalln("Enable TLS未设置或设置有误")
-	} else {
-		EnableTLS = b
 	}
 	for {
 		if ip := net.ParseIP(gatewayHost); ip != nil { //为IP
