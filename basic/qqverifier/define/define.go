@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/basic/qqverifier/log"
@@ -19,7 +18,6 @@ import (
 )
 
 var (
-	EnableTLS    bool
 	GatewayIP    net.IP
 	GRPCClient   *grpc.ClientConn
 	ConnectorCtx context.Context
@@ -33,15 +31,9 @@ var (
 
 const (
 	ConfigDir = "/config"
-	CertsDir  = ConfigDir + "/certs"
 )
 
 func init() {
-	if b, err := strconv.ParseBool(os.Getenv("ENABLE_TLS")); err != nil {
-		logger.Fatalln("Enable TLS未设置或设置有误")
-	} else {
-		EnableTLS = b
-	}
 	gatewayHost := os.Getenv("GATEWAY_HOST")
 	if gatewayHost == "" {
 		logger.Fatalln("Gateway API Host为空")
