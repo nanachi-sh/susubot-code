@@ -236,7 +236,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 			if image.URL != nil {
 				u = *image.URL
 			} else if image.Buf != nil {
-				resp, err := define.FilewebC.Upload(define.FilewebCtx, &fileweb.UploadRequest{
+				resp, err := define.FilewebC.Upload(define.DefaultCtx, &fileweb.UploadRequest{
 					Buf: image.Buf,
 				})
 				if err != nil {
@@ -259,7 +259,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 			if voice.URL != nil {
 				u = *voice.URL
 			} else if voice.Buf != nil {
-				resp, err := define.FilewebC.Upload(define.FilewebCtx, &fileweb.UploadRequest{
+				resp, err := define.FilewebC.Upload(define.DefaultCtx, &fileweb.UploadRequest{
 					Buf: voice.Buf,
 				})
 				if err != nil {
@@ -282,7 +282,7 @@ func marshalMessageChain(mc []*request.MessageChainObject) ([]*request_d.Message
 			if video.URL != nil {
 				u = *video.URL
 			} else if video.Buf != nil {
-				resp, err := define.FilewebC.Upload(define.FilewebCtx, &fileweb.UploadRequest{
+				resp, err := define.FilewebC.Upload(define.DefaultCtx, &fileweb.UploadRequest{
 					Buf: video.Buf,
 				})
 				if err != nil {

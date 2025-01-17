@@ -13,16 +13,14 @@ import (
 	fileweb_pb "github.com/nanachi-sh/susubot-code/basic/handler/protos/fileweb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 )
 
 var (
-	GatewayIP    net.IP
-	GRPCClient   *grpc.ClientConn
-	ConnectorCtx context.Context
-	ConnectorC   connector_pb.ConnectorClient
-	FilewebCtx   context.Context
-	FilewebC     fileweb_pb.FileWebClient
+	GatewayIP  net.IP
+	GRPCClient *grpc.ClientConn
+	ConnectorC connector_pb.ConnectorClient
+	FilewebC   fileweb_pb.FileWebClient
+	DefaultCtx context.Context
 
 	logger = log.Get()
 )
@@ -61,14 +59,6 @@ func init() {
 		logger.Fatalln(err)
 	}
 	GRPCClient = c
-	ConnectorCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
-		"service-target": "connector",
-		"version":        "stable",
-	}))
-	FilewebCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
-		"service-target": "fileweb",
-		"version":        "stable",
-	}))
 	ConnectorC = connector_pb.NewConnectorClient(GRPCClient)
 	FilewebC = fileweb_pb.NewFileWebClient(GRPCClient)
 }
