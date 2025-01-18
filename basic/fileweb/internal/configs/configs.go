@@ -16,6 +16,7 @@ var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
 	GRPC_LISTEN_PORT int
+	HTTP_LISTEN_PORT int
 	GRPC_mTLS        bool
 
 	SEED1, SEED2 uint64
@@ -47,6 +48,19 @@ func init() {
 		logger.Fatalln("gRPC服务监听端口范围不正确")
 	}
 	GRPC_LISTEN_PORT = int(port)
+
+	portStr = os.Getenv("HTTP_LISTEN_PORT")
+	if portStr == "" {
+		logger.Fatalln("HTTP服务监听端口未设置")
+	}
+	port, err = strconv.ParseInt(portStr, 10, 0)
+	if err != nil {
+		logger.Fatalln(err)
+	}
+	if port <= 0 || port > 65535 {
+		logger.Fatalln("HTTP服务监听端口范围不正确")
+	}
+	HTTP_LISTEN_PORT = int(port)
 
 	if mtls, err := strconv.ParseBool(os.Getenv("GRPC_mTLS")); err != nil {
 		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
