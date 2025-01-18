@@ -20,9 +20,9 @@ const (
 	ConfigDir = "/config"
 	CertsDir  = ConfigDir + "/certs"
 
-	GRPCCertFile = CertsDir + "/mtls.pem"
-	GRPCKeyFile  = CertsDir + "/mtls.key"
-	GRPCCaFile   = CertsDir + "/mtls_ca.pem"
+	GRPCCertFile   = CertsDir + "/mtls_server.crt"
+	GRPCKeyFile    = CertsDir + "/mtls_server.key"
+	GRPCCaCertFile = CertsDir + "/mtls_ca.crt"
 )
 
 // 获取环境变量
