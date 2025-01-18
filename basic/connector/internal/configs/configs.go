@@ -12,7 +12,7 @@ var (
 
 	GRPC_LISTEN_PORT int
 
-	LOAD struct{}
+	RPC_Config string = "rpc.yaml"
 )
 
 // 获取环境变量
@@ -35,7 +35,7 @@ func init() {
 func init() {
 	config := fmt.Sprintf(`Name: connector.rpc
 ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
-	if err := os.WriteFile("rpc.yaml", []byte(config), 0744); err != nil {
+	if err := os.WriteFile(RPC_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
 }
