@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/nanachi-sh/susubot-code/basic/connector/internal/configs"
 	"github.com/nanachi-sh/susubot-code/basic/connector/pkg/protos/connector"
 	"github.com/nanachi-sh/susubot-code/basic/connector/service/internal/config"
 	"github.com/nanachi-sh/susubot-code/basic/connector/service/internal/server"
@@ -19,6 +20,7 @@ import (
 var configFile = flag.String("f", "rpc.yaml", "the config file")
 
 func main() {
+	_ = configs.LOAD
 	flag.Parse()
 
 	var c config.Config

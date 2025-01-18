@@ -11,6 +11,8 @@ var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
 	GRPC_LISTEN_PORT int
+
+	LOAD struct{}
 )
 
 // 获取环境变量
