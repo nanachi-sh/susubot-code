@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 
@@ -36,10 +37,14 @@ func main() {
 	})
 	defer s.Stop()
 	if configs.GRPC_mTLS {
-		cred, err := credentials.NewServerTLSFromFile(configs.GRPCCertFile, configs.GRPCKeyFile)
+		cert, err := tls.LoadX509KeyPair(configs.GRPCCertFile, configs.GRPCKeyFile)
 		if err != nil {
 			panic(err)
 		}
+		cred := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{cert},
+			ClientAuth:   tls.RequireAndVerifyClientCert,
+		})
 		s.AddOptions(grpc.Creds(cred))
 	}
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
