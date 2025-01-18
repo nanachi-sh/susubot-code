@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
 	"flag"
 	"fmt"
 	"os"
@@ -49,11 +48,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		ca, _ := pem.Decode(buf)
-		if ca == nil {
-			panic(err)
-		}
-		if !caPool.AppendCertsFromPEM(ca.Bytes) {
+		if !caPool.AppendCertsFromPEM(buf) {
 			panic("")
 		}
 		cred := credentials.NewTLS(&tls.Config{
