@@ -27,7 +27,9 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
 
-	web.Serve()
+	go func() {
+		web.Serve()
+	}()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		fileweb.RegisterFileWebServer(grpcServer, server.NewFileWebServer(ctx))
