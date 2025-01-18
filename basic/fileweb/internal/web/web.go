@@ -9,6 +9,7 @@ import (
 )
 
 func Serve() {
-	fmt.Printf("Starting http file server at %d...\n", configs.HTTP_LISTEN_PORT)
-	log.Fatalln(http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configs.HTTP_LISTEN_PORT), http.FileServer(http.Dir(configs.WebDir))))
+	addr := fmt.Sprintf("0.0.0.0:%d", configs.HTTP_LISTEN_PORT)
+	fmt.Printf("Starting http file server at %s...\n", addr)
+	log.Fatalln(http.ListenAndServe(addr, http.FileServer(http.Dir(configs.WebDir))))
 }

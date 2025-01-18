@@ -4,11 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/nanachi-sh/susubot-code/basic/connector/internal/configs"
-	"github.com/nanachi-sh/susubot-code/basic/connector/pkg/protos/connector"
-	"github.com/nanachi-sh/susubot-code/basic/connector/service/internal/config"
-	"github.com/nanachi-sh/susubot-code/basic/connector/service/internal/server"
-	"github.com/nanachi-sh/susubot-code/basic/connector/service/internal/svc"
+	"github.com/nanachi-sh/susubot-code/basic/handler/pkg/protos/handler/response"
+	"github.com/nanachi-sh/susubot-code/basic/handler/service/internal/config"
+	responsehandlerServer "github.com/nanachi-sh/susubot-code/basic/handler/service/internal/server/responsehandler"
+	"github.com/nanachi-sh/susubot-code/basic/handler/service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -17,7 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", configs.RPCServer_Config, "the config file")
+var configFile = flag.String("f", "etc/response.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -27,14 +26,13 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		connector.RegisterConnectorServer(grpcServer, server.NewConnectorServer(ctx))
+		response.RegisterResponseHandlerServer(grpcServer, responsehandlerServer.NewResponseHandlerServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
 	})
 	defer s.Stop()
-	s.AddOptions(configs.GRPCOptions()...)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

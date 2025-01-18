@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package susubot.basic.fileweb;
+
+option go_package = "protos/fileweb";
+
+service FileWeb {
+    rpc Upload (UploadRequest) returns (UploadResponse);
+}
+
+enum Errors {
+    EMPTY = 0;
+    Undefined = 1;
+}
+
+message UploadRequest {
+    bytes Buf = 1;
+    optional uint32 ValidTime = 2; //过期时间(ms)
+    bool AutoRefresh = 3; //资源被请求后自动重置过期时间
+}
+
+message UploadResponse {
+    oneof Body {
+        string Hash = 1;
+        Errors err = 2;
+    }
+}

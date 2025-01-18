@@ -18,7 +18,7 @@ var (
 	GRPC_LISTEN_PORT int
 	GRPC_mTLS        bool
 
-	RPC_Config string = "rpc.yaml"
+	RPCServer_Config string = "rpc_server.yaml"
 )
 
 const (
@@ -56,7 +56,7 @@ func init() {
 func init() {
 	config := fmt.Sprintf(`Name: connector.rpc
 ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
-	if err := os.WriteFile(RPC_Config, []byte(config), 0744); err != nil {
+	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
 }
