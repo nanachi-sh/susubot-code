@@ -14,6 +14,7 @@ import (
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -34,7 +35,13 @@ func main() {
 		}
 	})
 	defer s.Stop()
-
+	if configs.GRPC_mTLS {
+		cred, err := credentials.NewServerTLSFromFile(configs.GRPCCertFile, configs.GRPCKeyFile)
+		if err != nil {
+			panic(err)
+		}
+		s.AddOptions(grpc.Creds(cred))
+	}
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

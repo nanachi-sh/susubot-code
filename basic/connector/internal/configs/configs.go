@@ -11,8 +11,17 @@ var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
 	GRPC_LISTEN_PORT int
+	GRPC_mTLS        bool
 
 	RPC_Config string = "rpc.yaml"
+)
+
+const (
+	ConfigDir = "/config"
+	CertsDir  = ConfigDir + "/certs"
+
+	GRPCCertFile = CertsDir + "/mtls.pem"
+	GRPCKeyFile  = CertsDir + "/mtls.key"
 )
 
 // 获取环境变量
@@ -29,6 +38,12 @@ func init() {
 		logger.Fatalln("gRPC服务监听端口范围不正确")
 	}
 	GRPC_LISTEN_PORT = int(port)
+
+	if mtls, err := strconv.ParseBool(os.Getenv("GRPC_mTLS")); err != nil {
+		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
+	} else {
+		GRPC_mTLS = mtls
+	}
 }
 
 // 初始化gRPC配置
