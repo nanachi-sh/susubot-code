@@ -1,10 +1,15 @@
 package configs
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -18,11 +23,11 @@ var (
 
 const (
 	ConfigDir = "/config"
-	CertsDir  = ConfigDir + "/certs"
 
-	GRPCCertFile   = CertsDir + "/mtls_server.crt"
-	GRPCKeyFile    = CertsDir + "/mtls_server.key"
-	GRPCCaCertFile = CertsDir + "/mtls_ca.crt"
+	CertsDir           = ConfigDir + "/certs"
+	GRPCServerCertFile = CertsDir + "/mtls_server.crt"
+	GRPCServerKeyFile  = CertsDir + "/mtls_server.key"
+	GRPCCaCertFile     = CertsDir + "/mtls_ca.crt"
 )
 
 // 获取环境变量
@@ -54,4 +59,29 @@ ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
 	if err := os.WriteFile(RPC_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
+}
+
+func GRPCOptions() []grpc.ServerOption {
+	opts := []grpc.ServerOption{}
+	if GRPC_mTLS {
+		cert, err := tls.LoadX509KeyPair(GRPCServerCertFile, GRPCServerKeyFile)
+		if err != nil {
+			panic(err)
+		}
+		caPool := x509.NewCertPool()
+		buf, err := os.ReadFile(GRPCCaCertFile)
+		if err != nil {
+			panic(err)
+		}
+		if !caPool.AppendCertsFromPEM(buf) {
+			panic("添加CA证书失败")
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{cert},
+			ClientAuth:   tls.RequireAndVerifyClientCert,
+			ClientCAs:    caPool,
+		})
+		opts = append(opts, grpc.Creds(cred))
+	}
+	return opts
 }
