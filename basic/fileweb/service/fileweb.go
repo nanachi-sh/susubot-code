@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/configs"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/web"
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/pkg/protos/fileweb"
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/config"
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/server"
@@ -25,6 +26,8 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
+
+	web.Serve()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		fileweb.RegisterFileWebServer(grpcServer, server.NewFileWebServer(ctx))
