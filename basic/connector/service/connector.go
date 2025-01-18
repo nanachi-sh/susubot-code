@@ -44,7 +44,7 @@ func main() {
 			panic(err)
 		}
 		caPool := x509.NewCertPool()
-		buf, err := os.ReadFile(configs.GRPCCaFile)
+		buf, err := os.ReadFile(configs.GRPCCaCertFile)
 		if err != nil {
 			panic(err)
 		}
