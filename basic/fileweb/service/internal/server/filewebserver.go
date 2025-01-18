@@ -7,9 +7,9 @@ package server
 import (
 	"context"
 
-	"service/C:/Users/User/works/susubot-code/basic/fileweb/pkg/protos/fileweb"
-	"service/internal/logic"
-	"service/internal/svc"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/pkg/protos/fileweb"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/logic"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/svc"
 )
 
 type FileWebServer struct {

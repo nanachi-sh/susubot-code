@@ -18,10 +18,13 @@ var (
 	GRPC_LISTEN_PORT int
 	GRPC_mTLS        bool
 
+	SEED1, SEED2 uint64
+
 	RPC_Config string = "rpc.yaml"
 )
 
 const (
+	WebDir    = "/var/www/html"
 	ConfigDir = "/config"
 
 	CertsDir           = ConfigDir + "/certs"
@@ -49,6 +52,17 @@ func init() {
 		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
 	} else {
 		GRPC_mTLS = mtls
+	}
+
+	if s, err := strconv.ParseUint(os.Getenv("SEED1"), 10, 0); err != nil {
+		logger.Fatalln("SEED未设置或设置不正确")
+	} else {
+		SEED1 = s
+	}
+	if s, err := strconv.ParseUint(os.Getenv("SEED2"), 10, 0); err != nil {
+		logger.Fatalln("SEED未设置或设置不正确")
+	} else {
+		SEED2 = s
 	}
 }
 

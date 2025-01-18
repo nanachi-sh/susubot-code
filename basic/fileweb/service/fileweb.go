@@ -4,10 +4,11 @@ import (
 	"flag"
 	"fmt"
 
-	"service/C:/Users/User/works/susubot-code/basic/fileweb/pkg/protos/fileweb"
-	"service/internal/config"
-	"service/internal/server"
-	"service/internal/svc"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/configs"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/pkg/protos/fileweb"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/config"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/server"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -16,7 +17,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/fileweb.yaml", "the config file")
+var configFile = flag.String("f", configs.RPC_Config, "the config file")
 
 func main() {
 	flag.Parse()
@@ -33,6 +34,7 @@ func main() {
 		}
 	})
 	defer s.Stop()
+	s.AddOptions(configs.GRPCOptions()...)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

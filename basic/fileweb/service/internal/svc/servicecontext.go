@@ -1,6 +1,6 @@
 package svc
 
-import "service/internal/config"
+import "github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/config"
 
 type ServiceContext struct {
 	Config config.Config

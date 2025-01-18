@@ -8,6 +8,11 @@ service FileWeb {
     rpc Upload (UploadRequest) returns (UploadResponse);
 }
 
+enum Errors {
+    EMPTY = 0;
+    Undefined = 1;
+}
+
 message UploadRequest {
     bytes Buf = 1;
     optional uint32 ValidTime = 2; //过期时间(ms)
@@ -15,6 +20,8 @@ message UploadRequest {
 }
 
 message UploadResponse {
-    string Hash = 1;
-    string URLPath = 2;
+    oneof Body {
+        string Hash = 1;
+        Errors err = 2;
+    }
 }

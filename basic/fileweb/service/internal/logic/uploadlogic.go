@@ -3,8 +3,9 @@ package logic
 import (
 	"context"
 
-	"service/C:/Users/User/works/susubot-code/basic/fileweb/pkg/protos/fileweb"
-	"service/internal/svc"
+	fw "github.com/nanachi-sh/susubot-code/basic/fileweb/internal/fileweb"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/pkg/protos/fileweb"
+	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +25,5 @@ func NewUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadLogi
 }
 
 func (l *UploadLogic) Upload(in *fileweb.UploadRequest) (*fileweb.UploadResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &fileweb.UploadResponse{}, nil
+	return fw.NewRequest(l.Logger).Upload(in)
 }
