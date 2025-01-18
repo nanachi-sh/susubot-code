@@ -2,8 +2,11 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/nanachi-sh/susubot-code/basic/connector/internal/configs"
 	"github.com/nanachi-sh/susubot-code/basic/connector/pkg/protos/connector"
@@ -41,9 +44,22 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		caPool := x509.NewCertPool()
+		buf, err := os.ReadFile(configs.GRPCCaFile)
+		if err != nil {
+			panic(err)
+		}
+		ca, _ := pem.Decode(buf)
+		if ca == nil {
+			panic(err)
+		}
+		if !caPool.AppendCertsFromPEM(ca.Bytes) {
+			panic("")
+		}
 		cred := credentials.NewTLS(&tls.Config{
 			Certificates: []tls.Certificate{cert},
 			ClientAuth:   tls.RequireAndVerifyClientCert,
+			ClientCAs:    caPool,
 		})
 		s.AddOptions(grpc.Creds(cred))
 	}

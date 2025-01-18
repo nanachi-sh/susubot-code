@@ -22,6 +22,7 @@ const (
 
 	GRPCCertFile = CertsDir + "/mtls.pem"
 	GRPCKeyFile  = CertsDir + "/mtls.key"
+	GRPCCaFile   = CertsDir + "/mtls_ca.pem"
 )
 
 // 获取环境变量
