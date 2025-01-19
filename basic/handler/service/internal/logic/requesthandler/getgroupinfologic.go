@@ -3,6 +3,7 @@ package requesthandlerlogic
 import (
 	"context"
 
+	r "github.com/nanachi-sh/susubot-code/basic/handler/internal/handler/request"
 	"github.com/nanachi-sh/susubot-code/basic/handler/pkg/protos/handler/request"
 	"github.com/nanachi-sh/susubot-code/basic/handler/service/internal/svc"
 
@@ -24,7 +25,5 @@ func NewGetGroupInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetG
 }
 
 func (l *GetGroupInfoLogic) GetGroupInfo(in *request.GetGroupInfoRequest) (*request.BasicResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &request.BasicResponse{}, nil
+	return r.NewRequest(l.Logger).GetGroupInfo(in)
 }

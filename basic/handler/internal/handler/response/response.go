@@ -4,7 +4,6 @@ package response
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"math/rand"
 	"strconv"
 	"time"
@@ -41,7 +40,7 @@ func (r *Request) Unmarshal(in *response_pb.UnmarshalRequest) (*response_pb.Unma
 		return &response_pb.UnmarshalResponse{Body: &response_pb.UnmarshalResponse_Err{Err: *serr}}, nil
 	}
 	if in.IgnoreCmdEvent && responseH.ResponseType() == response_pb.ResponseType_ResponseType_CmdEvent {
-		return &response_pb.UnmarshalResponse{Body: &response_pb.UnmarshalResponse_Err{Err: response_pb.Errors_NoMatch_ResponseType}}, nil
+		return &response_pb.UnmarshalResponse{Body: &response_pb.UnmarshalResponse_Err{Err: response_pb.Errors_TypeNoMatch}}, nil
 	}
 	response, serr := responseH.MarshalToResponse(r.logger)
 	if serr != nil {
@@ -258,7 +257,7 @@ func (rh *responseH) matchType(logger logx.Logger) (response_pb.ResponseType, *r
 	}
 	if j.PostType == nil {
 		logger.Error("响应事件类型无匹配，PostType为nil")
-		return -1, response_pb.Errors_NoMatch_ResponseType.Enum()
+		return -1, response_pb.Errors_TypeNoMatch.Enum()
 	} else {
 		switch pt := *j.PostType; pt {
 		case "message":
@@ -269,7 +268,7 @@ func (rh *responseH) matchType(logger logx.Logger) (response_pb.ResponseType, *r
 			return response_pb.ResponseType_ResponseType_BotEvent, nil
 		default:
 			logger.Errorf("响应事件类型无匹配; PostType: %v", pt)
-			return -1, response_pb.Errors_NoMatch_ResponseType.Enum()
+			return -1, response_pb.Errors_TypeNoMatch.Enum()
 		}
 	}
 }
@@ -1290,10 +1289,9 @@ func (qemrh *qqevent_messageRecallH) group(logger logx.Logger) (*response_pb.Res
 		// 同一人
 		if j.UserId == j.OperatorId {
 			useridStr := strconv.FormatInt(j.UserId, 10)
-			ggmi, err := getGroupMemberInfo(logger, ctx, groupidStr, useridStr, nil)
-			if err != nil {
-				logger.Println(err)
-				return nil, err
+			ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, useridStr, nil)
+			if serr != nil {
+				return nil, serr
 			}
 			targetName = &ggmi.UserName
 		} else { //不同人
@@ -1450,18 +1448,9 @@ func getGroupMemberInfo(logger logx.Logger, ctx context.Context, groupid, member
 }
 
 func getFriendInfo(logger logx.Logger, ctx context.Context, friendid string, stream grpc.ServerStreamingClient[connector_pb.ReadResponse]) (*response_pb.Response_CmdEvent_GetFriendInfo, *response_pb.Errors) {
-	if stream == nil {
-		x, err := configs.Call_Connector.Read(ctx, &connector_pb.Empty{})
-		if err != nil {
-			logger.Error(err)
-			return nil, response_pb.Errors_Undefined.Enum()
-		}
-		stream = x
-	}
-	readCh := make(chan any, 1)
 	requestEcho := strconv.FormatInt(rand.Int63(), 10)
-	request := request.NewRequest(logger)
 	//获取写入内容
+	request := request.NewRequest(logger)
 	resp, err := request.GetFriendInfo(&request_pb.GetFriendInfoRequest{
 		Echo:     &requestEcho,
 		FriendId: friendid,
@@ -1470,64 +1459,9 @@ func getFriendInfo(logger logx.Logger, ctx context.Context, friendid string, str
 		logger.Error(err)
 		return nil, response_pb.Errors_Undefined.Enum()
 	}
-	//写入
-	go func() {
-		if _, err := configs.Call_Connector.Write(ctx, &connector_pb.WriteRequest{
-			Buf: resp.Buf,
-		}); err != nil {
-			writeCh <- err
-			logger.Println(err)
-			return
-		}
-	}()
-	//读取
-	go func() {
-		for {
-			resp, err := stream.Recv()
-			if err != nil {
-				readCh <- err
-				logger.Println(err)
-				return
-			}
-			respH := new(responseH)
-			respH.buf = resp.Buf
-			rt, err := respH.matchType()
-			if err != nil {
-				readCh <- err
-				logger.Println(err)
-				return
-			}
-			if rt != response_pb.ResponseType_ResponseType_CmdEvent {
-				continue
-			}
-			ceh := new(cmdEventH)
-			ceh.buf = resp.Buf
-			echo, err := ceh.Echo()
-			if err != nil {
-				continue
-			}
-			if echo != requestEcho {
-				continue
-			}
-			readCh <- ceh
-			return
-		}
-	}()
-	select {
-	case err := <-writeCh:
-		logger.Println(err)
-		return nil, err
-	case x := <-readCh:
-		switch x := x.(type) {
-		case error:
-			logger.Println(x)
-			return nil, x
-		case *cmdEventH:
-			return x.GetFriendInfo()
-		default:
-			return nil, errors.New("异常错误")
-		}
-	case <-ctx.Done():
-		return nil, errors.New("获取额外用户信息超时")
+	ceh, serr := sendCommand(logger, ctx, resp.Buf, requestEcho, stream)
+	if serr != nil {
+		return nil, serr
 	}
+	return ceh.GetFriendInfo(logger)
 }

@@ -3,6 +3,7 @@ package responsehandlerlogic
 import (
 	"context"
 
+	r "github.com/nanachi-sh/susubot-code/basic/handler/internal/handler/response"
 	"github.com/nanachi-sh/susubot-code/basic/handler/pkg/protos/handler/response"
 	"github.com/nanachi-sh/susubot-code/basic/handler/service/internal/svc"
 
@@ -24,7 +25,5 @@ func NewUnmarshalLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Unmarsh
 }
 
 func (l *UnmarshalLogic) Unmarshal(in *response.UnmarshalRequest) (*response.UnmarshalResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &response.UnmarshalResponse{}, nil
+	return r.NewRequest(l.Logger).Unmarshal(in)
 }
