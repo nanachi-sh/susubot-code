@@ -678,7 +678,7 @@ func (cegmh *cmdEvent_GetMessageH) Message(logger logx.Logger) (*response_pb.Res
 		}
 		m.Group = g
 	case response_pb.MessageType_MessageType_Private:
-		p, serr := cegmh.private(logger)
+		p, serr := cegmh.private()
 		if serr != nil {
 			return nil, serr
 		}
@@ -725,7 +725,7 @@ func (cegmh *cmdEvent_GetMessageH) group(logger logx.Logger) (*response_pb.Respo
 	}, nil
 }
 
-func (cegmh *cmdEvent_GetMessageH) private(logger logx.Logger) (*response_pb.Response_CmdEvent_Message_Private, *response_pb.Errors) {
+func (cegmh *cmdEvent_GetMessageH) private() (*response_pb.Response_CmdEvent_Message_Private, *response_pb.Errors) {
 	return nil, response_pb.Errors_Undefined.Enum()
 }
 
@@ -950,12 +950,12 @@ func (qeh *qqeventH) groupMute(logger logx.Logger) (*response_pb.Response_QQEven
 			return nil, response_pb.Errors_Undefined.Enum()
 		}
 		user_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, useridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		targetName = &user_ggmi.UserName
 		operator_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, operatoridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		operatorName = &operator_ggmi.UserName
@@ -994,12 +994,12 @@ func (qeh *qqeventH) groupUnmute(logger logx.Logger) (*response_pb.Response_QQEv
 			return nil, response_pb.Errors_Undefined.Enum()
 		}
 		user_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, useridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		targetName = &user_ggmi.UserName
 		operator_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, operatoridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		operatorName = &operator_ggmi.UserName
@@ -1052,7 +1052,7 @@ func (qegah *qqevent_groupAddH) GroupAdd(logger logx.Logger) (*response_pb.Respo
 		}
 		qegah.d.Direct = d
 	case response_pb.QQEventType_GroupAddType_QQEventType_GroupAddType_Invite:
-		i, serr := qegah.invite(logger)
+		i, serr := qegah.invite()
 		if serr != nil {
 			return nil, serr
 		}
@@ -1083,11 +1083,11 @@ func (qegah *qqevent_groupAddH) direct(logger logx.Logger) (*response_pb.Respons
 			return nil, response_pb.Errors_Undefined.Enum()
 		}
 		user_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, useridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		operator_ggmi, serr := getGroupMemberInfo(logger, ctx, groupidStr, operatoridStr, stream)
-		if err != nil {
+		if serr != nil {
 			return nil, serr
 		}
 		joinerName = &user_ggmi.UserName
@@ -1104,7 +1104,7 @@ func (qegah *qqevent_groupAddH) direct(logger logx.Logger) (*response_pb.Respons
 	}, nil
 }
 
-func (qegah *qqevent_groupAddH) invite(logger logx.Logger) (*response_pb.Response_QQEvent_GroupAdd_Invite, *response_pb.Errors) {
+func (qegah *qqevent_groupAddH) invite() (*response_pb.Response_QQEvent_GroupAdd_Invite, *response_pb.Errors) {
 	return nil, response_pb.Errors_Undefined.Enum()
 }
 
@@ -1388,7 +1388,7 @@ func sendCommand(logger logx.Logger, ctx context.Context, buf []byte, requestEch
 			respH := new(responseH)
 			respH.buf = buf
 			rt, serr := respH.matchType(logger)
-			if err != nil {
+			if serr != nil {
 				readCh <- serr
 				return
 			}
