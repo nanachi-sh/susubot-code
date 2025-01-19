@@ -55,8 +55,10 @@ func Serve() {
 	if err := jwt.RegisterJwtHandler(context.Background(), sMux, conn); err != nil {
 		logger.Fatalln(err)
 	}
+	addr := fmt.Sprintf("0.0.0.0:%d", configs.HTTP_LISTEN_PORT)
+	fmt.Printf("Starting grpc gateway at %s...\n", addr)
 	logger.Fatalln(
-		http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", configs.HTTP_LISTEN_PORT), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ListenAndServe(addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("Origin") != "" {
 				w.Header().Add("Access-Control-Allow-Origin", "*")
 				w.Header().Add("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, OPTIONS, DELETE")

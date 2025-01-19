@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: basic/jwt/pkg/protos/jwt/jwt.proto
+// source: pkg/protos/jwt/jwt.WITHOUT.proto
 
 package jwt
 
@@ -155,5 +155,5 @@ var Jwt_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "basic/jwt/pkg/protos/jwt/jwt.proto",
+	Metadata: "pkg/protos/jwt/jwt.WITHOUT.proto",
 }

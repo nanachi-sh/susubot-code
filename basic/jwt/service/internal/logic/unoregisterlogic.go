@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	j "github.com/nanachi-sh/susubot-code/basic/jwt/internal/jwt"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/jwt"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/service/internal/svc"
 
@@ -24,7 +25,5 @@ func NewUnoRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UnoRe
 }
 
 func (l *UnoRegisterLogic) Uno_Register(in *jwt.Uno_RegisterRequest) (*jwt.Uno_RegisterResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &jwt.Uno_RegisterResponse{}, nil
+	return j.NewRequest(l.Logger).Uno_Register(in)
 }

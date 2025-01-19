@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/nanachi-sh/susubot-code/basic/jwt/gateway"
+	"github.com/nanachi-sh/susubot-code/basic/jwt/internal/configs"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/jwt"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/service/internal/config"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/service/internal/server"
@@ -16,7 +18,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/jwt.yaml", "the config file")
+var configFile = flag.String("f", configs.RPCServer_Config, "the config file")
 
 func main() {
 	flag.Parse()
@@ -33,6 +35,10 @@ func main() {
 		}
 	})
 	defer s.Stop()
+	s.AddOptions(configs.GRPCOptions()...)
+	go func() {
+		gateway.Serve()
+	}()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

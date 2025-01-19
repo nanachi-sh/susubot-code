@@ -2,23 +2,11 @@ syntax = "proto3";
 
 package susubot.basic.jwt;
 
-import "google/api/annotations.proto";
-
 option go_package = "protos/jwt";
 
 service jwt {
-    rpc Uno_Sign (Uno_SignRequest) returns (Uno_SignResponse) {
-        option (google.api.http) = {
-            post: "/v1/sign/uno"
-            body: "*"
-        };
-    }
-    rpc Uno_Register (Uno_RegisterRequest) returns (Uno_RegisterResponse) {
-        option (google.api.http) = {
-            post: "/v1/register/uno"
-            body: "*"
-        };
-    }
+    rpc Uno_Sign (Uno_SignRequest) returns (Uno_SignResponse) {}
+    rpc Uno_Register (Uno_RegisterRequest) returns (Uno_RegisterResponse) {}
 }
 
 enum Errors {

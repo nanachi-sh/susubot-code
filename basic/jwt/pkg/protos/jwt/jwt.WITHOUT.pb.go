@@ -2,12 +2,11 @@
 // versions:
 // 	protoc-gen-go v1.36.1
 // 	protoc        v5.28.2
-// source: basic/jwt/pkg/protos/jwt/jwt.proto
+// source: pkg/protos/jwt/jwt.WITHOUT.proto
 
 package jwt
 
 import (
-	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,28 +24,32 @@ type Errors int32
 
 const (
 	Errors_EMPTY             Errors = 0
-	Errors_UserExist         Errors = 1 //用户已存在
-	Errors_UserNoExist       Errors = 2 //用户不存在
-	Errors_UserPasswordWrong Errors = 3 //用户密码错误
-	Errors_UserVerifyError   Errors = 4 //用户验证(验证器)错误
-	Errors_Undefined         Errors = 5 //未定义错误
-	Errors_JWTError          Errors = 6 //JWT有误
-	Errors_JWTExpired        Errors = 7 //JWT已过期
-	Errors_JWTInconformity   Errors = 8 //JWT不一致
+	Errors_UserExist         Errors = 1  //用户已存在
+	Errors_UserNoExist       Errors = 2  //用户不存在
+	Errors_UserPasswordWrong Errors = 3  //用户密码错误
+	Errors_UserVerifyError   Errors = 4  //用户验证(验证器)错误
+	Errors_ValueError        Errors = 5  //存在错误参数
+	Errors_Undefined         Errors = 6  //未定义错误
+	Errors_JWTError          Errors = 7  //JWT有误
+	Errors_JWTExpired        Errors = 8  //JWT已过期
+	Errors_JWTInconformity   Errors = 9  //JWT不一致
+	Errors_UserUnknownSource Errors = 10 //未知用户来源
 )
 
 // Enum value maps for Errors.
 var (
 	Errors_name = map[int32]string{
-		0: "EMPTY",
-		1: "UserExist",
-		2: "UserNoExist",
-		3: "UserPasswordWrong",
-		4: "UserVerifyError",
-		5: "Undefined",
-		6: "JWTError",
-		7: "JWTExpired",
-		8: "JWTInconformity",
+		0:  "EMPTY",
+		1:  "UserExist",
+		2:  "UserNoExist",
+		3:  "UserPasswordWrong",
+		4:  "UserVerifyError",
+		5:  "ValueError",
+		6:  "Undefined",
+		7:  "JWTError",
+		8:  "JWTExpired",
+		9:  "JWTInconformity",
+		10: "UserUnknownSource",
 	}
 	Errors_value = map[string]int32{
 		"EMPTY":             0,
@@ -54,10 +57,12 @@ var (
 		"UserNoExist":       2,
 		"UserPasswordWrong": 3,
 		"UserVerifyError":   4,
-		"Undefined":         5,
-		"JWTError":          6,
-		"JWTExpired":        7,
-		"JWTInconformity":   8,
+		"ValueError":        5,
+		"Undefined":         6,
+		"JWTError":          7,
+		"JWTExpired":        8,
+		"JWTInconformity":   9,
+		"UserUnknownSource": 10,
 	}
 )
 
@@ -72,11 +77,11 @@ func (x Errors) String() string {
 }
 
 func (Errors) Descriptor() protoreflect.EnumDescriptor {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_enumTypes[0].Descriptor()
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_enumTypes[0].Descriptor()
 }
 
 func (Errors) Type() protoreflect.EnumType {
-	return &file_basic_jwt_pkg_protos_jwt_jwt_proto_enumTypes[0]
+	return &file_pkg_protos_jwt_jwt_WITHOUT_proto_enumTypes[0]
 }
 
 func (x Errors) Number() protoreflect.EnumNumber {
@@ -85,7 +90,7 @@ func (x Errors) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Errors.Descriptor instead.
 func (Errors) EnumDescriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{0}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{0}
 }
 
 type Uno_SignRequest struct {
@@ -101,7 +106,7 @@ type Uno_SignRequest struct {
 
 func (x *Uno_SignRequest) Reset() {
 	*x = Uno_SignRequest{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[0]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -113,7 +118,7 @@ func (x *Uno_SignRequest) String() string {
 func (*Uno_SignRequest) ProtoMessage() {}
 
 func (x *Uno_SignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[0]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -126,7 +131,7 @@ func (x *Uno_SignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignRequest.ProtoReflect.Descriptor instead.
 func (*Uno_SignRequest) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{0}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Uno_SignRequest) GetBody() isUno_SignRequest_Body {
@@ -184,7 +189,7 @@ type Uno_SignResponse struct {
 
 func (x *Uno_SignResponse) Reset() {
 	*x = Uno_SignResponse{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[1]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -196,7 +201,7 @@ func (x *Uno_SignResponse) String() string {
 func (*Uno_SignResponse) ProtoMessage() {}
 
 func (x *Uno_SignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[1]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,7 +214,7 @@ func (x *Uno_SignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignResponse.ProtoReflect.Descriptor instead.
 func (*Uno_SignResponse) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{1}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Uno_SignResponse) GetBody() isUno_SignResponse_Body {
@@ -280,7 +285,7 @@ type Uno_RegisterRequest struct {
 
 func (x *Uno_RegisterRequest) Reset() {
 	*x = Uno_RegisterRequest{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[2]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -292,7 +297,7 @@ func (x *Uno_RegisterRequest) String() string {
 func (*Uno_RegisterRequest) ProtoMessage() {}
 
 func (x *Uno_RegisterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[2]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -305,7 +310,7 @@ func (x *Uno_RegisterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_RegisterRequest.ProtoReflect.Descriptor instead.
 func (*Uno_RegisterRequest) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{2}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Uno_RegisterRequest) GetId() string {
@@ -349,7 +354,7 @@ type Uno_RegisterResponse struct {
 
 func (x *Uno_RegisterResponse) Reset() {
 	*x = Uno_RegisterResponse{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[3]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -361,7 +366,7 @@ func (x *Uno_RegisterResponse) String() string {
 func (*Uno_RegisterResponse) ProtoMessage() {}
 
 func (x *Uno_RegisterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[3]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -374,7 +379,7 @@ func (x *Uno_RegisterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_RegisterResponse.ProtoReflect.Descriptor instead.
 func (*Uno_RegisterResponse) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{3}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Uno_RegisterResponse) GetBody() isUno_RegisterResponse_Body {
@@ -428,7 +433,7 @@ type Uno_SignRequest_FromPassword struct {
 
 func (x *Uno_SignRequest_FromPassword) Reset() {
 	*x = Uno_SignRequest_FromPassword{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[4]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -440,7 +445,7 @@ func (x *Uno_SignRequest_FromPassword) String() string {
 func (*Uno_SignRequest_FromPassword) ProtoMessage() {}
 
 func (x *Uno_SignRequest_FromPassword) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[4]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -453,7 +458,7 @@ func (x *Uno_SignRequest_FromPassword) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignRequest_FromPassword.ProtoReflect.Descriptor instead.
 func (*Uno_SignRequest_FromPassword) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{0, 0}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *Uno_SignRequest_FromPassword) GetId() string {
@@ -480,7 +485,7 @@ type Uno_SignRequest_FromRefreshJWT struct {
 
 func (x *Uno_SignRequest_FromRefreshJWT) Reset() {
 	*x = Uno_SignRequest_FromRefreshJWT{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[5]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -492,7 +497,7 @@ func (x *Uno_SignRequest_FromRefreshJWT) String() string {
 func (*Uno_SignRequest_FromRefreshJWT) ProtoMessage() {}
 
 func (x *Uno_SignRequest_FromRefreshJWT) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[5]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -505,7 +510,7 @@ func (x *Uno_SignRequest_FromRefreshJWT) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignRequest_FromRefreshJWT.ProtoReflect.Descriptor instead.
 func (*Uno_SignRequest_FromRefreshJWT) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{0, 1}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{0, 1}
 }
 
 func (x *Uno_SignRequest_FromRefreshJWT) GetRefreshJWT() string {
@@ -532,7 +537,7 @@ type Uno_SignResponse_FromPassword struct {
 
 func (x *Uno_SignResponse_FromPassword) Reset() {
 	*x = Uno_SignResponse_FromPassword{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[6]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +549,7 @@ func (x *Uno_SignResponse_FromPassword) String() string {
 func (*Uno_SignResponse_FromPassword) ProtoMessage() {}
 
 func (x *Uno_SignResponse_FromPassword) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[6]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +562,7 @@ func (x *Uno_SignResponse_FromPassword) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignResponse_FromPassword.ProtoReflect.Descriptor instead.
 func (*Uno_SignResponse_FromPassword) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{1, 0}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *Uno_SignResponse_FromPassword) GetRefreshJWT() string {
@@ -583,7 +588,7 @@ type Uno_SignResponse_FromRefreshJWT struct {
 
 func (x *Uno_SignResponse_FromRefreshJWT) Reset() {
 	*x = Uno_SignResponse_FromRefreshJWT{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[7]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +600,7 @@ func (x *Uno_SignResponse_FromRefreshJWT) String() string {
 func (*Uno_SignResponse_FromRefreshJWT) ProtoMessage() {}
 
 func (x *Uno_SignResponse_FromRefreshJWT) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[7]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +613,7 @@ func (x *Uno_SignResponse_FromRefreshJWT) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_SignResponse_FromRefreshJWT.ProtoReflect.Descriptor instead.
 func (*Uno_SignResponse_FromRefreshJWT) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{1, 1}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{1, 1}
 }
 
 func (x *Uno_SignResponse_FromRefreshJWT) GetAccessJWT() string {
@@ -628,7 +633,7 @@ type Uno_RegisterResponse_Response struct {
 
 func (x *Uno_RegisterResponse_Response) Reset() {
 	*x = Uno_RegisterResponse_Response{}
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[8]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -640,7 +645,7 @@ func (x *Uno_RegisterResponse_Response) String() string {
 func (*Uno_RegisterResponse_Response) ProtoMessage() {}
 
 func (x *Uno_RegisterResponse_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[8]
+	mi := &file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +658,7 @@ func (x *Uno_RegisterResponse_Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Uno_RegisterResponse_Response.ProtoReflect.Descriptor instead.
 func (*Uno_RegisterResponse_Response) Descriptor() ([]byte, []int) {
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP(), []int{3, 0}
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP(), []int{3, 0}
 }
 
 func (x *Uno_RegisterResponse_Response) GetRefreshJWT() string {
@@ -670,15 +675,13 @@ func (x *Uno_RegisterResponse_Response) GetAccessJWT() string {
 	return ""
 }
 
-var File_basic_jwt_pkg_protos_jwt_jwt_proto protoreflect.FileDescriptor
+var File_pkg_protos_jwt_jwt_WITHOUT_proto protoreflect.FileDescriptor
 
-var file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDesc = []byte{
-	0x0a, 0x22, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2f, 0x6a, 0x77, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x6a, 0x77, 0x74, 0x2f, 0x6a, 0x77, 0x74, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x11, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61,
-	0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f,
-	0x61, 0x70, 0x69, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xbb, 0x02, 0x0a, 0x0f, 0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69,
+var file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDesc = []byte{
+	0x0a, 0x20, 0x70, 0x6b, 0x67, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x6a, 0x77, 0x74,
+	0x2f, 0x6a, 0x77, 0x74, 0x2e, 0x57, 0x49, 0x54, 0x48, 0x4f, 0x55, 0x54, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x12, 0x11, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69,
+	0x63, 0x2e, 0x6a, 0x77, 0x74, 0x22, 0xbb, 0x02, 0x0a, 0x0f, 0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69,
 	0x67, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4d, 0x0a, 0x08, 0x50, 0x61, 0x73,
 	0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2f, 0x2e, 0x73, 0x75,
 	0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x2e,
@@ -741,51 +744,50 @@ var file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDesc = []byte{
 	0x68, 0x4a, 0x57, 0x54, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x52, 0x65, 0x66, 0x72,
 	0x65, 0x73, 0x68, 0x4a, 0x57, 0x54, 0x12, 0x1c, 0x0a, 0x09, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73,
 	0x4a, 0x57, 0x54, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x41, 0x63, 0x63, 0x65, 0x73,
-	0x73, 0x4a, 0x57, 0x54, 0x42, 0x06, 0x0a, 0x04, 0x42, 0x6f, 0x64, 0x79, 0x2a, 0xa1, 0x01, 0x0a,
+	0x73, 0x4a, 0x57, 0x54, 0x42, 0x06, 0x0a, 0x04, 0x42, 0x6f, 0x64, 0x79, 0x2a, 0xc8, 0x01, 0x0a,
 	0x06, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x73, 0x12, 0x09, 0x0a, 0x05, 0x45, 0x4d, 0x50, 0x54, 0x59,
 	0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x55, 0x73, 0x65, 0x72, 0x45, 0x78, 0x69, 0x73, 0x74, 0x10,
 	0x01, 0x12, 0x0f, 0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x4e, 0x6f, 0x45, 0x78, 0x69, 0x73, 0x74,
 	0x10, 0x02, 0x12, 0x15, 0x0a, 0x11, 0x55, 0x73, 0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f,
 	0x72, 0x64, 0x57, 0x72, 0x6f, 0x6e, 0x67, 0x10, 0x03, 0x12, 0x13, 0x0a, 0x0f, 0x55, 0x73, 0x65,
-	0x72, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x10, 0x04, 0x12, 0x0d,
-	0x0a, 0x09, 0x55, 0x6e, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x64, 0x10, 0x05, 0x12, 0x0c, 0x0a,
-	0x08, 0x4a, 0x57, 0x54, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x10, 0x06, 0x12, 0x0e, 0x0a, 0x0a, 0x4a,
-	0x57, 0x54, 0x45, 0x78, 0x70, 0x69, 0x72, 0x65, 0x64, 0x10, 0x07, 0x12, 0x13, 0x0a, 0x0f, 0x4a,
-	0x57, 0x54, 0x49, 0x6e, 0x63, 0x6f, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x69, 0x74, 0x79, 0x10, 0x08,
-	0x32, 0xf1, 0x01, 0x0a, 0x03, 0x6a, 0x77, 0x74, 0x12, 0x6c, 0x0a, 0x08, 0x55, 0x6e, 0x6f, 0x5f,
-	0x53, 0x69, 0x67, 0x6e, 0x12, 0x22, 0x2e, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62,
-	0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x2e, 0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69, 0x67,
-	0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23, 0x2e, 0x73, 0x75, 0x73, 0x75, 0x62,
-	0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x2e, 0x55, 0x6e, 0x6f,
-	0x5f, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x17, 0x82,
-	0xd3, 0xe4, 0x93, 0x02, 0x11, 0x3a, 0x01, 0x2a, 0x22, 0x0c, 0x2f, 0x76, 0x31, 0x2f, 0x73, 0x69,
-	0x67, 0x6e, 0x2f, 0x75, 0x6e, 0x6f, 0x12, 0x7c, 0x0a, 0x0c, 0x55, 0x6e, 0x6f, 0x5f, 0x52, 0x65,
+	0x72, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x10, 0x04, 0x12, 0x0e,
+	0x0a, 0x0a, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x10, 0x05, 0x12, 0x0d,
+	0x0a, 0x09, 0x55, 0x6e, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x64, 0x10, 0x06, 0x12, 0x0c, 0x0a,
+	0x08, 0x4a, 0x57, 0x54, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x10, 0x07, 0x12, 0x0e, 0x0a, 0x0a, 0x4a,
+	0x57, 0x54, 0x45, 0x78, 0x70, 0x69, 0x72, 0x65, 0x64, 0x10, 0x08, 0x12, 0x13, 0x0a, 0x0f, 0x4a,
+	0x57, 0x54, 0x49, 0x6e, 0x63, 0x6f, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x69, 0x74, 0x79, 0x10, 0x09,
+	0x12, 0x15, 0x0a, 0x11, 0x55, 0x73, 0x65, 0x72, 0x55, 0x6e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x53,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x10, 0x0a, 0x32, 0xbf, 0x01, 0x0a, 0x03, 0x6a, 0x77, 0x74, 0x12,
+	0x55, 0x0a, 0x08, 0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69, 0x67, 0x6e, 0x12, 0x22, 0x2e, 0x73, 0x75,
+	0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x2e,
+	0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x23, 0x2e, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e,
+	0x6a, 0x77, 0x74, 0x2e, 0x55, 0x6e, 0x6f, 0x5f, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x61, 0x0a, 0x0c, 0x55, 0x6e, 0x6f, 0x5f, 0x52, 0x65,
 	0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x12, 0x26, 0x2e, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74,
 	0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a, 0x77, 0x74, 0x2e, 0x55, 0x6e, 0x6f, 0x5f, 0x52,
 	0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27,
 	0x2e, 0x73, 0x75, 0x73, 0x75, 0x62, 0x6f, 0x74, 0x2e, 0x62, 0x61, 0x73, 0x69, 0x63, 0x2e, 0x6a,
 	0x77, 0x74, 0x2e, 0x55, 0x6e, 0x6f, 0x5f, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1b, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x15, 0x3a,
-	0x01, 0x2a, 0x22, 0x10, 0x2f, 0x76, 0x31, 0x2f, 0x72, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72,
-	0x2f, 0x75, 0x6e, 0x6f, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x6a,
-	0x77, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0c, 0x5a, 0x0a, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x73, 0x2f, 0x6a, 0x77, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescOnce sync.Once
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescData = file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDesc
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescOnce sync.Once
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescData = file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDesc
 )
 
-func file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescGZIP() []byte {
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescOnce.Do(func() {
-		file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescData = protoimpl.X.CompressGZIP(file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescData)
+func file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescGZIP() []byte {
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescOnce.Do(func() {
+		file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescData = protoimpl.X.CompressGZIP(file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescData)
 	})
-	return file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDescData
+	return file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDescData
 }
 
-var file_basic_jwt_pkg_protos_jwt_jwt_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_basic_jwt_pkg_protos_jwt_jwt_proto_goTypes = []any{
+var file_pkg_protos_jwt_jwt_WITHOUT_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_pkg_protos_jwt_jwt_WITHOUT_proto_goTypes = []any{
 	(Errors)(0),                             // 0: susubot.basic.jwt.Errors
 	(*Uno_SignRequest)(nil),                 // 1: susubot.basic.jwt.Uno_SignRequest
 	(*Uno_SignResponse)(nil),                // 2: susubot.basic.jwt.Uno_SignResponse
@@ -797,7 +799,7 @@ var file_basic_jwt_pkg_protos_jwt_jwt_proto_goTypes = []any{
 	(*Uno_SignResponse_FromRefreshJWT)(nil), // 8: susubot.basic.jwt.Uno_SignResponse.FromRefreshJWT
 	(*Uno_RegisterResponse_Response)(nil),   // 9: susubot.basic.jwt.Uno_RegisterResponse.Response
 }
-var file_basic_jwt_pkg_protos_jwt_jwt_proto_depIdxs = []int32{
+var file_pkg_protos_jwt_jwt_WITHOUT_proto_depIdxs = []int32{
 	5, // 0: susubot.basic.jwt.Uno_SignRequest.Password:type_name -> susubot.basic.jwt.Uno_SignRequest.FromPassword
 	6, // 1: susubot.basic.jwt.Uno_SignRequest.JWT:type_name -> susubot.basic.jwt.Uno_SignRequest.FromRefreshJWT
 	0, // 2: susubot.basic.jwt.Uno_SignResponse.err:type_name -> susubot.basic.jwt.Errors
@@ -816,21 +818,21 @@ var file_basic_jwt_pkg_protos_jwt_jwt_proto_depIdxs = []int32{
 	0, // [0:7] is the sub-list for field type_name
 }
 
-func init() { file_basic_jwt_pkg_protos_jwt_jwt_proto_init() }
-func file_basic_jwt_pkg_protos_jwt_jwt_proto_init() {
-	if File_basic_jwt_pkg_protos_jwt_jwt_proto != nil {
+func init() { file_pkg_protos_jwt_jwt_WITHOUT_proto_init() }
+func file_pkg_protos_jwt_jwt_WITHOUT_proto_init() {
+	if File_pkg_protos_jwt_jwt_WITHOUT_proto != nil {
 		return
 	}
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[0].OneofWrappers = []any{
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[0].OneofWrappers = []any{
 		(*Uno_SignRequest_Password)(nil),
 		(*Uno_SignRequest_JWT)(nil),
 	}
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[1].OneofWrappers = []any{
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[1].OneofWrappers = []any{
 		(*Uno_SignResponse_Err)(nil),
 		(*Uno_SignResponse_Password)(nil),
 		(*Uno_SignResponse_JWT)(nil),
 	}
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes[3].OneofWrappers = []any{
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes[3].OneofWrappers = []any{
 		(*Uno_RegisterResponse_Err)(nil),
 		(*Uno_RegisterResponse_JWT)(nil),
 	}
@@ -838,19 +840,19 @@ func file_basic_jwt_pkg_protos_jwt_jwt_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDesc,
+			RawDescriptor: file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDesc,
 			NumEnums:      1,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_basic_jwt_pkg_protos_jwt_jwt_proto_goTypes,
-		DependencyIndexes: file_basic_jwt_pkg_protos_jwt_jwt_proto_depIdxs,
-		EnumInfos:         file_basic_jwt_pkg_protos_jwt_jwt_proto_enumTypes,
-		MessageInfos:      file_basic_jwt_pkg_protos_jwt_jwt_proto_msgTypes,
+		GoTypes:           file_pkg_protos_jwt_jwt_WITHOUT_proto_goTypes,
+		DependencyIndexes: file_pkg_protos_jwt_jwt_WITHOUT_proto_depIdxs,
+		EnumInfos:         file_pkg_protos_jwt_jwt_WITHOUT_proto_enumTypes,
+		MessageInfos:      file_pkg_protos_jwt_jwt_WITHOUT_proto_msgTypes,
 	}.Build()
-	File_basic_jwt_pkg_protos_jwt_jwt_proto = out.File
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_rawDesc = nil
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_goTypes = nil
-	file_basic_jwt_pkg_protos_jwt_jwt_proto_depIdxs = nil
+	File_pkg_protos_jwt_jwt_WITHOUT_proto = out.File
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_rawDesc = nil
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_goTypes = nil
+	file_pkg_protos_jwt_jwt_WITHOUT_proto_depIdxs = nil
 }

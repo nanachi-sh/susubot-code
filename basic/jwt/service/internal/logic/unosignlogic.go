@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	j "github.com/nanachi-sh/susubot-code/basic/jwt/internal/jwt"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/jwt"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/service/internal/svc"
 
@@ -24,7 +25,5 @@ func NewUnoSignLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UnoSignLo
 }
 
 func (l *UnoSignLogic) Uno_Sign(in *jwt.Uno_SignRequest) (*jwt.Uno_SignResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &jwt.Uno_SignResponse{}, nil
+	return j.NewRequest(l.Logger).Uno_Sign(in)
 }
