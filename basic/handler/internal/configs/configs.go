@@ -106,6 +106,18 @@ func init() {
 			}
 		}
 	}
+	portStr = os.Getenv("GATEWAY_GRPC_PORT")
+	if portStr == "" {
+		logger.Fatalln("Gateway gRPC服务端口未设置")
+	}
+	port, err = strconv.ParseInt(portStr, 10, 0)
+	if err != nil {
+		logger.Fatalln(err)
+	}
+	if !utils.PortRangeCheck(port) {
+		logger.Fatalln("Gateway gRPC服务端口范围不正确")
+	}
+	GATEWAY_GRPC_PORT = int(port)
 
 	if ASSETS_URL = os.Getenv("ASSETS_URL"); ASSETS_URL == "" {
 		logger.Fatalln("Assets URL未设置")
