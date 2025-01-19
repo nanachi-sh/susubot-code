@@ -225,24 +225,28 @@ func init() {
 	if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
 		logger.Fatalln(err)
 	}
-	cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	caPool := x509.NewCertPool()
-	buf, err := os.ReadFile(GRPCCaCertFile)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !caPool.AppendCertsFromPEM(buf) {
-		logger.Fatalln("添加CA证书失败")
-	}
-	cred := credentials.NewTLS(&tls.Config{
-		RootCAs:      caPool,
-		Certificates: []tls.Certificate{cert},
-		ServerName:   "mtls.susu",
-	})
-	client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+	// cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
+	// if err != nil {
+	// 	logger.Fatalln(err)
+	// }
+	// caPool := x509.NewCertPool()
+	// buf, err := os.ReadFile(GRPCCaCertFile)
+	// if err != nil {
+	// 	logger.Fatalln(err)
+	// }
+	// if !caPool.AppendCertsFromPEM(buf) {
+	// 	logger.Fatalln("添加CA证书失败")
+	// }
+	// cred := credentials.NewTLS(&tls.Config{
+	// 	RootCAs:      caPool,
+	// 	Certificates: []tls.Certificate{cert},
+	// 	ServerName:   "mtls.susu",
+	// })
+	// client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+	// if err != nil {
+	// 	logger.Fatalln(err)
+	// }
+	client, err := zrpc.NewClient(c.RpcClientConf)
 	if err != nil {
 		logger.Fatalln(err)
 	}
