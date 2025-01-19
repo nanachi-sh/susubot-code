@@ -29,7 +29,8 @@ func initDB() error {
 	}
 	// 创建表
 	if _, err := db.Exec(`CREATE TABLE Players (
-		Id TEXT NOT NULL UNIQUE,
+		index INT PRIMARY KEY,
+		Id VARCHAR(100) NOT NULL UNIQUE,
 		Name TEXT NOT NULL,
 		Password TEXT NOT NULL,
 		Salt TEXT NOT NULL,

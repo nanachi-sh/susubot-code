@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package susubot.basic.qqverifier;
+
+option go_package = "protos/qqverifier";
+
+enum Errors {
+    Intervaling = 0; //正处于间隔时间内
+    NoFriend = 1; //请求QQ号非机器人好友
+    ErrVerified = 2; //已验证(重复验证)
+    VerifyNoFound = 3; //未找到验证请求
+    Expired = 4; //已过期
+    CodeWrong = 5; //验证码错误
+    UnVerified = 6; //还未验证
+}
+
+enum Result {
+    Verified = 0; //已验证
+}
+
+service qqverifier {
+    rpc NewVerify (NewVerifyRequest) returns (NewVerifyResponse) {}
+    rpc Verify (VerifyRequest) returns (VerifyResponse) {}
+    rpc Verified (VerifiedRequest) returns (VerifiedResponse) {}
+}
+
+message NewVerifyRequest {
+    int32 interval = 1; //请求间隔时间(ms)
+    int32 expires = 2; //验证码过期时间
+    string QQID = 3; //QQ号
+}
+
+message NewVerifyResponse {
+    optional Errors err = 1;
+    string VerifyHash = 2;
+}
+
+message VerifyRequest {
+    string VerifyHash = 1;
+    string VerifyCode = 2;
+}
+
+message VerifyResponse {
+    optional Errors err = 1;
+    optional Result result = 2;
+    string VarifyId = 3;
+}
+
+message VerifiedRequest {
+    string VerifyHash = 1;
+}
+
+message VerifiedResponse {
+    optional Errors err = 1;
+    optional Result result = 2;
+    string VarifyId = 3;
+}

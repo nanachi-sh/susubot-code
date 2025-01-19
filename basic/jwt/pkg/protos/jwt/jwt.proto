@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package susubot.basic.jwt;
+
+import "google/api/annotations.proto";
+
+option go_package = "protos/jwt";
+
+service jwt {
+    rpc Uno_Sign (Uno_SignRequest) returns (Uno_SignResponse) {
+        option (google.api.http) = {
+            post: "/v1/sign/uno"
+            body: "*"
+        };
+    }
+    rpc Uno_Register (Uno_RegisterRequest) returns (Uno_RegisterResponse) {
+        option (google.api.http) = {
+            post: "/v1/register/uno"
+            body: "*"
+        };
+    }
+}
+
+enum Errors {
+    EMPTY = 0;
+    UserExist = 1; //用户已存在
+    UserNoExist = 2; //用户不存在
+    UserPasswordWrong = 3; //用户密码错误
+    UserVerifyError = 4; //用户验证(验证器)错误
+    Undefined = 5; //未定义错误
+    JWTError = 6; //JWT有误
+    JWTExpired = 7; //JWT已过期
+    JWTInconformity = 8; //JWT不一致
+}
+
+message Uno_SignRequest {
+    message FromPassword {
+        string Id = 1;
+        string Password = 2; //DES CBC加密，k=timestamp(ms)/30000
+    }
+    message FromRefreshJWT {
+        string RefreshJWT = 1; //刷新JWT
+        string AccessJWT = 2; //即将过期的访问JWT
+    }
+
+    oneof Body {
+        FromPassword Password = 1;
+        FromRefreshJWT JWT = 2;
+    }
+}
+
+message Uno_SignResponse {
+    message FromPassword {
+        string RefreshJWT = 1;
+        string AccessJWT = 2;
+    }
+    message FromRefreshJWT {
+        string AccessJWT = 1;
+    }
+
+    oneof Body {
+        Errors err = 1;
+        FromPassword Password = 2;
+        FromRefreshJWT JWT = 3;
+    }
+}
+
+message Uno_RegisterRequest {
+    string Id = 1;
+    string Name = 2;
+    string Password = 3; //DES加密
+    string VerifyHash = 4;
+}
+
+message Uno_RegisterResponse {
+    message Response {
+        string RefreshJWT = 1;
+        string AccessJWT = 2;
+    }
+    
+    oneof Body {
+        Errors err = 1;
+        Response JWT = 2;
+    }
+}
