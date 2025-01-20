@@ -115,7 +115,7 @@ func DefaultMock() *MockConnector {
 			return &connector.BasicResponse{}, nil
 		}
 	}).AnyTimes()
-	mock.EXPECT().Read(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ any, in *connector.ConnectRequest, _ ...any) (connector.Connector_ReadClient, error) {
+	mock.EXPECT().Read(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ any, _ *connector.Empty, _ ...any) (connector.Connector_ReadClient, error) {
 		return readstream, nil
 	}).AnyTimes()
 	return mock
