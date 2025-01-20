@@ -147,6 +147,8 @@ func NewVerify(logger logx.Logger, in *verifier_pb.QQ_NewVerifyRequest) (*verifi
 				return
 			}
 			resp := call_resp.GetResponse()
+			fmt.Println(resp.GetType())
+			fmt.Println(resp.GetCmdEvent())
 			ce := resp.GetCmdEvent()
 			if ce.Echo != echo {
 				continue
