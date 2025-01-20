@@ -16,6 +16,7 @@ import (
 	"time"
 
 	qqverifierclient "github.com/nanachi-sh/susubot-code/basic/jwt/internal/caller/qqverifier"
+	mock_qqverifierclient "github.com/nanachi-sh/susubot-code/basic/jwt/internal/mock/qqverifier"
 	unomodel "github.com/nanachi-sh/susubot-code/basic/jwt/internal/model/uno"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/internal/types"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/utils"
@@ -29,6 +30,7 @@ import (
 var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
+	DEBUG             bool
 	GRPC_LISTEN_PORT  int
 	HTTP_LISTEN_PORT  int
 	GRPC_mTLS         bool
@@ -94,6 +96,15 @@ func init() {
 		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
 	} else {
 		GRPC_mTLS = mtls
+	}
+
+	d := os.Getenv("DEBUG")
+	if d != "" {
+		if debug, err := strconv.ParseBool(d); err != nil {
+			logger.Fatalln("Debug状态设置不正确")
+		} else {
+			DEBUG = debug
+		}
 	}
 
 	for {
@@ -216,36 +227,36 @@ ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
 
 // 初始化gRPC Callers
 func init() {
-	var c types.Config
-	if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
-		logger.Fatalln(err)
+	if !DEBUG {
+		var c types.Config
+		if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
+			logger.Fatalln(err)
+		}
+		cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		caPool := x509.NewCertPool()
+		buf, err := os.ReadFile(GRPCCaCertFile)
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		if !caPool.AppendCertsFromPEM(buf) {
+			logger.Fatalln("添加CA证书失败")
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			RootCAs:      caPool,
+			Certificates: []tls.Certificate{cert},
+			ServerName:   "mtls.susu",
+		})
+		client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		Call_QQVerifier = qqverifierclient.NewQqverifier(client)
+	} else {
+		Call_QQVerifier = mock_qqverifierclient.DefaultMock()
 	}
-	// cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
-	// if err != nil {
-	// 	logger.Fatalln(err)
-	// }
-	// caPool := x509.NewCertPool()
-	// buf, err := os.ReadFile(GRPCCaCertFile)
-	// if err != nil {
-	// 	logger.Fatalln(err)
-	// }
-	// if !caPool.AppendCertsFromPEM(buf) {
-	// 	logger.Fatalln("添加CA证书失败")
-	// }
-	// cred := credentials.NewTLS(&tls.Config{
-	// 	RootCAs:      caPool,
-	// 	Certificates: []tls.Certificate{cert},
-	// 	ServerName:   "mtls.susu",
-	// })
-	// client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
-	// if err != nil {
-	// 	logger.Fatalln(err)
-	// }
-	client, err := zrpc.NewClient(c.RpcClientConf)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	Call_QQVerifier = qqverifierclient.NewQqverifier(client)
 }
 
 // 初始化SQL Models
