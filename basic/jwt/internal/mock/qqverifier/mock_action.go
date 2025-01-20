@@ -15,7 +15,7 @@ import (
 func DefaultMock() *MockQqverifier {
 	ctrl := gomock.NewController(nil)
 	mock := NewMockQqverifier(ctrl)
-	mock.EXPECT().Verified(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, in *qqverifierclient.VerifiedRequest, _ any) (*qqverifierclient.VerifiedResponse, error) {
+	mock.EXPECT().Verified(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, in *qqverifierclient.VerifiedRequest, _ ...any) (*qqverifierclient.VerifiedResponse, error) {
 		fmt.Println("Request")
 		if in == nil {
 			return nil, errors.New("")
