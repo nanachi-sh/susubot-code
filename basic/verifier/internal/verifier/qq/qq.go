@@ -130,6 +130,7 @@ func NewVerify(logger logx.Logger, in *verifier_pb.QQ_NewVerifyRequest) (*verifi
 				return
 			}
 			buf := readResp.GetBuf()
+			fmt.Println(string(buf))
 			call_resp, err := configs.Call_Handler_Response.Unmarshal(configs.DefaultCtx, &handler_response_pb.UnmarshalRequest{
 				Buf:          buf,
 				Type:         handler_response_pb.ResponseType_ResponseType_CmdEvent.Enum(),
