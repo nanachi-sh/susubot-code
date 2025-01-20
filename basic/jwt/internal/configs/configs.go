@@ -34,7 +34,6 @@ var (
 	GRPC_mTLS         bool
 	GATEWAY_IP        netip.Addr
 	GATEWAY_GRPC_PORT int
-	ASSETS_URL        string
 	DATABASE_IP       netip.Addr
 	DATABASE_PORT     int
 	DATABASE_USER     string
@@ -145,10 +144,6 @@ func init() {
 		logger.Fatalln("Gateway gRPC服务端口范围不正确")
 	}
 	GATEWAY_GRPC_PORT = int(port)
-
-	if ASSETS_URL = os.Getenv("ASSETS_URL"); ASSETS_URL == "" {
-		logger.Fatalln("Assets URL未设置")
-	}
 
 	for {
 		host := os.Getenv("DATABASE_HOST")
