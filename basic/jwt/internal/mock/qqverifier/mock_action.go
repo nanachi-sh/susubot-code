@@ -3,6 +3,7 @@ package mock_qqverifierclient
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	qqverifierclient "github.com/nanachi-sh/susubot-code/basic/jwt/internal/caller/qqverifier"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/qqverifier"
@@ -15,6 +16,7 @@ func DefaultMock() *MockQqverifier {
 	ctrl := gomock.NewController(nil)
 	mock := NewMockQqverifier(ctrl)
 	mock.EXPECT().Verified(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, in *qqverifierclient.VerifiedRequest, _ any) (*qqverifierclient.VerifiedResponse, error) {
+		fmt.Println("Request")
 		if in == nil {
 			return nil, errors.New("")
 		}
