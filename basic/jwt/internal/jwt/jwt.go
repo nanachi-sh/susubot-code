@@ -113,7 +113,11 @@ func uno_SignFromRefreshJWT(logger logx.Logger, in *jwt_pb.Uno_SignRequest_FromR
 	if serr != nil {
 		return nil, serr
 	}
-	if !uno_refresh_check(accessBody) {
+	ok, serr := uno_refresh_check(logger, accessBody)
+	if serr != nil {
+		return nil, serr
+	}
+	if !ok {
 		return nil, jwt_pb.Errors_Undefined.Enum()
 	}
 	// 验证更新JWT
@@ -141,7 +145,14 @@ func uno_SignFromRefreshJWT(logger logx.Logger, in *jwt_pb.Uno_SignRequest_FromR
 	}, nil
 }
 
-func uno_refresh_check(accessJWT Uno_Sign_AccessJWT_Body) bool {
+func uno_refresh_check(logger logx.Logger, accessJWT Uno_Sign_AccessJWT_Body) (bool, *jwt_pb.Errors) {
+	if uno_refresh_timecheck(accessJWT) {
+		return true, nil
+	}
+	return uno_refresh_updatecheck(logger, accessJWT)
+}
+
+func uno_refresh_timecheck(accessJWT Uno_Sign_AccessJWT_Body) bool {
 	iat := accessJWT.IssuedAt
 	exp := accessJWT.ExpiresAt
 	// 计算有效时间
@@ -150,6 +161,14 @@ func uno_refresh_check(accessJWT Uno_Sign_AccessJWT_Body) bool {
 	after := iat.Add(dur - time.Duration(float64(dur)*uno_access_nearExpired))
 	// 判断
 	return time.Until(after) <= 0 //已达到更新阈值
+}
+
+func uno_refresh_updatecheck(logger logx.Logger, accessJWT Uno_Sign_AccessJWT_Body) (bool, *jwt_pb.Errors) {
+	u, serr := db.Uno_GetUser(logger, accessJWT.Id)
+	if serr != nil {
+		return false, serr
+	}
+	return (accessJWT.Name != u.Name || accessJWT.WinCount != int(u.WinCount) || accessJWT.LoseCount != int(u.LoseCount)), nil
 }
 
 func uno_decryptPassword(pwd string) string {
