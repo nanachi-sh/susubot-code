@@ -84,6 +84,9 @@ func uno_SignFromPassword(logger logx.Logger, in *jwt_pb.Uno_SignRequest_FromPas
 	if serr != nil {
 		return nil, serr
 	}
+	if !ok {
+		return nil, jwt_pb.Errors_UserPasswordWrong.Enum()
+	}
 	u, serr := db.Uno_GetUser(logger, in.Id)
 	if serr != nil {
 		return nil, serr

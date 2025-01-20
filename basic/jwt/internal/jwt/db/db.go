@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/VividCortex/mysqlerr"
+	"github.com/go-sql-driver/mysql"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/internal/configs"
 	unomodel "github.com/nanachi-sh/susubot-code/basic/jwt/internal/model/uno"
 	jwt_pb "github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/jwt"
@@ -37,11 +39,15 @@ func Uno_CreateUser(logger logx.Logger, userid, username, password string) *jwt_
 		WinCount:  0,
 		LoseCount: 0,
 	}); err != nil {
-		switch err {
-		default:
-			logger.Errorf("未处理错误: %s", err.Error())
-		case sqlx.ErrNotSettable:
-			return jwt_pb.Errors_UserExist.Enum()
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			switch sqlerr.Number {
+			default:
+				logger.Errorf("未处理错误: %s", sqlerr.Error())
+			case mysqlerr.ER_DUP_ENTRY: //primary key duplicate
+				return jwt_pb.Errors_UserExist.Enum()
+			}
+		} else {
+			logger.Error(err)
 		}
 		return jwt_pb.Errors_Undefined.Enum()
 	}
