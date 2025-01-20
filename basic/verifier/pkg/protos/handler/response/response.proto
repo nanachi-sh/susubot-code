@@ -1,0 +1,353 @@
+syntax = "proto3";
+
+package susubot.basic.handler.response;
+
+option go_package = "protos/handler/response";
+
+service ResponseHandler {
+    rpc Unmarshal (UnmarshalRequest) returns (UnmarshalResponse);
+}
+
+enum Errors {
+    EMPTY = 0;
+    Undefined = 1;
+    TypeNoMatch = 2;
+    MessageChainError = 3;
+    CmdEventTypeNoSet = 4;
+}
+
+enum ResponseType {     //机器人响应类型
+    ResponseType_Message = 0;     //消息事件
+    ResponseType_QQEvent = 1;     //QQ事件
+    ResponseType_CmdEvent = 2;    //命令响应
+    ResponseType_BotEvent = 3;    //机器人事件
+}
+
+enum MessageType {      //消息事件类型
+    MessageType_Private = 0;     //私聊消息
+    MessageType_Group = 1;       //群组消息
+}
+
+enum MessageChainType {
+    MessageChainType_Text = 0;   //纯文本
+    MessageChainType_Image = 1;  //图片 or 动图
+    MessageChainType_Voice = 2;  //语音
+    MessageChainType_Video = 3;  //视频
+    MessageChainType_At = 4;     //At
+    MessageChainType_Reply = 5;  //回复
+}
+message MessageChainObject {
+    MessageChainType Type = 1;
+    optional MessageChain_Text Text = 2;
+    optional MessageChain_Image Image = 3;
+    optional MessageChain_Voice Voice = 4;
+    optional MessageChain_Video Video = 5;
+    optional MessageChain_At At = 6;
+    optional MessageChain_Reply Reply = 7;
+}
+message MessageChain_Text {
+    string Text = 1;
+}
+message MessageChain_Image {
+    string URL = 1;
+}
+message MessageChain_Voice {
+    string URL = 1;
+}
+message MessageChain_Video {
+    string URL = 1;
+}
+message MessageChain_At {
+    string TargetId = 1;
+}
+message MessageChain_Reply {
+    string MessageId = 1;
+}
+
+enum QQEventType {      //QQ事件类型
+    QQEventType_GroupAdd = 0;    //群聊成员增加
+    QQEventType_GroupRemove = 1; //群聊成员减少
+    QQEventType_GroupMute = 2;   //群聊成员被禁言
+    QQEventType_GroupUnmute = 3; //群聊成员被解除禁言
+    QQEventType_MessageRecall = 4;   //消息撤回
+}
+enum QQEventType_GroupAddType {
+    QQEventType_GroupAddType_Direct = 0; //直接加入群聊
+    QQEventType_GroupAddType_Invite = 1; //群聊成员邀请加入
+}
+enum QQEventType_GroupRemoveType {
+    QQEventType_GroupRemoveType_Manual = 0; //主动退出群聊
+    QQEventType_GroupRemoveType_Kick = 1;   //被踢出群聊
+}
+enum QQEventType_MessageRecallType {
+    QQEventType_MessageRecallType_Group = 0;  //群聊消息撤回
+    QQEventType_MessageRecallType_Private = 1;    //私聊消息撤回
+}
+
+enum CmdEventType {   //命令响应类型
+    CmdEventType_GetGroupInfo = 0;   //获取指定群聊信息
+    CmdEventType_GetGroupMemberInfo = 1; //获取指定群聊指定成员信息
+    CmdEventType_GetMessage = 2; //获取消息事件(通过MessageId)
+    CmdEventType_GetFriendList = 3;  //获取所有好友信息
+    CmdEventType_GetFriendInfo = 4;  //
+}
+
+enum BotEventType {     //机器人事件类型
+    BotEventType_HeartPacket = 0;
+    BotEventType_Connected = 1;
+}
+
+enum GroupRole {     //群组成员身份
+    GroupRole_Member = 0;   //普通成员
+    GroupRole_Admin = 1;    //管理员
+    GroupRole_Owner = 2;    //群主
+}
+
+message Response_Message { //消息事件
+    optional MessageType Type = 1;
+    optional Response_Message_Private Private = 2;
+    optional Response_Message_Group Group = 3;
+}
+message Response_Message_Private {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    repeated MessageChainObject MessageChain = 6;
+}
+message Response_Message_Group {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    string GroupId = 6;
+    optional GroupRole SenderRole = 7;
+    optional GroupRole BotRole = 8;
+    repeated MessageChainObject MessageChain = 9;
+}
+
+message Response_QQEvent {   //QQ事件
+    optional QQEventType Type = 1;
+    optional Response_QQEvent_GroupAdd GroupAdd = 2;
+    optional Response_QQEvent_GroupRemove GroupRemove = 3;
+    optional Response_QQEvent_GroupMute GroupMute = 4;
+    optional Response_QQEvent_GroupUnmute GroupUnmute = 5;
+    optional Response_QQEvent_MessageRecall MessageRecall = 6;
+}
+message Response_QQEvent_GroupAdd {
+    optional QQEventType_GroupAddType Type = 1;
+    optional Response_QQEvent_GroupAdd_Direct Direct = 2;
+    optional Response_QQEvent_GroupAdd_Invite Invite = 3;
+}
+message Response_QQEvent_GroupAdd_Direct {
+    string JoinerId = 1;    //新加入成员Id
+    optional string JoinerName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string ApproverId = 6;
+    optional string ApproverName = 7;
+}
+message Response_QQEvent_GroupAdd_Invite {
+    string JoinerId = 1;    //新加入成员Id
+    optional string JoinerName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string InviterId = 6;   //邀请者Id
+    optional string InviterName = 7;
+    string ApproverId = 8;  //审核者Id
+    optional string ApproverName = 9;
+}
+
+message Response_QQEvent_GroupRemove {
+    optional QQEventType_GroupRemoveType Type = 1;
+    optional Response_QQEvent_GroupRemove_Manual Manual = 2;
+    optional Response_QQEvent_GroupRemove_Kick Kick = 3;
+}
+message Response_QQEvent_GroupRemove_Manual {
+    string QuiterId = 1;    //退出者Id
+    optional string QuiterName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+}
+message Response_QQEvent_GroupRemove_Kick {
+    string TargetId = 1;    //被踢出者Id
+    optional string TargetName = 2;
+    string GroupId = 3;
+    int64 Timestamp = 4;
+    string BotId = 5;
+    string OperatorId = 6;
+    optional string OperatorName = 7;
+}
+
+message Response_QQEvent_GroupMute {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    int32 Duration = 6;
+    string GroupId = 7;
+    string BotId = 8;
+}
+
+message Response_QQEvent_GroupUnmute {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    string GroupId = 6;
+    string BotId = 7;
+}
+
+message Response_QQEvent_MessageRecall {
+    optional QQEventType_MessageRecallType Type = 1;
+    optional Response_QQEvent_MessageRecall_Group Group = 2;
+    optional Response_QQEvent_MessageRecall_Private Private = 3;
+}
+message Response_QQEvent_MessageRecall_Group {
+    string TargetId = 1;
+    optional string TargetName = 2;
+    int64 Timestamp = 3;
+    string OperatorId = 4;
+    optional string OperatorName = 5;
+    string GroupId = 6;
+    string BotId = 7;
+    string MessageId = 8;
+}
+message Response_QQEvent_MessageRecall_Private {
+    string RecallerId = 1;
+    optional string RecallerName = 2;
+    int64 Timestamp = 3;
+    string BotId = 4;
+    string MessageId = 5;
+}
+
+message Response_CmdEvent {
+    optional CmdEventType Type = 1;
+    string Echo = 2;
+    optional Response_CmdEvent_GetGroupInfo GetGroupInfo = 3;
+    optional Response_CmdEvent_GetGroupMemberInfo GetGroupMemberInfo = 4;
+    optional Response_CmdEvent_GetMessage GetMessage = 5;
+    optional Response_CmdEvent_GetFriendList GetFriendList = 6;
+    optional Response_CmdEvent_GetFriendInfo GetFriendInfo = 7;
+}
+message Response_CmdEvent_GetGroupInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string GroupId = 3;
+    string GroupName = 4;
+    int32 MemberMax = 5;
+    int32 MemberNow = 6;
+}
+message Response_CmdEvent_GetGroupMemberInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string GroupId = 3;
+    string UserId = 4;
+    string UserName = 5;
+    optional string Card = 6;   //群内自定义名称
+    optional int64 JoinTime = 7;
+    optional int64 LastActiveTime = 8;  //上次操作时间
+    optional int64 LastSentTime = 9;    //上次发送信息时间
+    GroupRole Role = 10;
+}
+message Response_CmdEvent_GetMessage {
+    bool OK = 1;
+    optional string Retcode = 2;
+    optional Response_CmdEvent_Message Message = 3;
+}
+message Response_CmdEvent_Message {
+    optional MessageType Type = 1;
+    optional Response_CmdEvent_Message_Private Private = 2;
+    optional Response_CmdEvent_Message_Group Group = 3;
+}
+message Response_CmdEvent_Message_Private {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    repeated MessageChainObject MessageChain = 6;
+}
+message Response_CmdEvent_Message_Group {
+    string SenderId = 1;
+    optional string SenderName = 2;
+    string MessageId = 3; //机器人核心内Id
+    int64 Timestamp = 4;
+    string BotId = 5; //机器人QQ号
+    string GroupId = 6;
+    optional GroupRole SenderRole = 7;
+    optional GroupRole BotRole = 8;
+    repeated MessageChainObject MessageChain = 9;
+}
+message Response_CmdEvent_GetFriendList {
+    message FriendInfo {
+        string UserName = 1;
+        string UserId = 2;
+        optional string Remark = 3;
+    }
+
+    bool OK = 1;
+    optional string Retcode = 2;
+    repeated FriendInfo Friends = 3;
+}
+
+message Response_CmdEvent_GetFriendInfo {
+    bool OK = 1;
+    optional string Retcode = 2;
+    string UserName = 3;
+    string UserId = 4;
+    optional string Remark = 5;
+}
+
+message Response_BotEvent {
+    optional BotEventType Type = 1;
+    optional Response_BotEvent_HeartPacket HeartPacket = 2;
+    optional Response_BotEvent_Connected Connected = 3;
+}
+message Response_BotEvent_HeartPacket {
+    message status {
+        bool Online = 1;
+        bool Good = 2;
+    }
+
+    int64 Timestamp = 1;
+    string BotId = 2;
+    int64 Interval = 3; //每隔多久发送一次心跳包(ms)
+    status Status = 4;
+}
+message Response_BotEvent_Connected {
+    int64 Timestamp = 1;
+    string BotId = 2;
+}
+
+message UnmarshalRequest {
+    bytes Buf = 1;
+    optional ResponseType Type = 2;
+    optional CmdEventType CmdEventType = 3; //ResponseType == CmdEvent need
+    bool ExtraInfo = 4;
+    bool IgnoreCmdEvent = 5;
+}
+
+message UnmarshalResponse {
+    message ResponseDefine {
+        oneof Body {
+            Response_Message Message = 2;
+            Response_QQEvent QQEvent = 3;
+            Response_CmdEvent CmdEvent = 4;
+            Response_BotEvent BotEvent = 5;
+        }
+        ResponseType Type = 1;
+    }
+
+    oneof Body {
+        ResponseDefine Response = 1;
+        Errors err = 2;
+    }
+}
