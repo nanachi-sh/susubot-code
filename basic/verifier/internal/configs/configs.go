@@ -16,6 +16,7 @@ import (
 	connectorclient "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/connector"
 	requesthandler "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/handler/request"
 	responsehandler "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/handler/response"
+	mock_connectorclient "github.com/nanachi-sh/susubot-code/basic/verifier/internal/mock/connector"
 	"github.com/nanachi-sh/susubot-code/basic/verifier/internal/types"
 	"github.com/nanachi-sh/susubot-code/basic/verifier/pkg/utils"
 	"github.com/zeromicro/go-zero/core/conf"
@@ -199,7 +200,7 @@ func init() {
 		if err != nil {
 			logger.Fatalln(err)
 		}
-		Call_Connector = connectorclient.NewConnector(client)
+		Call_Connector = mock_connectorclient.DefaultMock()
 		Call_Handler_Request = requesthandler.NewRequestHandler(client)
 		Call_Handler_Response = responsehandler.NewResponseHandler(client)
 	}
