@@ -196,6 +196,9 @@ func init() {
 		Call_Handler_Response = responsehandler.NewResponseHandler(client)
 	} else {
 		var c types.Config
+		if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
+			logger.Fatalln(err)
+		}
 		client, err := zrpc.NewClient(c.RpcClientConf)
 		if err != nil {
 			logger.Fatalln(err)
