@@ -97,6 +97,7 @@ func NewVerify(logger logx.Logger, in *verifier_pb.QQ_NewVerifyRequest) (*verifi
 		logger.Error(err)
 		return nil, verifier_pb.Errors_Undefined.Enum()
 	}
+	fmt.Println(string(resp.Buf))
 	if _, err := configs.Call_Connector.Write(configs.DefaultCtx, &connector_pb.WriteRequest{
 		Buf: resp.Buf,
 	}); err != nil {
