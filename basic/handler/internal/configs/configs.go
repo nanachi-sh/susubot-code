@@ -2,8 +2,6 @@ package configs
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
 	"net"
@@ -20,14 +18,12 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
 	GRPC_LISTEN_PORT  int
-	GRPC_mTLS         bool
 	GATEWAY_IP        netip.Addr
 	GATEWAY_GRPC_PORT int
 	ASSETS_URL        string
@@ -42,13 +38,6 @@ var (
 
 const (
 	ConfigDir = "/config"
-
-	CertsDir           = ConfigDir + "/certs"
-	GRPCServerCertFile = CertsDir + "/mtls_server.crt"
-	GRPCServerKeyFile  = CertsDir + "/mtls_server.key"
-	GRPCClientCertFile = CertsDir + "/mtls_client.crt"
-	GRPCClientKeyFile  = CertsDir + "/mtls_client.key"
-	GRPCCaCertFile     = CertsDir + "/mtls_ca.crt"
 )
 
 // 获取环境变量
@@ -65,12 +54,6 @@ func init() {
 		logger.Fatalln("gRPC服务监听端口范围不正确")
 	}
 	GRPC_LISTEN_PORT = int(port)
-
-	if mtls, err := strconv.ParseBool(os.Getenv("GRPC_mTLS")); err != nil {
-		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
-	} else {
-		GRPC_mTLS = mtls
-	}
 
 	for {
 		gatewayHost := os.Getenv("GATEWAY_HOST")
@@ -145,24 +128,7 @@ func init() {
 	if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
 		logger.Fatalln(err)
 	}
-	cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	caPool := x509.NewCertPool()
-	buf, err := os.ReadFile(GRPCCaCertFile)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !caPool.AppendCertsFromPEM(buf) {
-		logger.Fatalln("添加CA证书失败")
-	}
-	cred := credentials.NewTLS(&tls.Config{
-		RootCAs:      caPool,
-		Certificates: []tls.Certificate{cert},
-		ServerName:   "mtls.susu",
-	})
-	client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+	client, err := zrpc.NewClient(c.RpcClientConf)
 	if err != nil {
 		logger.Fatalln(err)
 	}
@@ -172,25 +138,5 @@ func init() {
 
 func GRPCOptions() []grpc.ServerOption {
 	opts := []grpc.ServerOption{}
-	if GRPC_mTLS {
-		cert, err := tls.LoadX509KeyPair(GRPCServerCertFile, GRPCServerKeyFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		caPool := x509.NewCertPool()
-		buf, err := os.ReadFile(GRPCCaCertFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		if !caPool.AppendCertsFromPEM(buf) {
-			logger.Fatalln("添加CA证书失败")
-		}
-		cred := credentials.NewTLS(&tls.Config{
-			Certificates: []tls.Certificate{cert},
-			ClientAuth:   tls.RequireAndVerifyClientCert,
-			ClientCAs:    caPool,
-		})
-		opts = append(opts, grpc.Creds(cred))
-	}
 	return opts
 }
