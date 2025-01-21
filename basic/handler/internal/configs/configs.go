@@ -23,6 +23,8 @@ import (
 var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
+	DEBUG bool
+
 	GRPC_LISTEN_PORT  int
 	GATEWAY_IP        netip.Addr
 	GATEWAY_GRPC_PORT int
@@ -54,6 +56,15 @@ func init() {
 		logger.Fatalln("gRPC服务监听端口范围不正确")
 	}
 	GRPC_LISTEN_PORT = int(port)
+
+	d := os.Getenv("DEBUG")
+	if d != "" {
+		if debug, err := strconv.ParseBool(d); err != nil {
+			logger.Fatalln("Debug状态设置不正确")
+		} else {
+			DEBUG = debug
+		}
+	}
 
 	for {
 		gatewayHost := os.Getenv("GATEWAY_HOST")
