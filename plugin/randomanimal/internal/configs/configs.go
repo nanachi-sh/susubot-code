@@ -132,7 +132,8 @@ func init() {
 // 初始化gRPC配置
 func init() {
 	config := fmt.Sprintf(`Name: connector.rpc
-ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
+ListenOn: 0.0.0.0:%d
+Timeout: 10000`, GRPC_LISTEN_PORT)
 	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
