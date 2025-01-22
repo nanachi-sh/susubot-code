@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/netip"
@@ -131,20 +132,25 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-	config := fmt.Sprintf(`ListenOn: 0.0.0.0:%d
-Timeout: 10000
-ServiceConf:
-- Name: randomanimal.rpc`, GRPC_LISTEN_PORT)
-	if DEBUG {
-		config += `
-  Log:
-  - Mode: file, console
-    Path: out.log`
+	configm := make(map[string]any)
+	configm["Timeout"] = 10000
+	configm["ListenOn"] = fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT)
+	configm["Name"] = "randomanimal.rpc"
+	configm["Log"] = struct {
+		Mode string
+		Path string
+	}{
+		"file, console",
+		"out.log",
 	}
-	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
+	configbs, err := json.Marshal(configm)
+	if err != nil {
 		logger.Fatalln(err)
 	}
-	config = fmt.Sprintf(`Target: %s:%d`, GATEWAY_IP.String(), GATEWAY_GRPC_PORT)
+	if err := os.WriteFile(RPCServer_Config, configbs, 0744); err != nil {
+		logger.Fatalln(err)
+	}
+	config := fmt.Sprintf(`Target: %s:%d`, GATEWAY_IP.String(), GATEWAY_GRPC_PORT)
 	if err := os.WriteFile(RPCClient_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
