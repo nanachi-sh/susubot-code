@@ -141,7 +141,7 @@ func init() {
 		Path string
 	}{
 		"file",
-		"out.log",
+		"logs",
 	}
 	configbs, err := json.Marshal(configm)
 	if err != nil {
@@ -204,5 +204,6 @@ func init() {
 
 func GRPCOptions() []grpc.ServerOption {
 	opts := []grpc.ServerOption{}
+	opts = append(opts, grpc.MaxSendMsgSize(128*1024*1024))
 	return opts
 }

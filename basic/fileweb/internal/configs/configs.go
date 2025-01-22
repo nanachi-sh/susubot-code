@@ -73,5 +73,6 @@ ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
 
 func GRPCOptions() []grpc.ServerOption {
 	opts := []grpc.ServerOption{}
+	opts = append(opts, grpc.MaxRecvMsgSize(128*1024*1024))
 	return opts
 }
