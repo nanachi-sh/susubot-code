@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/configs"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/pkg/protos/randomanimal"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/service/internal/config"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/service/internal/server"
@@ -16,7 +17,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/randomanimal.yaml", "the config file")
+var configFile = flag.String("f", configs.RPCServer_Config, "the config file")
 
 func main() {
 	flag.Parse()
@@ -33,6 +34,7 @@ func main() {
 		}
 	})
 	defer s.Stop()
+	s.AddOptions(configs.GRPCOptions()...)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
