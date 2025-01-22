@@ -46,7 +46,7 @@ var (
 
 	DefaultCtx = context.Background()
 
-	RPCServer_Config string = "rpc_server.yaml"
+	RPCServer_Config string = "rpc_server.json"
 	RPCClient_Config string = "rpc_client.yaml"
 )
 
