@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/configs"
+	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/model/randomanimal"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/randomanimal/db"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/types"
 	"github.com/nanachi-sh/susubot-code/plugin/randomanimal/internal/utils"
@@ -27,7 +28,7 @@ func NewRequest(l logx.Logger) *Request {
 }
 
 func (r *Request) GetCat(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.BasicResponse, error) {
-	ret, ok := getCat(r.logger)
+	ret, ok := getCat(r.logger, in)
 	if !ok {
 		return &randomanimal_pb.BasicResponse{
 			Body: &randomanimal_pb.BasicResponse_Err{Err: randomanimal_pb.Errors_NoGet},
@@ -105,7 +106,7 @@ func (r *Request) GetChiken_CXK(in *randomanimal_pb.BasicRequest) (*randomanimal
 }
 
 func (r *Request) GetDog(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.BasicResponse, error) {
-	ret, ok := getDog(r.logger)
+	ret, ok := getDog(r.logger, in)
 	if !ok {
 		return &randomanimal_pb.BasicResponse{
 			Body: &randomanimal_pb.BasicResponse_Err{Err: randomanimal_pb.Errors_NoGet},
@@ -142,7 +143,7 @@ func (r *Request) GetDog(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.Bas
 }
 
 func (r *Request) GetDuck(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.BasicResponse, error) {
-	ret, ok := getDuck(r.logger)
+	ret, ok := getDuck(r.logger, in)
 	if !ok {
 		return &randomanimal_pb.BasicResponse{
 			Body: &randomanimal_pb.BasicResponse_Err{Err: randomanimal_pb.Errors_NoGet},
@@ -179,7 +180,7 @@ func (r *Request) GetDuck(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.Ba
 }
 
 func (r *Request) GetFox(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.BasicResponse, error) {
-	ret, ok := getFox(r.logger)
+	ret, ok := getFox(r.logger, in)
 	if !ok {
 		return &randomanimal_pb.BasicResponse{
 			Body: &randomanimal_pb.BasicResponse_Err{Err: randomanimal_pb.Errors_NoGet},
@@ -243,7 +244,7 @@ func upload(logger logx.Logger, buf []byte) (string, bool) {
 	return hash, true
 }
 
-func getCat(logger logx.Logger) (types.BasicReturn, bool) {
+func getCat(logger logx.Logger, in *randomanimal_pb.BasicRequest) (types.BasicReturn, bool) {
 	resp, err := http.Get(configs.CatAPI)
 	if err != nil {
 		logger.Error(err)
@@ -295,13 +296,16 @@ func getCat(logger logx.Logger) (types.BasicReturn, bool) {
 		logger.Error(err)
 		return types.BasicReturn{}, false
 	}
+	if in.AutoUpload {
+		db.AddCache(logger, idhash, randomanimal.AssetType(Type.String()))
+	}
 	return types.BasicReturn{
 		Buf:  assetResp_body,
 		Type: Type,
 	}, true
 }
 
-func getDog(logger logx.Logger) (types.BasicReturn, bool) {
+func getDog(logger logx.Logger, in *randomanimal_pb.BasicRequest) (types.BasicReturn, bool) {
 	resp, err := http.Get(configs.DogAPI)
 	if err != nil {
 		logger.Error(err)
@@ -353,13 +357,16 @@ func getDog(logger logx.Logger) (types.BasicReturn, bool) {
 		logger.Error(err)
 		return types.BasicReturn{}, false
 	}
+	if in.AutoUpload {
+		db.AddCache(logger, idhash, randomanimal.AssetType(Type.String()))
+	}
 	return types.BasicReturn{
 		Buf:  assetResp_body,
 		Type: Type,
 	}, true
 }
 
-func getFox(logger logx.Logger) (types.BasicReturn, bool) {
+func getFox(logger logx.Logger, in *randomanimal_pb.BasicRequest) (types.BasicReturn, bool) {
 	resp, err := http.Get(configs.FoxAPI)
 	if err != nil {
 		logger.Error(err)
@@ -410,13 +417,16 @@ func getFox(logger logx.Logger) (types.BasicReturn, bool) {
 		logger.Error(err)
 		return types.BasicReturn{}, false
 	}
+	if in.AutoUpload {
+		db.AddCache(logger, idhash, randomanimal.AssetType(Type.String()))
+	}
 	return types.BasicReturn{
 		Buf:  assetResp_body,
 		Type: Type,
 	}, true
 }
 
-func getDuck(logger logx.Logger) (types.BasicReturn, bool) {
+func getDuck(logger logx.Logger, in *randomanimal_pb.BasicRequest) (types.BasicReturn, bool) {
 	resp, err := http.Get(configs.DuckAPI)
 	if err != nil {
 		logger.Error(err)
