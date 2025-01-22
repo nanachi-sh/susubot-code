@@ -136,9 +136,9 @@ ListenOn: 0.0.0.0:%d
 Timeout: 10000`, GRPC_LISTEN_PORT)
 	if DEBUG {
 		config += `
-		Log:
-			Mode: file, console
-			Path: out.log`
+Log:
+	Mode: file, console
+	Path: out.log`
 	}
 	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
