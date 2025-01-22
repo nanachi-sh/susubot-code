@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
+	"os"
 	"regexp"
 	"sync"
 
@@ -19,7 +21,11 @@ type readStream struct {
 	waitBlock sync.RWMutex
 }
 
-var readstream *readStream
+var (
+	readstream *readStream
+
+	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
+)
 
 type myret struct{}
 
@@ -92,6 +98,7 @@ func DefaultMock() *MockConnector {
 			})
 			return &connector.BasicResponse{}, nil
 		case sfm_action:
+			logger.Println(string(in.Buf))
 			m := make(map[string]any)
 			if echo != "" {
 				m["echo"] = echo
