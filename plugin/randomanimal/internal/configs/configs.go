@@ -2,6 +2,8 @@ package configs
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"net/netip"
@@ -16,6 +18,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -141,15 +144,42 @@ ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
 
 // 初始化gRPC Callers
 func init() {
-	var c types.Config
-	if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
-		logger.Fatalln(err)
+	if !DEBUG {
+		var c types.Config
+		if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
+			logger.Fatalln(err)
+		}
+		client, err := zrpc.NewClient(c.RpcClientConf)
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		Call_Fileweb = filewebclient.NewFileWeb(client)
+	} else {
+		var c types.Config
+		if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
+			logger.Fatalln(err)
+		}
+		cert, err := tls.LoadX509KeyPair("client.crt", "client.key")
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		caPool := x509.NewCertPool()
+		caCert, err := os.ReadFile("ca.crt")
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		caPool.AppendCertsFromPEM(caCert)
+		cred := credentials.NewTLS(&tls.Config{
+			RootCAs:      caPool,
+			Certificates: []tls.Certificate{cert},
+			ServerName:   "mtls.susu",
+		})
+		client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		Call_Fileweb = filewebclient.NewFileWeb(client)
 	}
-	client, err := zrpc.NewClient(c.RpcClientConf)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	Call_Fileweb = filewebclient.NewFileWeb(client)
 }
 
 // 初始化SQL Models
