@@ -2,36 +2,30 @@ package configs
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"log"
-	"net"
 	"net/netip"
 	"os"
-	"regexp"
 	"strconv"
-	"time"
 
 	connectorclient "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/connector"
 	requesthandler "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/handler/request"
 	responsehandler "github.com/nanachi-sh/susubot-code/basic/verifier/internal/caller/handler/response"
 	mock_connectorclient "github.com/nanachi-sh/susubot-code/basic/verifier/internal/mock/connector"
 	"github.com/nanachi-sh/susubot-code/basic/verifier/internal/types"
-	"github.com/nanachi-sh/susubot-code/basic/verifier/pkg/utils"
+	"github.com/nanachi-sh/susubot-code/basic/verifier/internal/utils"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var (
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
-	DEBUG             bool
+	DEBUG bool
+
 	GRPC_LISTEN_PORT  int
 	HTTP_LISTEN_PORT  int
-	GRPC_mTLS         bool
 	GATEWAY_IP        netip.Addr
 	GATEWAY_GRPC_PORT int
 
@@ -48,51 +42,23 @@ var (
 
 const (
 	ConfigDir = "/config"
-
-	CertsDir           = ConfigDir + "/certs"
-	GRPCServerCertFile = CertsDir + "/mtls_server.crt"
-	GRPCServerKeyFile  = CertsDir + "/mtls_server.key"
-	GRPCClientCertFile = CertsDir + "/mtls_client.crt"
-	GRPCClientKeyFile  = CertsDir + "/mtls_client.key"
-	GRPCCaCertFile     = CertsDir + "/mtls_ca.crt"
 )
 
 // 获取环境变量
 func init() {
-	portStr := os.Getenv("GRPC_LISTEN_PORT")
-	if portStr == "" {
-		logger.Fatalln("gRPC服务监听端口未设置")
-	}
-	port, err := strconv.ParseInt(portStr, 10, 0)
+	port, err := utils.EnvPortToPort("GRPC_LISTEN_PORT")
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !utils.PortRangeCheck(port) {
-		logger.Fatalln("gRPC服务监听端口范围不正确")
+		logger.Fatalf("grpc监听端口获取失败，err： %v", err)
 	}
 	GRPC_LISTEN_PORT = int(port)
 
-	portStr = os.Getenv("HTTP_LISTEN_PORT")
-	if portStr == "" {
-		logger.Fatalln("HTTP服务监听端口未设置")
-	}
-	port, err = strconv.ParseInt(portStr, 10, 0)
+	port, err = utils.EnvPortToPort("HTTP_LISTEN_PORT")
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if port <= 0 || port > 65535 {
-		logger.Fatalln("HTTP服务监听端口范围不正确")
+		logger.Fatalf("http监听端口获取失败，err: %v", err)
 	}
 	HTTP_LISTEN_PORT = int(port)
 
-	if mtls, err := strconv.ParseBool(os.Getenv("GRPC_mTLS")); err != nil {
-		logger.Fatalln("gRPC mTLS状态未设置或设置不正确")
-	} else {
-		GRPC_mTLS = mtls
-	}
-
-	d := os.Getenv("DEBUG")
-	if d != "" {
+	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
 			logger.Fatalln("Debug状态设置不正确")
 		} else {
@@ -100,52 +66,18 @@ func init() {
 		}
 	}
 
-	for {
-		gatewayHost := os.Getenv("GATEWAY_HOST")
-		if gatewayHost == "" {
-			logger.Fatalln("Gateway API Host为空")
+	if gatewayHost := os.Getenv("GATEWAY_HOST"); gatewayHost == "" {
+		logger.Fatalln("Gateway API Host为空")
+	} else {
+		ip, err := utils.ResolvIP(gatewayHost)
+		if err != nil {
+			logger.Fatalf("Gateway API Host解析出错，Err: %s\n", err.Error())
 		}
-		if ip := net.ParseIP(gatewayHost); ip != nil { //为IP
-			a, err := netip.ParseAddr(ip.String())
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			GATEWAY_IP = a
-			break
-		} else if ok, err := regexp.MatchString(`^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$`, gatewayHost); ok { //为域名
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-			defer cancel()
-			ips, err := net.DefaultResolver.LookupIP(ctx, "ip", gatewayHost)
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			if len(ips) == 0 {
-				logger.Fatalln("Gateway API Host有误，无解析结果")
-			}
-			a, err := netip.ParseAddr(ips[0].String())
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			GATEWAY_IP = a
-			break
-		} else { //若无错误，为未知
-			if err != nil {
-				logger.Fatalln(err)
-			} else {
-				logger.Fatalln("Gateway API Host有误，非域名或IP")
-			}
-		}
+		GATEWAY_IP = ip
 	}
-	portStr = os.Getenv("GATEWAY_GRPC_PORT")
-	if portStr == "" {
-		logger.Fatalln("Gateway gRPC服务端口未设置")
-	}
-	port, err = strconv.ParseInt(portStr, 10, 0)
+	port, err = utils.EnvPortToPort("GATEWAY_GRPC_PORT")
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !utils.PortRangeCheck(port) {
-		logger.Fatalln("Gateway gRPC服务端口范围不正确")
+		logger.Fatalf("gateway grpc port获取失败，err: %v", err)
 	}
 	GATEWAY_GRPC_PORT = int(port)
 }
@@ -170,24 +102,7 @@ func init() {
 		if err := conf.LoadConfig(RPCClient_Config, &c); err != nil {
 			logger.Fatalln(err)
 		}
-		cert, err := tls.LoadX509KeyPair(GRPCClientCertFile, GRPCClientKeyFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		caPool := x509.NewCertPool()
-		buf, err := os.ReadFile(GRPCCaCertFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		if !caPool.AppendCertsFromPEM(buf) {
-			logger.Fatalln("添加CA证书失败")
-		}
-		cred := credentials.NewTLS(&tls.Config{
-			RootCAs:      caPool,
-			Certificates: []tls.Certificate{cert},
-			ServerName:   "mtls.susu",
-		})
-		client, err := zrpc.NewClient(c.RpcClientConf, zrpc.WithDialOption(grpc.WithTransportCredentials(cred)))
+		client, err := zrpc.NewClient(c.RpcClientConf)
 		if err != nil {
 			logger.Fatalln(err)
 		}
@@ -211,25 +126,5 @@ func init() {
 
 func GRPCOptions() []grpc.ServerOption {
 	opts := []grpc.ServerOption{}
-	if GRPC_mTLS {
-		cert, err := tls.LoadX509KeyPair(GRPCServerCertFile, GRPCServerKeyFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		caPool := x509.NewCertPool()
-		buf, err := os.ReadFile(GRPCCaCertFile)
-		if err != nil {
-			logger.Fatalln(err)
-		}
-		if !caPool.AppendCertsFromPEM(buf) {
-			logger.Fatalln("添加CA证书失败")
-		}
-		cred := credentials.NewTLS(&tls.Config{
-			Certificates: []tls.Certificate{cert},
-			ClientAuth:   tls.RequireAndVerifyClientCert,
-			ClientCAs:    caPool,
-		})
-		opts = append(opts, grpc.Creds(cred))
-	}
 	return opts
 }

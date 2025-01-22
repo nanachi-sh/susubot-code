@@ -4,17 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"net/netip"
 	"os"
-	"regexp"
 	"strconv"
-	"time"
 
 	connectorclient "github.com/nanachi-sh/susubot-code/basic/handler/internal/caller/connector"
 	filewebclient "github.com/nanachi-sh/susubot-code/basic/handler/internal/caller/fileweb"
 	"github.com/nanachi-sh/susubot-code/basic/handler/internal/types"
-	"github.com/nanachi-sh/susubot-code/basic/handler/pkg/utils"
+	"github.com/nanachi-sh/susubot-code/basic/handler/internal/utils"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -44,21 +41,13 @@ const (
 
 // 获取环境变量
 func init() {
-	portStr := os.Getenv("GRPC_LISTEN_PORT")
-	if portStr == "" {
-		logger.Fatalln("gRPC服务监听端口未设置")
-	}
-	port, err := strconv.ParseInt(portStr, 10, 0)
+	port, err := utils.EnvPortToPort(os.Getenv("GRPC_LISTEN_PORT"))
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !utils.PortRangeCheck(port) {
-		logger.Fatalln("gRPC服务监听端口范围不正确")
+		logger.Fatalf("gRPC监听端口有误，Err: %s\n", err.Error())
 	}
 	GRPC_LISTEN_PORT = int(port)
 
-	d := os.Getenv("DEBUG")
-	if d != "" {
+	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
 			logger.Fatalln("Debug状态设置不正确")
 		} else {
@@ -66,52 +55,18 @@ func init() {
 		}
 	}
 
-	for {
-		gatewayHost := os.Getenv("GATEWAY_HOST")
-		if gatewayHost == "" {
-			logger.Fatalln("Gateway API Host为空")
+	if gatewayHost := os.Getenv("GATEWAY_HOST"); gatewayHost == "" {
+		logger.Fatalln("Gateway API Host为空")
+	} else {
+		ip, err := utils.ResolvIP(gatewayHost)
+		if err != nil {
+			logger.Fatalf("Gateway API Host解析出错，Err: %s\n", err.Error())
 		}
-		if ip := net.ParseIP(gatewayHost); ip != nil { //为IP
-			a, err := netip.ParseAddr(ip.String())
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			GATEWAY_IP = a
-			break
-		} else if ok, err := regexp.MatchString(`^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$`, gatewayHost); ok { //为域名
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-			defer cancel()
-			ips, err := net.DefaultResolver.LookupIP(ctx, "ip", gatewayHost)
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			if len(ips) == 0 {
-				logger.Fatalln("Gateway API Host有误，无解析结果")
-			}
-			a, err := netip.ParseAddr(ips[0].String())
-			if err != nil {
-				logger.Fatalln(err)
-			}
-			GATEWAY_IP = a
-			break
-		} else { //若无错误，为未知
-			if err != nil {
-				logger.Fatalln(err)
-			} else {
-				logger.Fatalln("Gateway API Host有误，非域名或IP")
-			}
-		}
+		GATEWAY_IP = ip
 	}
-	portStr = os.Getenv("GATEWAY_GRPC_PORT")
-	if portStr == "" {
-		logger.Fatalln("Gateway gRPC服务端口未设置")
-	}
-	port, err = strconv.ParseInt(portStr, 10, 0)
+	port, err = utils.EnvPortToPort(os.Getenv("GATEWAY_GRPC_PORT"))
 	if err != nil {
-		logger.Fatalln(err)
-	}
-	if !utils.PortRangeCheck(port) {
-		logger.Fatalln("Gateway gRPC服务端口范围不正确")
+		logger.Fatalf("Gateway gRPC服务端口有误，Err: %s\n", err.Error())
 	}
 	GATEWAY_GRPC_PORT = int(port)
 

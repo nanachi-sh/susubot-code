@@ -10,8 +10,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/nanachi-sh/susubot-code/basic/jwt/internal/configs"
 	unomodel "github.com/nanachi-sh/susubot-code/basic/jwt/internal/model/uno"
+	"github.com/nanachi-sh/susubot-code/basic/jwt/internal/utils"
 	jwt_pb "github.com/nanachi-sh/susubot-code/basic/jwt/pkg/protos/jwt"
-	"github.com/nanachi-sh/susubot-code/basic/jwt/pkg/utils"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -71,7 +71,7 @@ func Uno_GetUser(logger logx.Logger, userid string) (unomodel.Users, *jwt_pb.Err
 }
 
 func generateSalt() string {
-	return utils.RandomString(6, utils.Dict)
+	return utils.RandomString(6, utils.Dict_Mixed)
 }
 
 func encryptPassword(password, salt string) string {
