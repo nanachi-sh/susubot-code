@@ -41,7 +41,7 @@ const (
 
 // 获取环境变量
 func init() {
-	port, err := utils.EnvPortToPort(os.Getenv("GRPC_LISTEN_PORT"))
+	port, err := utils.EnvPortToPort("GRPC_LISTEN_PORT")
 	if err != nil {
 		logger.Fatalf("gRPC监听端口有误，Err: %s\n", err.Error())
 	}
@@ -64,7 +64,7 @@ func init() {
 		}
 		GATEWAY_IP = ip
 	}
-	port, err = utils.EnvPortToPort(os.Getenv("GATEWAY_GRPC_PORT"))
+	port, err = utils.EnvPortToPort("GATEWAY_GRPC_PORT")
 	if err != nil {
 		logger.Fatalf("Gateway gRPC服务端口有误，Err: %s\n", err.Error())
 	}

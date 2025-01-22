@@ -85,7 +85,7 @@ func init() {
 		}
 		GATEWAY_IP = addr
 	}
-	port, err = utils.EnvPortToPort(os.Getenv("GATEWAY_GRPC_PORT"))
+	port, err = utils.EnvPortToPort("GATEWAY_GRPC_PORT")
 	if err != nil {
 		logger.Fatalf("gateway grpc port获取失败，err: %v", err)
 	}

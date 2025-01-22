@@ -30,13 +30,13 @@ const (
 
 // 获取环境变量
 func init() {
-	port, err := utils.EnvPortToPort(os.Getenv("GRPC_LISTEN_PORT"))
+	port, err := utils.EnvPortToPort("GRPC_LISTEN_PORT")
 	if err != nil {
 		logger.Fatalf("grpc监听端口获取出错，err：%v", err)
 	}
 	GRPC_LISTEN_PORT = int(port)
 
-	port, err = utils.EnvPortToPort(os.Getenv("HTTP_LISTEN_PORT"))
+	port, err = utils.EnvPortToPort("HTTP_LISTEN_PORT")
 	if err != nil {
 		logger.Fatalf("HTTP监听端口获取出错，err：%v", err)
 	}

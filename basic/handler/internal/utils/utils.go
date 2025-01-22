@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net"
 	"net/netip"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,8 +52,12 @@ func ResolvIP(addr string) (netip.Addr, error) {
 	}
 }
 
-func EnvPortToPort(str string) (uint16, error) {
-	port, err := strconv.ParseInt(str, 10, 0)
+func EnvPortToPort(envKey string) (uint16, error) {
+	portStr := os.Getenv(envKey)
+	if portStr == "" {
+		return 0, errors.New("未设置")
+	}
+	port, err := strconv.ParseInt(portStr, 10, 0)
 	if err != nil {
 		return 0, err
 	}
