@@ -87,7 +87,7 @@ func MatchMediaType(resp *http.Response) (randomanimal.Type, error) {
 	switch ct := strings.ToLower(resp.Header.Get("Content-Type")); ct {
 	case "image/webp", "image/jpeg", "image/png", "image/gif":
 		return randomanimal.Type_Image, nil
-	case "video/mpeg4", "video/mp4":
+	case "video/mpeg4", "video/mp4", "video/webm":
 		return randomanimal.Type_Video, nil
 	default:
 		return 0, fmt.Errorf("判断响应类型失败，Content-Type: %v", ct)
