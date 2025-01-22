@@ -32,7 +32,7 @@ func RandomString(length int, dict string) string {
 func ResolvIP(addr string) (netip.Addr, error) {
 	if ip := net.ParseIP(addr); ip != nil { //为IP
 		return netip.ParseAddr(ip.String())
-	} else if ok, err := regexp.MatchString(`^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})|localhost){1,1}$`, addr); ok { //为域名或localhost
+	} else if ok, err := regexp.MatchString(`^(([a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62}))+|localhost)$`, addr); ok { //为域名或localhost
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 		ips, err := net.DefaultResolver.LookupIP(ctx, "ip", addr)
