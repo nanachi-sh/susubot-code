@@ -1,12 +1,16 @@
 package configs
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/utils"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
@@ -64,8 +68,19 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-	config := fmt.Sprintf(`Name: connector.rpc
-ListenOn: 0.0.0.0:%d`, GRPC_LISTEN_PORT)
+	j := &zrpc.RpcServerConf{
+		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
+		ServiceConf: service.ServiceConf{
+			Name: "connector.rpc",
+			Log: logx.LogConf{
+				MaxContentLength: 100,
+			},
+		},
+	}
+	config, err := json.Marshal(j)
+	if err != nil {
+		logger.Fatalln(err)
+	}
 	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
 		logger.Fatalln(err)
 	}
