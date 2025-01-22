@@ -137,10 +137,10 @@ func init() {
 	configm["ListenOn"] = fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT)
 	configm["Name"] = "randomanimal.rpc"
 	configm["Log"] = struct {
-		Mode []string
+		Mode string
 		Path string
 	}{
-		[]string{"file", "console"},
+		"file",
 		"out.log",
 	}
 	configbs, err := json.Marshal(configm)
