@@ -12,38 +12,37 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
-func FindCache(logger logx.Logger, hash string) (randomanimalmodel.Caches, bool) {
+func FindCache(logger logx.Logger, id string) (randomanimalmodel.Caches, bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
-	cache, err := configs.Model_Randomanimal.FindOne(ctx, hash)
+	cache, err := configs.Model_Randomanimal.FindOne(ctx, id)
 	if err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
-			if myerr.Is(sqlx.ErrNotFound) {
-				return randomanimalmodel.Caches{}, false
-			}
 			switch myerr.Number {
 			default:
 				logger.Errorf("未处理错误：%s", myerr.Error())
 			}
 		} else {
-			logger.Error(err)
+			switch err {
+			default:
+				logger.Errorf("未处理错误：%s", err.Error())
+			case sqlx.ErrNotFound:
+			}
 		}
 		return randomanimalmodel.Caches{}, false
 	}
 	return *cache, true
 }
 
-func AddCache(logger logx.Logger, hash string, atype randomanimalmodel.AssetType) {
+func AddCache(logger logx.Logger, id, hash string, atype randomanimalmodel.AssetType) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	if _, err := configs.Model_Randomanimal.Insert(ctx, &randomanimalmodel.Caches{
 		AssetType: string(atype),
+		AssetId:   id,
 		AssetHash: hash,
 	}); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
-			if myerr.Is(sqlx.ErrNotFound) {
-				return
-			}
 			switch myerr.Number {
 			default:
 				logger.Errorf("未处理错误：%s", myerr.Error())
@@ -51,26 +50,31 @@ func AddCache(logger logx.Logger, hash string, atype randomanimalmodel.AssetType
 				logger.Errorf("重复缓存, Hash: %s", hash)
 			}
 		} else {
-			logger.Error(err)
+			switch err {
+			default:
+				logger.Errorf("未处理错误：%s", err.Error())
+			case sqlx.ErrNotFound:
+			}
 		}
 	}
 }
 
-func DeleteCache(logger logx.Logger, hash string) {
+func DeleteCache(logger logx.Logger, id string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
-	if err := configs.Model_Randomanimal.Delete(ctx, hash); err != nil {
+	if err := configs.Model_Randomanimal.Delete(ctx, id); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
-			if myerr.Is(sqlx.ErrNotFound) {
-				logger.Errorf("不存在缓存，Hash: %s", hash)
-				return
-			}
 			switch myerr.Number {
 			default:
 				logger.Errorf("未处理错误：%s", myerr.Error())
 			}
 		} else {
-			logger.Error(err)
+			switch err {
+			default:
+				logger.Errorf("未处理错误：%s", err.Error())
+			case sqlx.ErrNotFound:
+				logger.Errorf("不存在缓存，Id: %s", id)
+			}
 		}
 	}
 }

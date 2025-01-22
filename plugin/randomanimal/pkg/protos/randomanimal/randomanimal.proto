@@ -16,6 +16,7 @@ enum Errors {
     EMPTY = 0;
     NoGet = 1;
     NoUpload = 2;
+    Undefined = 3;
 }
 
 enum Type {

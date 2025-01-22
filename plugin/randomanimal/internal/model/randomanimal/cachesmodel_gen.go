@@ -19,15 +19,15 @@ var (
 	cachesFieldNames          = builder.RawFieldNames(&Caches{})
 	cachesRows                = strings.Join(cachesFieldNames, ",")
 	cachesRowsExpectAutoSet   = strings.Join(stringx.Remove(cachesFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	cachesRowsWithPlaceHolder = strings.Join(stringx.Remove(cachesFieldNames, "`AssetHash`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	cachesRowsWithPlaceHolder = strings.Join(stringx.Remove(cachesFieldNames, "`AssetId`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 )
 
 type (
 	cachesModel interface {
 		Insert(ctx context.Context, data *Caches) (sql.Result, error)
-		FindOne(ctx context.Context, assetHash string) (*Caches, error)
+		FindOne(ctx context.Context, assetId string) (*Caches, error)
 		Update(ctx context.Context, data *Caches) error
-		Delete(ctx context.Context, assetHash string) error
+		Delete(ctx context.Context, assetId string) error
 	}
 
 	defaultCachesModel struct {
@@ -37,6 +37,7 @@ type (
 
 	Caches struct {
 		AssetType string `db:"AssetType"`
+		AssetId   string `db:"AssetId"`
 		AssetHash string `db:"AssetHash"`
 	}
 )
@@ -48,16 +49,16 @@ func newCachesModel(conn sqlx.SqlConn) *defaultCachesModel {
 	}
 }
 
-func (m *defaultCachesModel) Delete(ctx context.Context, assetHash string) error {
-	query := fmt.Sprintf("delete from %s where `AssetHash` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, assetHash)
+func (m *defaultCachesModel) Delete(ctx context.Context, assetId string) error {
+	query := fmt.Sprintf("delete from %s where `AssetId` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, assetId)
 	return err
 }
 
-func (m *defaultCachesModel) FindOne(ctx context.Context, assetHash string) (*Caches, error) {
-	query := fmt.Sprintf("select %s from %s where `AssetHash` = ? limit 1", cachesRows, m.table)
+func (m *defaultCachesModel) FindOne(ctx context.Context, assetId string) (*Caches, error) {
+	query := fmt.Sprintf("select %s from %s where `AssetId` = ? limit 1", cachesRows, m.table)
 	var resp Caches
-	err := m.conn.QueryRowCtx(ctx, &resp, query, assetHash)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, assetId)
 	switch err {
 	case nil:
 		return &resp, nil
@@ -69,14 +70,14 @@ func (m *defaultCachesModel) FindOne(ctx context.Context, assetHash string) (*Ca
 }
 
 func (m *defaultCachesModel) Insert(ctx context.Context, data *Caches) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?)", m.table, cachesRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.AssetType, data.AssetHash)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?)", m.table, cachesRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.AssetType, data.AssetId, data.AssetHash)
 	return ret, err
 }
 
 func (m *defaultCachesModel) Update(ctx context.Context, data *Caches) error {
-	query := fmt.Sprintf("update %s set %s where `AssetHash` = ?", m.table, cachesRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.AssetType, data.AssetHash)
+	query := fmt.Sprintf("update %s set %s where `AssetId` = ?", m.table, cachesRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.AssetType, data.AssetHash, data.AssetId)
 	return err
 }
 
