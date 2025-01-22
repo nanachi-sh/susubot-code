@@ -72,7 +72,7 @@ func init() {
 		ServiceConf: service.ServiceConf{
 			Name: "connector.rpc",
 			Log: logx.LogConf{
-				MaxContentLength: 32 * 1024,
+				MaxContentLength: 1000000000,
 			},
 		},
 	}
