@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +23,7 @@ var (
 
 	SEED1, SEED2 uint64
 
-	RPCServer_Config string = "rpc_server.json"
+	RPCServer_Config zrpc.RpcServerConf
 )
 
 const (
@@ -68,7 +67,7 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-	j := &zrpc.RpcServerConf{
+	RPCServer_Config = zrpc.RpcServerConf{
 		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
 		ServiceConf: service.ServiceConf{
 			Name: "connector.rpc",
@@ -76,13 +75,6 @@ func init() {
 				MaxContentLength: 100,
 			},
 		},
-	}
-	config, err := json.Marshal(j)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	if err := os.WriteFile(RPCServer_Config, []byte(config), 0744); err != nil {
-		logger.Fatalln(err)
 	}
 }
 
