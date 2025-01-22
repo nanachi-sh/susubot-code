@@ -24,7 +24,7 @@ var (
 
 	SEED1, SEED2 uint64
 
-	RPCServer_Config string = "rpc_server.yaml"
+	RPCServer_Config string = "rpc_server.json"
 )
 
 const (
