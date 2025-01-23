@@ -132,22 +132,18 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-	configm := make(map[string]any)
-	configm["Timeout"] = 10000
-	configm["ListenOn"] = fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT)
-	configm["Name"] = "randomanimal.rpc"
-	configm["Log"] = struct {
-		Mode string
-		Path string
-	}{
-		"file",
-		"logs",
+	m := map[string]any{
+		"Name":     "connector.rpc",
+		"ListenOn": fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
+		"Log": map[string]any{
+			"MaxContentLength": 16 * 1024,
+		},
 	}
-	configbs, err := json.Marshal(configm)
+	buf, err := json.Marshal(m)
 	if err != nil {
 		logger.Fatalln(err)
 	}
-	if err := os.WriteFile(RPCServer_Config, configbs, 0744); err != nil {
+	if err := os.WriteFile(RPCServer_Config, buf, 0744); err != nil {
 		logger.Fatalln(err)
 	}
 	config := fmt.Sprintf(`Target: %s:%d`, GATEWAY_IP.String(), GATEWAY_GRPC_PORT)
