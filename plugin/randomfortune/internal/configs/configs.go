@@ -22,9 +22,6 @@ var (
 
 	GRPC_LISTEN_PORT int
 
-	GATEWAY_IP        netip.Addr
-	GATEWAY_GRPC_PORT int
-
 	DATABASE_IP       netip.Addr
 	DATABASE_PORT     int
 	DATABASE_USER     string
@@ -60,25 +57,9 @@ func init() {
 		}
 	}
 
-	if host := os.Getenv("GATEWAY_HOST"); host == "" {
-		logger.Fatalln("gateway host未设置")
-	} else {
-		addr, err := utils.ResolvIP(host)
-		if err != nil {
-			logger.Fatalf("gateway host获取失败，err: %v", err)
-		}
-		GATEWAY_IP = addr
-	}
-
 	if ASSETS_URL = os.Getenv("ASSETS_URL"); ASSETS_URL == "" {
 		logger.Fatalln("assets url未设置")
 	}
-
-	port, err = utils.EnvPortToPort("GATEWAY_GRPC_PORT")
-	if err != nil {
-		logger.Fatalf("gateway grpc port获取失败，err: %v", err)
-	}
-	GATEWAY_GRPC_PORT = int(port)
 
 	if host := os.Getenv("DATABASE_HOST"); host == "" {
 		logger.Fatalln("database host未设置")
