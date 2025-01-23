@@ -32,7 +32,7 @@ func CheckPlayerTime(logger logx.Logger, id string) *randomfortune_pb.Errors {
 	now := time.Now()
 	last := time.Unix(u.LastGetFortuneTime, 0)
 	if last.Year() == now.Year() && last.Month() == now.Month() {
-		fmt.Println(now.Day() > last.Day())
+		fmt.Println(now.Day(), last.Day())
 		if now.Day() > last.Day() {
 			return nil
 		} else {
