@@ -83,6 +83,6 @@ func init() {
 
 func GRPCOptions() []grpc.ServerOption {
 	opts := []grpc.ServerOption{}
-	// opts = append(opts, grpc.MaxRecvMsgSize(128*1024*1024))
+	opts = append(opts, grpc.MaxRecvMsgSize(128*1024*1024))
 	return opts
 }
