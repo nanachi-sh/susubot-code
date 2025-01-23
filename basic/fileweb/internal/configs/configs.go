@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/utils"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -72,6 +73,11 @@ func init() {
 			Name: "connector.rpc",
 		},
 	}
+	buf, err := jsonx.Marshal(RPCServer_Config)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(buf))
 }
 
 func GRPCOptions() []grpc.ServerOption {
