@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/configs"
@@ -10,17 +11,19 @@ import (
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/server"
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/service/internal/svc"
 
+	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
+var configFile = flag.String("f", configs.RPCServer_Config, "the config file")
+
 func main() {
 	var c config.Config
-	c.RpcServerConf = configs.RPCServer_Config
+	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
-
 	go func() { web.Serve() }()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

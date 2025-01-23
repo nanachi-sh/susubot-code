@@ -23,7 +23,7 @@ var (
 
 	SEED1, SEED2 uint64
 
-	RPCServer_Config zrpc.RpcServerConf
+	RPCServer_Config string = "rpc_server.yaml"
 )
 
 const (
@@ -67,6 +67,7 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
+
 	RPCServer_Config = zrpc.RpcServerConf{
 		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
 		ServiceConf: service.ServiceConf{
