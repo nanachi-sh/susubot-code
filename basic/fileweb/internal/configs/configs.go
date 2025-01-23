@@ -1,13 +1,13 @@
 package configs
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/utils"
-	"github.com/zeromicro/go-zero/core/jsonx"
 	"google.golang.org/grpc"
 )
 
@@ -65,15 +65,20 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-	os.WriteFile(RPCServer_Config, []byte(`{
-	"Name": "connector.rpc",
-	"ListenOn": "0.0.0.0:61080"
-	}`), 0744)
-	buf, err := jsonx.Marshal(RPCServer_Config)
-	if err != nil {
-		panic(err)
+	m := map[string]any{
+		"Name":     "connector.rpc",
+		"ListenOn": fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
+		"Log": map[string]any{
+			"MaxContentLength": 16 * 1024,
+		},
 	}
-	fmt.Println(string(buf))
+	buf, err := json.Marshal(m)
+	if err != nil {
+		logger.Fatalln(err)
+	}
+	if err := os.WriteFile(RPCServer_Config, buf, 0744); err != nil {
+		logger.Fatalln(err)
+	}
 }
 
 func GRPCOptions() []grpc.ServerOption {
