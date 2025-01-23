@@ -77,9 +77,10 @@ func (r *Request) GetFox(in *randomanimal_pb.BasicRequest) (*randomanimal_pb.Bas
 	return resp, nil
 }
 
-func cacheValidCheck(hash string) bool {
+func cacheValidCheck(logger logx.Logger, hash string) bool {
 	resp, err := http.Head(fmt.Sprintf("%s/%s", configs.ASSETS_URL, hash))
 	if err != nil {
+		logger.Error(err)
 		return false
 	}
 	defer resp.Body.Close()
@@ -131,7 +132,7 @@ func getCat(logger logx.Logger, in *randomanimal_pb.BasicRequest) (*randomanimal
 	idhash := utils.Murmurhash128ToString(configs.SEED1, configs.SEED2, id)
 	cache, ok := db.FindCache(logger, idhash)
 	if ok {
-		if cacheValidCheck(cache.AssetHash) { //检查缓存有效性
+		if cacheValidCheck(logger, cache.AssetHash) { //检查缓存有效性
 			return &randomanimal_pb.BasicResponse{Body: &randomanimal_pb.BasicResponse_Hash{Hash: &randomanimal_pb.BasicResponse_UploadResponseByHash{
 				Hash: cache.AssetHash,
 				Type: randomanimal_pb.Type(randomanimal_pb.Type_value[cache.AssetType]),
@@ -201,7 +202,7 @@ func getDog(logger logx.Logger, in *randomanimal_pb.BasicRequest) (*randomanimal
 	idhash := utils.Murmurhash128ToString(configs.SEED1, configs.SEED2, id)
 	cache, ok := db.FindCache(logger, idhash)
 	if ok {
-		if cacheValidCheck(cache.AssetHash) { //检查缓存有效性
+		if cacheValidCheck(logger, cache.AssetHash) { //检查缓存有效性
 			return &randomanimal_pb.BasicResponse{Body: &randomanimal_pb.BasicResponse_Hash{Hash: &randomanimal_pb.BasicResponse_UploadResponseByHash{
 				Hash: cache.AssetHash,
 				Type: randomanimal_pb.Type(randomanimal_pb.Type_value[cache.AssetType]),
@@ -269,7 +270,7 @@ func getFox(logger logx.Logger, in *randomanimal_pb.BasicRequest) (*randomanimal
 	idhash := utils.Murmurhash128ToString(configs.SEED1, configs.SEED2, id)
 	cache, ok := db.FindCache(logger, idhash)
 	if ok { //命中缓存
-		if cacheValidCheck(cache.AssetHash) { //检查缓存有效性
+		if cacheValidCheck(logger, cache.AssetHash) { //检查缓存有效性
 			return &randomanimal_pb.BasicResponse{Body: &randomanimal_pb.BasicResponse_Hash{Hash: &randomanimal_pb.BasicResponse_UploadResponseByHash{
 				Hash: cache.AssetHash,
 				Type: randomanimal_pb.Type(randomanimal_pb.Type_value[cache.AssetType]),
