@@ -8,8 +8,6 @@ import (
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/utils"
 	"github.com/zeromicro/go-zero/core/jsonx"
-	"github.com/zeromicro/go-zero/core/service"
-	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
@@ -71,12 +69,6 @@ func init() {
 	"Name": "connector.rpc",
 	"ListenOn": "0.0.0.0:61080"
 	}`), 0744)
-	RPCServer_Config = zrpc.RpcServerConf{
-		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
-		ServiceConf: service.ServiceConf{
-			Name: "connector.rpc",
-		},
-	}
 	buf, err := jsonx.Marshal(RPCServer_Config)
 	if err != nil {
 		panic(err)
