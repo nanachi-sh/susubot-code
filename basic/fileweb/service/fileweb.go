@@ -20,7 +20,6 @@ func main() {
 	var c config.Config
 	c.RpcServerConf = configs.RPCServer_Config
 	ctx := svc.NewServiceContext(c)
-	fmt.Println(ctx.Config.Log)
 
 	go func() { web.Serve() }()
 

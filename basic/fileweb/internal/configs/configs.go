@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/nanachi-sh/susubot-code/basic/fileweb/internal/utils"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -71,9 +70,6 @@ func init() {
 		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
 		ServiceConf: service.ServiceConf{
 			Name: "connector.rpc",
-			Log: logx.LogConf{
-				MaxContentLength: 1000000000,
-			},
 		},
 	}
 }
