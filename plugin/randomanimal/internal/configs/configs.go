@@ -135,6 +135,7 @@ func init() {
 	m := map[string]any{
 		"Name":     "connector.rpc",
 		"ListenOn": fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
+		"Timeout":  10 * 1000,
 		"Log": map[string]any{
 			"MaxContentLength": 16 * 1024,
 		},
