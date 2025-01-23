@@ -67,7 +67,10 @@ func init() {
 
 // 初始化gRPC配置
 func init() {
-
+	os.WriteFile(RPCServer_Config, []byte(`{
+	"Name": "connector.rpc",
+	"ListenOn": "0.0.0.0:61080"
+	}`), 0744)
 	RPCServer_Config = zrpc.RpcServerConf{
 		ListenOn: fmt.Sprintf("0.0.0.0:%d", GRPC_LISTEN_PORT),
 		ServiceConf: service.ServiceConf{
