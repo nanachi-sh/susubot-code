@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package twoonone.api;
+
+option go_package = "protos/twoonone";
+
+// 1xxx 标准错误
+// 2xxx 游戏错误
+enum Error {
+    ERROR_UNKNOWN = 0;
+    ERROR_UNDEFINED = 1;
+    ERROR_INVALID_ARGUMENT = 2;
+    
+    ERROR_NO_AUTH = 1001; //启用了OIDC中间件，但用户未认证
+    ERROR_USER_NO_EXIST = 1002; //用户不存在
+    ERROR_USER_INCOMPLETE = 1003; //用户信息不完整
+    ERROR_USER_EXISTED = 1004; //用户已存在(斗地主信息)
+
+    ERROR_ROOM_FULL = 2001;
+    ERROR_ROOM_NO_EXIST = 2002; //房间不存在
+    ERROR_ROOM_EXIST_PLAYER = 2003; //玩家已存在房间内
+    ERROR_ROOM_NO_EXIST_PLAYER = 2004; //
+    ERROR_ROOM_NO_ROB_LANDOWNERING = 2005; //房间不在抢地主阶段
+    ERROR_ROOM_NO_SENDING_CARD = 2006; //房间不在出牌阶段
+    ERROR_PLAYER_CARD_NO_EXIST = 2007; //玩家卡牌不足
+    ERROR_PLAYER_NO_OPERATOR = 2008; //玩家不是当前操作者
+    ERROR_PLAYER_NO_EXIST = 2009; //玩家不存在
+    ERROR_PLAYER_ALREADY_GET_DALIY_COIN = 2010; //玩家已获取过每日豆子
+    ERROR_ROOM_NO_FULL = 2011; //房间玩家未满
+    ERROR_ROOM_STARTED = 2012; //房间已开始
+    ERROR_ROOM_NO_ROB_LANDOWNER = 2013; //无人抢地主
+    ERROR_SEND_CARD_TYPE_UNKNOWN = 2014; //出的牌类型未知
+    ERROR_SEND_CARD_TYPE_NE_LAST_CARD_TYPE = 2015; //出的牌类型与上一副牌不同
+    ERROR_SEND_CARD_CONTINUOUS_NE_LAST_CARD_CONTINUOUS = 2016; //出的牌连续数与上一副牌不同
+    ERROR_SEND_CARD_SIZE_LE_LAST_CARD_SIZE = 2017; //出的牌小于或等于上一副牌
+    ERROR_PLAYER_EXISTED_A_ROOM = 2018; //玩家已存在于一个房间
+    ERROR_PLAYER_COIN_LT_ROOM_COIN = 2019; //玩家豆子小于房间底分
+    ERROR_PLAYER_IS_ONLY_OPERATOR = 2020; //玩家为唯一可操作者
+}

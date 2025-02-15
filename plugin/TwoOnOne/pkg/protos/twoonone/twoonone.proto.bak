@@ -1,0 +1,413 @@
+syntax = "proto3";
+
+package susubot.plugin.twoonone;
+
+option go_package = "protos/twoonone";
+
+service twoonone {
+    rpc GetRooms (GetRoomsRequest) returns (GetRoomsResponse);
+    rpc GetDailyCoin (GetDailyCoinRequest) returns (GetDailyCoinResponse);
+    rpc GetRoom (GetRoomRequest) returns (GetRoomResponse);
+    rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse);
+    rpc JoinRoom (JoinRoomRequest) returns (JoinRoomResponse);
+    rpc ExitRoom (ExitRoomRequest) returns (ExitRoomResponse);
+    rpc StartRoom (StartRoomRequest) returns (StartRoomResponse);
+    rpc RobLandowner (RobLandownerRequest) returns (RobLandownerResponse);
+    rpc NoRobLandowner (NoRobLandownerRequest) returns (NoRobLandownerResponse);
+    rpc SendCard (SendCardRequest) returns (SendCardResponse);
+    rpc NoSendCard (NoSendCardRequest) returns (NoSendCardResponse);
+    rpc EventRoom (EventRoomRequest) returns (stream EventRoomResponse);
+}
+
+enum MiddleWare {
+    MIDDLE_WARE_AUTH_HANDLER = 0;
+    MIDDLE_WARE_SQL_HANDLER = 1;
+}
+
+enum ErrorType {
+    ERROR_TYPE_INTERNAL = 0;
+    ERROR_TYPE_MIDDLE_WARE = 1;
+    ERROR_TYPE_GAME = 2;
+}
+
+enum Role {
+    ROLE_UNKNOWN = 0;
+    ROLE_LANDOWNER = 1;
+    ROLE_FARMER = 2;
+}
+
+message InternalError {
+    enum Error {
+        ERROR_UNKNOWN = 0;
+        ERROR_UNDEFINED = 1;
+    }
+    
+    InternalError.Error error = 1;
+}
+
+message MiddlewareError {
+    message AuthHandler {
+        enum Error {
+            ERROR_UNKNOWN = 0;
+            ERROR_UNDEFINED = 1;
+        }
+
+        AuthHandler.Error error = 1;
+    }
+    message SQLHandler {
+        enum Error {
+            ERROR_UNKNOWN = 0;
+            ERROR_UNDEFINED = 1;
+            ERROR_USER_NO_EXIST = 2;
+            ERROR_USER_EXISTED = 3;
+        }
+
+        SQLHandler.Error error = 1;
+    }
+
+    MiddleWare Type = 1;
+    oneof Body {
+        AuthHandler auth_handler = 2;
+        SQLHandler sql_handler = 3;
+    }
+}
+
+message GameError {
+    enum Error {
+        ERROR_UNKNOWN = 0;
+        ERROR_UNDEFINED = 1;
+        ERROR_ROOM_FULL = 2; //房间已满
+        ERROR_ROOM_NO_EXIST = 3; //房间不存在
+        ERROR_ROOM_EXIST_PLAYER = 4; //玩家已存在房间内
+        ERROR_ROOM_NO_EXIST_PLAYER = 5; //
+        ERROR_ROOM_NO_ROB_LANDOWNERING = 6; //房间不在抢地主阶段
+        ERROR_ROOM_NO_SENDING_CARD = 7; //房间不在出牌阶段
+        ERROR_PLAYER_CARD_NO_EXIST = 8; //玩家卡牌不足
+        ERROR_PLAYER_NO_OPERATOR = 9; //玩家不是当前操作者
+        ERROR_PLAYER_NO_EXIST = 10; //玩家不存在
+        ERROR_PLAYER_ALREADY_GET_DALIY_COIN = 11; //玩家已获取过每日豆子
+        ERROR_ROOM_NO_FULL = 12; //房间玩家未满
+        ERROR_ROOM_STARTED = 13; //房间已开始
+        ERROR_ROOM_NO_ROB_LANDOWNER = 14; //无人抢地主
+        ERROR_SEND_CARD_TYPE_UNKNOWN = 15; //出的牌类型未知
+        ERROR_SEND_CARD_TYPE_NE_LAST_CARD_TYPE = 16; //出的牌类型与上一副牌不同
+        ERROR_SEND_CARD_CONTINUOUS_NE_LAST_CARD_CONTINUOUS = 17; //出的牌连续数与上一副牌不同
+        ERROR_SEND_CARD_SIZE_LE_LAST_CARD_SIZE = 18; //出的牌小于或等于上一副牌
+        ERROR_PLAYER_EXISTED_A_ROOM = 19; //玩家已存在于一个房间
+        ERROR_PLAYER_COIN_LT_ROOM_COIN = 20; //玩家豆子小于房间底分
+        ERROR_PLAYER_IS_ONLY_OPERATOR = 21; //玩家为唯一可操作者
+    }
+
+    GameError.Error error = 1;
+}
+
+message ErrorMSG {
+    ErrorType type = 1;
+    string message = 2;
+
+    oneof Body {
+        InternalError internal = 3;
+        MiddlewareError middleware = 4;
+        GameError game = 5;
+    }
+}
+
+message Card {
+    enum Number {
+        THREE = 0;
+        FOUR = 1;
+        FIVE = 2;
+        SIX = 3;
+        SEVEN = 4;
+        EIGHT = 5;
+        NINE = 6;
+        TEN = 7;
+        J = 8;
+        Q = 9;
+        K = 10;
+        A = 11;
+        TWO = 12;
+        JOKER = 13;
+        KING = 14;
+    }
+
+    Card.Number number = 1;
+}
+
+enum CardType {
+    CARD_TYPE_UNKNOWN = 0; //未知
+    CARD_TYPE_KING_BOOM = 1; //王炸
+    CARD_TYPE_SINGLE = 2; //单牌
+    CARD_TYPE_DOUBLE = 3; //双牌
+    CARD_TYPE_THREE_CARD = 4; //三牌
+    CARD_TYPE_THREE_WITH_SINGLE = 5; //三带一
+    CARD_TYPE_THREE_WITH_DOUBLE = 6; //三带一对
+    CARD_TYPE_BOOM = 7; //炸弹
+    CARD_TYPE_FOUR_WITH_TWO_SINGLE = 8; //四带两
+    CARD_TYPE_FOUR_WITH_TWO_DOUBLE = 9; //四带两对
+    CARD_TYPE_SINGLE_SEQUENCE = 10; //顺子
+    CARD_TYPE_DOUBLE_SEQUENCE = 11; //连对
+    CARD_TYPE_AIR_SEQUENCE = 12; //纯飞机
+    CARD_TYPE_AIR_SEQUENCE_WITH_TWO_SINGLE = 13; //飞机带两
+    CARD_TYPE_AIR_SEQUENCE_WITH_TWO_DOUBLE = 14; //飞机带两对
+}
+
+message RobLandownerInfo {
+    enum Action {
+        ACTION_EMPTY = 0;
+        ACTION_ROB = 1;
+        ACTION_NO_ROB = 2;
+    }
+
+    Action action = 1;
+    int64 action_time = 2;
+}
+
+message SendCard {
+    PlayerInfo sender_info = 1;
+    repeated Card sendcards = 2;
+    CardType sendcard_type = 3;
+    int32 sendcard_size = 4;
+    int32 sendcard_continuous = 5; //顺子，连对等牌型有效
+}
+
+message PlayerInfo {
+    message TableInfo {
+        string room_hash = 1;
+        RobLandownerInfo roblandowner_info = 2;
+    }
+    message UserInfo {
+        string id = 1;
+        string name = 2;
+    }
+
+    PlayerInfo.UserInfo user = 1;
+    PlayerInfo.TableInfo table = 2;
+}
+
+enum RoomStage {
+    ROOM_STAGE_UNKNOWN = 0;
+    ROOM_STAGE_WAITTING_START = 1;
+    ROOM_STAGE_ROB_LANDOWNERING = 2;
+    ROOM_STAGE_SENDING_CARD = 3;
+}
+
+message RoomInfo {
+    string hash = 1;
+    repeated PlayerInfo player_infos = 2;
+    double basic_coin = 3;
+    int32 multiple = 4;
+    RoomStage stage = 5;
+    repeated SendCard sendcards = 6;
+    optional PlayerInfo operator_now = 7;
+}
+
+message MiddleWareAuthHandlerContent {
+    
+}
+
+message GetRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 1;
+
+    string room_hash = 2;
+}
+
+message GetRoomResponse {
+    oneof Body {
+        ErrorMSG error = 1;
+        RoomInfo room_info = 2;
+    }
+}
+
+message CreateRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 1;
+}
+
+message CreateRoomResponse {
+    string room_hash = 1;
+}
+
+message JoinRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 3;
+
+    string room_hash = 1;
+    string user_id = 2;
+}
+
+message JoinRoomResponse {
+    optional ErrorMSG error = 1;
+}
+
+message ExitRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 3;
+
+    string player_id = 1;
+    string room_hash = 2;
+}
+
+message ExitRoomResponse {
+    optional ErrorMSG error = 1;
+}
+
+message RobLandownerRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 3;
+
+    string player_id = 1;
+    string room_hash = 2;
+}
+
+message RobLandownerResponse {
+    optional ErrorMSG error = 1;
+}
+
+message NoRobLandownerRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 3;
+
+    string player_id = 1;
+    string room_hash = 2;
+}
+
+message NoRobLandownerResponse {
+    optional ErrorMSG error = 1;
+}
+
+message SendCardRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 4;
+
+    string player_id = 1;
+    string room_hash = 2;
+    repeated Card sendcards = 3;
+}
+
+message SendCardResponse {
+    optional ErrorMSG error = 1;
+}
+
+message NoSendCardRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 3;
+
+    string player_id = 1;
+    string room_hash = 2;
+}
+
+message NoSendCardResponse {
+    optional ErrorMSG error = 1;
+}
+
+message GetDailyCoinRequest {
+    string user_id = 1;
+}
+
+message GetDailyCoinResponse {
+    optional ErrorMSG error = 1;
+}
+
+message StartRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 2;
+
+    string room_hash = 1;
+}
+
+message StartRoomResponse {
+    optional ErrorMSG error = 1;
+}
+
+message GetRoomsRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 1;
+}
+
+message GetRoomsResponse {
+    repeated RoomInfo room_infos = 1;
+}
+
+message EventRoomRequest {
+    optional MiddleWareAuthHandlerContent auth_handler_content = 2;
+
+    string room_hash = 1;
+}
+
+message EventRoomResponse {
+    message RoomJoinPlayer {
+        PlayerInfo joiner_info = 1;
+        repeated PlayerInfo player_infos = 2;
+    }
+    message RoomExitPlayer {
+        PlayerInfo leaver_info = 1;
+        repeated PlayerInfo player_infos = 2;
+    }
+    message RoomStarted {
+        PlayerInfo next_operator_info = 1;
+    }
+    message RoomRobLandowner {
+        PlayerInfo operator_info = 1;
+        PlayerInfo next_operator_info = 2;
+    }
+    message RoomNoRobLandowner {
+        PlayerInfo operator_info = 1;
+        PlayerInfo next_operator_info = 2;
+    }
+    message RoomSendCard {
+        PlayerInfo operator_info = 1;
+        PlayerInfo next_operator_info = 2;
+        repeated Card sendcards = 3;
+    }
+    message RoomNoSendCard {
+        PlayerInfo operator_info = 1;
+        PlayerInfo next_operator_info = 2;
+    }
+    
+
+    message RobLandownerIntoSendingCard {
+        PlayerInfo sendcarder_info = 1;
+        repeated Card landowner_cards = 2;
+    }
+    message RobLandownerContinuousRob {
+        int32 multiple = 1;
+    }
+
+    message SendCardSpringNotice {
+        int32 multiple = 1;
+    }
+    message SendCardBoomNotice {
+        int32 multiple = 1;
+        PlayerInfo sendcarder_info = 2;
+    }
+    message SendCardKingBoomNotice {
+        int32 multiple = 1;
+        PlayerInfo sendcarder_info = 2;
+    }
+    message SendCardCardNumberNotice {
+        int32 number = 1;
+        PlayerInfo notice_target_info = 2;
+    }
+
+    message GameFinish {
+        message PlayerInfoExtra {
+            PlayerInfo player_info = 1;
+            repeated Card hand_cards = 2;
+        }
+
+        PlayerInfoExtra landowner_info = 1;
+        PlayerInfoExtra farmer1_info = 2;
+        PlayerInfoExtra farmer2_info = 3;
+        Role Winner = 4;
+    }
+
+    oneof Body {
+        RobLandownerIntoSendingCard roblandowner_into_sendingcard = 1;
+        RobLandownerContinuousRob roblandowner_continuous_rob = 2;
+        SendCardSpringNotice sendcard_spring_notice = 3;
+        SendCardBoomNotice sendcard_boom_notice = 4;
+        SendCardKingBoomNotice sendcard_kingboom_notice = 5;
+        GameFinish game_finish = 6;
+        SendCardCardNumberNotice sendcard_cardnumber_notice = 7;
+        RoomJoinPlayer room_join_player = 8;
+        RoomExitPlayer room_exit_player = 9;
+        RoomStarted room_started = 10;
+        RoomRobLandowner room_rob_landowner = 11;
+        RoomNoRobLandowner room_norob_landowner = 12;
+        RoomSendCard room_sendcard = 13;
+        RoomNoSendCard room_no_sendcard = 14;
+        ErrorMSG error = 15;
+    }
+}

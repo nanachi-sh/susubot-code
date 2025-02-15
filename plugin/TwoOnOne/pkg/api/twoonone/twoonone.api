@@ -1,0 +1,87 @@
+syntax = "v1"
+
+type GetDailyCoinRequest {
+	UserId string `json:"user_id"`
+}
+
+type GetRoomRequest {
+	RoomHash string `path:"room_hash"`
+}
+
+type JoinRoomRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+type ExitRoomRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+type RobLandownerRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+type NoRobLandownerRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+type Card {
+	Number int `json:"number,range=[0:14]"`
+}
+
+type SendCardRequest {
+	RoomHash  string `path:"room_hash"`
+	UserId    string `json:"user_id"`
+	SendCards []Card `json:"sendcards"`
+}
+
+type NoSendCardRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+type StartRoomRequest {
+	RoomHash string `path:"room_hash"`
+	UserId   string `json:"user_id"`
+}
+
+@server (
+	prefix: /v1 //规范
+	// 处理SSO认证，暂时全部请求均需认证
+	middleware: OIDCAuthMiddleware
+)
+service twoonone-api {
+	@handler getRooms
+	get /rooms returns (any)
+
+	@handler getDailyCoin
+	post /get_daliy_coin (GetDailyCoinRequest) returns (any)
+
+	@handler getRoom
+	get /rooms/:room_hash (GetRoomRequest) returns (any)
+
+	@handler joinRoom
+	post /rooms/:room_hash/join (JoinRoomRequest) returns (any)
+
+	@handler exitRoom
+	post /rooms/:room_hash/exit (ExitRoomRequest) returns (any)
+
+	@handler robLandowner
+	post /rooms/:room_hash/play/robLandowner (RobLandownerRequest) returns (any)
+
+	@handler noRobLandowner
+	post /rooms/:room_hash/play/noRobLandowner (NoRobLandownerRequest) returns (any)
+
+	@handler sendCard
+	post /rooms/:room_hash/play/sendCard (SendCardRequest) returns (any)
+
+	@handler noSendCard
+	post /rooms/:room_hash/play/noSendCard (NoSendCardRequest) returns (any)
+
+	@handler startRoom
+	post /rooms/:room_hash/start (StartRoomRequest) returns (any)
+}
+
