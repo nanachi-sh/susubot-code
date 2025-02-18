@@ -177,6 +177,7 @@ func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...data
 		}
 		return *u
 	}()
+	u.Id = id
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	if serr := updateUser(logger, ctx, u); serr != nil {
