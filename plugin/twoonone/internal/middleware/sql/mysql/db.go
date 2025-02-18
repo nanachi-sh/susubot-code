@@ -132,7 +132,7 @@ func (s *db_action_update_getdaily_time) Merge(logger logx.Logger, u *twoonone_m
 	u.LastGetdaliyTime = s.Time
 }
 
-func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.User, *pkg_types.AppError) {
+func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.User, error) {
 	if id == "" {
 		logger.Error("invalid argument")
 		return database_type.User{}, pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
@@ -146,7 +146,7 @@ func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.Use
 	return u, nil
 }
 
-func (dbh *db_handler) CreateUser(logger logx.Logger, id string) *pkg_types.AppError {
+func (dbh *db_handler) CreateUser(logger logx.Logger, id string) error {
 	if id == "" {
 		logger.Error("invalid argument")
 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
@@ -165,7 +165,7 @@ func (dbh *db_handler) CreateUser(logger logx.Logger, id string) *pkg_types.AppE
 	return nil
 }
 
-func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...database_type.Action) *pkg_types.AppError {
+func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...database_type.Action) error {
 	if id == "" {
 		logger.Error("invalid argument")
 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
@@ -185,7 +185,7 @@ func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...data
 	return nil
 }
 
-func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) *pkg_types.AppError {
+func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) error {
 	if id == "" {
 		logger.Error("invalid argument")
 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
@@ -198,8 +198,8 @@ func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) *pkg_types.AppE
 	return nil
 }
 
-func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.User, *pkg_types.AppError) {
-	ut, err := func() (*twoonone_model.UserTwoonone, *pkg_types.AppError) {
+func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.User, error) {
+	ut, err := func() (*twoonone_model.UserTwoonone, error) {
 		u, err := configs.Model_TwoOnOne.FindOne(ctx, id)
 		if err != nil {
 			if myerr, ok := err.(*mysql.MySQLError); ok {
@@ -222,7 +222,7 @@ func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.
 	if err != nil {
 		return database_type.User{}, err
 	}
-	up, err := func() (*database_type.UserPublic, *pkg_types.AppError) {
+	up, err := func() (*database_type.UserPublic, error) {
 		u, err := ldap.FindUser(logger, id)
 		if err != nil {
 			return nil, err
@@ -238,7 +238,7 @@ func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.
 	}, nil
 }
 
-func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) *pkg_types.AppError {
+func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) error {
 	if err := configs.Model_TwoOnOne.Update(ctx, &u); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
 			switch myerr.Number {
@@ -258,7 +258,7 @@ func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTw
 	return nil
 }
 
-func deleteUser(logger logx.Logger, ctx context.Context, id string) *pkg_types.AppError {
+func deleteUser(logger logx.Logger, ctx context.Context, id string) error {
 	if err := configs.Model_TwoOnOne.Delete(ctx, id); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
 			switch myerr.Number {
@@ -278,7 +278,7 @@ func deleteUser(logger logx.Logger, ctx context.Context, id string) *pkg_types.A
 	return nil
 }
 
-func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) *pkg_types.AppError {
+func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) error {
 	if _, err := configs.Model_TwoOnOne.Insert(ctx, &u); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
 			switch myerr.Number {
