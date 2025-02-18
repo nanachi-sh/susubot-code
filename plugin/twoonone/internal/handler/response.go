@@ -10,7 +10,7 @@ import (
 type JSON_Response struct {
 	Code    int    `json:"code"`
 	Message string `json:"msg"`
-	Data    any    `json:"data"`
+	Data    any    `json:"data,omitempty"`
 }
 
 func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
@@ -28,6 +28,8 @@ func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 	} else {
 		ret.Code = 0
 		ret.Message = "OK"
+		ret.Data = resp
 	}
-	httpx.WriteJson(w, statusCode, ret)
+	ret.Data = resp
+	httpx.WriteJsonCtx(r.Context(), w, statusCode, ret)
 }
