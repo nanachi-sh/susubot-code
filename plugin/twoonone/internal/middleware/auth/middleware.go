@@ -12,6 +12,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/lestrrat-go/httprc/v3"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/configs"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/types"
@@ -26,7 +27,7 @@ var (
 
 	provider *oidc.Provider
 	verifier *oidc.IDTokenVerifier
-	jwks     jwk.Cache
+	jwks     *jwk.Cache
 	o2cfg    oauth2.Config
 
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
@@ -56,6 +57,13 @@ func initialize() {
 	verifier = provider.Verifier(&oidc.Config{
 		ClientID: configs.OIDC_CLIENT_ID,
 	})
+	{
+		c, err := jwk.NewCache(context.Background(), httprc.NewClient())
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		jwks = c
+	}
 	if err := jwks.Register(context.Background(), claims.JWKSUri); err != nil {
 		logger.Fatalln(err)
 	}

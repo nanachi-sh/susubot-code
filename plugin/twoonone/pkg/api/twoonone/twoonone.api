@@ -49,7 +49,6 @@ type StartRoomRequest {
 }
 
 @server (
-	prefix: /v1 //规范
 	// 处理SSO认证，暂时全部请求均需认证
 	middleware: OIDCAuthMiddleware
 )
