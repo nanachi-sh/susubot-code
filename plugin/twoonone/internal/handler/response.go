@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
@@ -14,8 +15,10 @@ type JSON_Response struct {
 
 func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 	ret := new(JSON_Response)
+	fmt.Println(err == nil)
 	if err != nil {
 		if e, ok := err.(*types.AppError); ok {
+			fmt.Println(e)
 			w.WriteHeader(e.StatusCode())
 			ret.Code = int(e.Code)
 			ret.Message = e.Message()
