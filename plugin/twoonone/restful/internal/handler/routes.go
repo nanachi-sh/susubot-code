@@ -17,9 +17,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.OIDCAuthMiddleware},
 			[]rest.Route{
 				{
+					Method:  http.MethodGet,
+					Path:    "/callback",
+					Handler: callbackHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPost,
 					Path:    "/get_daliy_coin",
 					Handler: getDailyCoinHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/login",
+					Handler: loginHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,

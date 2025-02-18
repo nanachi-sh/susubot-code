@@ -82,5 +82,11 @@ service twoonone-api {
 
 	@handler startRoom
 	post /rooms/:room_hash/start (StartRoomRequest) returns (any)
+
+	@handler callback
+	get /callback
+
+	@handler login
+	get /login
 }
 
