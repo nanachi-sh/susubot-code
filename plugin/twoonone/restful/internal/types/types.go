@@ -4,16 +4,16 @@
 package types
 
 type Card struct {
-	Number int `json:"number,range=[0:14]"`
+	Number int `form:"number,range=[0:14]"`
 }
 
 type ExitRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type GetDailyCoinRequest struct {
-	UserId string `json:"user_id"`
+	UserId string `form:"user_id"`
 }
 
 type GetRoomRequest struct {
@@ -22,31 +22,31 @@ type GetRoomRequest struct {
 
 type JoinRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type NoRobLandownerRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type NoSendCardRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type RobLandownerRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type SendCardRequest struct {
 	RoomHash  string `path:"room_hash"`
-	UserId    string `json:"user_id"`
-	SendCards []Card `json:"sendcards"`
+	UserId    string `form:"user_id"`
+	SendCards []Card `form:"sendcards"`
 }
 
 type StartRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }

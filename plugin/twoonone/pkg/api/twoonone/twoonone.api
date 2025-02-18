@@ -1,7 +1,7 @@
 syntax = "v1"
 
 type GetDailyCoinRequest {
-	UserId string `json:"user_id"`
+	UserId string `form:"user_id"`
 }
 
 type GetRoomRequest {
@@ -10,42 +10,42 @@ type GetRoomRequest {
 
 type JoinRoomRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type ExitRoomRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type RobLandownerRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type NoRobLandownerRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type Card {
-	Number int `json:"number,range=[0:14]"`
+	Number int `form:"number,range=[0:14]"`
 }
 
 type SendCardRequest {
 	RoomHash  string `path:"room_hash"`
-	UserId    string `json:"user_id"`
-	SendCards []Card `json:"sendcards"`
+	UserId    string `form:"user_id"`
+	SendCards []Card `form:"sendcards"`
 }
 
 type NoSendCardRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 type StartRoomRequest {
 	RoomHash string `path:"room_hash"`
-	UserId   string `json:"user_id"`
+	UserId   string `form:"user_id"`
 }
 
 @server (
