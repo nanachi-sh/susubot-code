@@ -206,10 +206,7 @@ func (r *APIRequest) StartRoom(req *twoonone_pb.StartRoomRequest) (resp any, err
 }
 
 func (r *APIRequest) CreateRoom(req *twoonone_pb.CreateRoomRequest) (resp any, err error) {
-	resp, err = createRoom(&twoonone_pb.CreateRoomRequest{})
-	r.logger.Info(err == nil)
-	r.logger.Infof("%T", err)
-	return
+	return createRoom(&twoonone_pb.CreateRoomRequest{})
 }
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {
@@ -246,7 +243,7 @@ func getRooms() *twoonone_pb.GetRoomsResponse {
 	}
 }
 
-func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, *types.AppError) {
+func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, error) {
 	u, err := db.GetUser(logger, in.UserId)
 	if err != nil {
 		return nil, err
@@ -277,7 +274,7 @@ func checkDailyCoin(u twoonone.UserTwoonone) bool {
 	}
 }
 
-func getRoom(logger logx.Logger, in *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, *types.AppError) {
+func getRoom(logger logx.Logger, in *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -287,7 +284,7 @@ func getRoom(logger logx.Logger, in *twoonone_pb.GetRoomRequest) (*twoonone_pb.G
 	}, nil
 }
 
-func createRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomResponse, *types.AppError) {
+func createRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomResponse, error) {
 	newRoom := room.New(200, 1)
 	rooms = append(rooms, newRoom)
 	return &twoonone_pb.CreateRoomResponse{
@@ -295,7 +292,7 @@ func createRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomRespo
 	}, nil
 }
 
-func joinRoom(logger logx.Logger, in *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, *types.AppError) {
+func joinRoom(logger logx.Logger, in *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -313,7 +310,7 @@ func joinRoom(logger logx.Logger, in *twoonone_pb.JoinRoomRequest) (*twoonone_pb
 	return &twoonone_pb.JoinRoomResponse{}, nil
 }
 
-func exitRoom(logger logx.Logger, in *twoonone_pb.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, *types.AppError) {
+func exitRoom(logger logx.Logger, in *twoonone_pb.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -324,7 +321,7 @@ func exitRoom(logger logx.Logger, in *twoonone_pb.ExitRoomRequest) (*twoonone_pb
 	return &twoonone_pb.ExitRoomResponse{}, nil
 }
 
-func startRoom(logger logx.Logger, in *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomResponse, *types.AppError) {
+func startRoom(logger logx.Logger, in *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -338,7 +335,7 @@ func startRoom(logger logx.Logger, in *twoonone_pb.StartRoomRequest) (*twoonone_
 	return &twoonone_pb.StartRoomResponse{}, nil
 }
 
-func robLandowner(logger logx.Logger, in *twoonone_pb.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, *types.AppError) {
+func robLandowner(logger logx.Logger, in *twoonone_pb.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -353,7 +350,7 @@ func robLandowner(logger logx.Logger, in *twoonone_pb.RobLandownerRequest) (*two
 	return &twoonone_pb.RobLandownerResponse{}, nil
 }
 
-func noRobLandowner(logger logx.Logger, in *twoonone_pb.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, *types.AppError) {
+func noRobLandowner(logger logx.Logger, in *twoonone_pb.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -368,7 +365,7 @@ func noRobLandowner(logger logx.Logger, in *twoonone_pb.NoRobLandownerRequest) (
 	return &twoonone_pb.NoRobLandownerResponse{}, nil
 }
 
-func sendCard(logger logx.Logger, in *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResponse, *types.AppError) {
+func sendCard(logger logx.Logger, in *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
@@ -383,7 +380,7 @@ func sendCard(logger logx.Logger, in *twoonone_pb.SendCardRequest) (*twoonone_pb
 	return &twoonone_pb.SendCardResponse{}, nil
 }
 
-func noSendCard(logger logx.Logger, in *twoonone_pb.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, *types.AppError) {
+func noSendCard(logger logx.Logger, in *twoonone_pb.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")

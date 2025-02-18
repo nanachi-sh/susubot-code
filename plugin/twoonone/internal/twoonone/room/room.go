@@ -70,7 +70,7 @@ func New(basicCoin float64, multiple int) *Room {
 	}
 }
 
-func (r *Room) Join(logger logx.Logger, id, name string, coin float64) *types.AppError {
+func (r *Room) Join(logger logx.Logger, id, name string, coin float64) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if r.stage != twoonone_pb.RoomStage_ROOM_STAGE_WAITTING_START {
@@ -108,7 +108,7 @@ func (r *Room) Join(logger logx.Logger, id, name string, coin float64) *types.Ap
 	return nil
 }
 
-func (r *Room) Exit(logger logx.Logger, playerId string) *types.AppError {
+func (r *Room) Exit(logger logx.Logger, playerId string) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if r.stage != twoonone_pb.RoomStage_ROOM_STAGE_WAITTING_START {
@@ -130,7 +130,7 @@ func (r *Room) Exit(logger logx.Logger, playerId string) *types.AppError {
 	return nil
 }
 
-func (r *Room) Start(logger logx.Logger) *types.AppError {
+func (r *Room) Start(logger logx.Logger) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if r.GetStage() != twoonone_pb.RoomStage_ROOM_STAGE_WAITTING_START {
@@ -177,7 +177,7 @@ func (r *Room) setLandownerCards(cards [3]card.Card) {
 	copy(r.landownerCards[:], cards[:])
 }
 
-func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) *types.AppError {
+func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if p.GetRoomHash() != r.GetHash() {
@@ -247,7 +247,7 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) *types.AppErro
 	return nil
 }
 
-func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) *types.AppError {
+func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if p.GetRoomHash() != r.GetHash() {
@@ -306,7 +306,7 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) *types.AppEr
 	return nil
 }
 
-func (r *Room) SendCard(logger logx.Logger, p *player.Player, sendcards []*twoonone_pb.Card) *types.AppError {
+func (r *Room) SendCard(logger logx.Logger, p *player.Player, sendcards []*twoonone_pb.Card) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if p.GetRoomHash() != r.hash {
@@ -325,7 +325,7 @@ func (r *Room) SendCard(logger logx.Logger, p *player.Player, sendcards []*twoon
 	return nil
 }
 
-func (r *Room) NoSendCard(logger logx.Logger, p *player.Player) *types.AppError {
+func (r *Room) NoSendCard(logger logx.Logger, p *player.Player) error {
 	r.lock.Lock()
 	r.lock.Unlock()
 	if p.GetRoomHash() != r.hash {
@@ -343,7 +343,7 @@ func (r *Room) NoSendCard(logger logx.Logger, p *player.Player) *types.AppError 
 	return nil
 }
 
-func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.Card) *types.AppError {
+func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.Card) error {
 	lastcard := r.GetLastCard()
 	// 正常出牌
 	cardtype := r.matchCardType(sendcards)
@@ -397,7 +397,7 @@ func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.C
 	return nil
 }
 
-func (r *Room) noSendCard(logger logx.Logger, p *player.Player) *types.AppError {
+func (r *Room) noSendCard(logger logx.Logger, p *player.Player) error {
 	lastcard := r.GetLastCard()
 	// 特殊情况判断
 	if lastcard == nil { //第一次出牌
@@ -422,7 +422,7 @@ func (r *Room) GetEvent() *event.EventStream {
 	return r.event
 }
 
-func (r *Room) gameFinish(logger logx.Logger) *types.AppError {
+func (r *Room) gameFinish(logger logx.Logger) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.operatorNow = nil
@@ -485,7 +485,7 @@ func (r *Room) gameFinish(logger logx.Logger) *types.AppError {
 	return nil
 }
 
-func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []card.Card, ct twoonone_pb.CardType, cs int, cc int) *types.AppError {
+func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []card.Card, ct twoonone_pb.CardType, cs int, cc int) error {
 	if !p.DeleteCards(sendcards) {
 		types.NewError(twoonone_pb.Error_ERROR_PLAYER_CARD_NO_EXIST, "")
 	}

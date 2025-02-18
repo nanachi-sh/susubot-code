@@ -12,7 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-func FindUser(logger logx.Logger, id string) (database.UserPublic, *types.AppError) {
+func FindUser(logger logx.Logger, id string) (database.UserPublic, error) {
 	result, err := configs.LDAP.Search(ldap.NewSearchRequest(
 		fmt.Sprintf("uid=%s,ou=user,%s", id, configs.LDAP_DN),
 		ldap.ScopeBaseObject,

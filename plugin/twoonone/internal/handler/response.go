@@ -15,9 +15,7 @@ type JSON_Response struct {
 
 func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 	ret := new(JSON_Response)
-	fmt.Println(err == nil)
 	if err != nil {
-		fmt.Printf("%T\n", err)
 		if e, ok := err.(*types.AppError); ok {
 			fmt.Println(e)
 			w.WriteHeader(e.StatusCode())
