@@ -67,12 +67,15 @@ func initialize() {
 }
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	xlogger.Info("in handle")
+	defer xlogger.Info("out handle")
 	if !configs.MIDDLEWARE_AuthHandlerStatus {
 		next(w, r)
 		return
 	}
 	once.Do(initialize)
 
+	xlogger.Info("test")
 	// 判断是否需要更新session_id
 	session_id, ok := getSessionId(r)
 	if !ok { //无session_id
@@ -164,7 +167,8 @@ func newSession(w http.ResponseWriter, r *http.Request) bool {
 }
 
 func cutDomain(domain string) string {
-	domain = regexp.MustCompile(`^(?:[a-z0-9-]+\.)+([a-z0-9-]+\.[a-z]{2,})$`).
+	domain = regexp.
+		MustCompile(`^(?:[a-z0-9-]+\.)+([a-z0-9-]+\.[a-z]{2,})$`).
 		ReplaceAllString(domain, `$1`)
 	if domain[0] != []byte(".")[0] {
 		domain = "." + domain
