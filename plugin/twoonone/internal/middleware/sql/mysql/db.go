@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/VividCortex/mysqlerr"
 	"github.com/go-sql-driver/mysql"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/configs"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql/ldap"
@@ -147,22 +146,7 @@ func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.Use
 }
 
 func (dbh *db_handler) CreateUser(logger logx.Logger, id string) error {
-	if id == "" {
-		logger.Error("invalid argument")
-		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
-	defer cancel()
-	if serr := createUser(logger, ctx, twoonone_model.Twoonone{
-		Id:               id,
-		Wincount:         0,
-		Losecount:        0,
-		LastGetdaliyTime: 0,
-		Coin:             0,
-	}); serr != nil {
-		return serr
-	}
-	return nil
+	return pkg_types.NewError(twoonone_pb.Error_ERROR_UNKNOWN, "不支持操作")
 }
 
 func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...database_type.Action) error {
@@ -187,16 +171,7 @@ func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...data
 }
 
 func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) error {
-	if id == "" {
-		logger.Error("invalid argument")
-		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
-	defer cancel()
-	if serr := deleteUser(logger, ctx, id); serr != nil {
-		return serr
-	}
-	return nil
+	return pkg_types.NewError(twoonone_pb.Error_ERROR_UNKNOWN, "不支持操作")
 }
 
 func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.User, error) {
@@ -259,42 +234,42 @@ func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoono
 	return nil
 }
 
-func deleteUser(logger logx.Logger, ctx context.Context, id string) error {
-	if err := configs.Model_TwoOnOne.Delete(ctx, id); err != nil {
-		if myerr, ok := err.(*mysql.MySQLError); ok {
-			switch myerr.Number {
-			default:
-				logger.Errorf("未处理错误：%v", myerr)
-			}
-		} else {
-			switch err {
-			default:
-				logger.Errorf("未处理错误：%v", err)
-			case twoonone_model.ErrNotFound:
-				return pkg_types.NewError(twoonone_pb.Error_ERROR_USER_NO_EXIST, "")
-			}
-		}
-		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
-	}
-	return nil
-}
+// func deleteUser(logger logx.Logger, ctx context.Context, id string) error {
+// 	if err := configs.Model_TwoOnOne.Delete(ctx, id); err != nil {
+// 		if myerr, ok := err.(*mysql.MySQLError); ok {
+// 			switch myerr.Number {
+// 			default:
+// 				logger.Errorf("未处理错误：%v", myerr)
+// 			}
+// 		} else {
+// 			switch err {
+// 			default:
+// 				logger.Errorf("未处理错误：%v", err)
+// 			case twoonone_model.ErrNotFound:
+// 				return pkg_types.NewError(twoonone_pb.Error_ERROR_USER_NO_EXIST, "")
+// 			}
+// 		}
+// 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
+// 	}
+// 	return nil
+// }
 
-func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoonone) error {
-	if _, err := configs.Model_TwoOnOne.Insert(ctx, &u); err != nil {
-		if myerr, ok := err.(*mysql.MySQLError); ok {
-			switch myerr.Number {
-			default:
-				logger.Errorf("未处理错误：%v", myerr)
-			case mysqlerr.ER_DUP_ENTRY:
-				return pkg_types.NewError(twoonone_pb.Error_ERROR_USER_EXISTED, "")
-			}
-		} else {
-			switch err {
-			default:
-				logger.Errorf("未处理错误：%v", err)
-			}
-		}
-		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
-	}
-	return nil
-}
+// func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoonone) error {
+// 	if _, err := configs.Model_TwoOnOne.Insert(ctx, &u); err != nil {
+// 		if myerr, ok := err.(*mysql.MySQLError); ok {
+// 			switch myerr.Number {
+// 			default:
+// 				logger.Errorf("未处理错误：%v", myerr)
+// 			case mysqlerr.ER_DUP_ENTRY:
+// 				return pkg_types.NewError(twoonone_pb.Error_ERROR_USER_EXISTED, "")
+// 			}
+// 		} else {
+// 			switch err {
+// 			default:
+// 				logger.Errorf("未处理错误：%v", err)
+// 			}
+// 		}
+// 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
+// 	}
+// 	return nil
+// }
