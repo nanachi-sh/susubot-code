@@ -205,6 +205,10 @@ func (r *APIRequest) StartRoom(req *twoonone_pb.StartRoomRequest) (resp any, err
 	})
 }
 
+func (r *APIRequest) CreateRoom(req *twoonone_pb.CreateRoomRequest) (resp any, err error) {
+	return createRoom(&twoonone_pb.CreateRoomRequest{})
+}
+
 func getPlayerFromRooms(id string) (*player.Player, bool) {
 	for _, v := range rooms {
 		pi, ok := v.GetPlayer(id)

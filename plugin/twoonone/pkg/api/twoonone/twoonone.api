@@ -62,6 +62,9 @@ service twoonone-api {
 	@handler getRoom
 	get /rooms/:room_hash (GetRoomRequest) returns (any)
 
+	@handler createRoom
+	post /rooms returns (any)
+
 	@handler joinRoom
 	post /rooms/:room_hash/join (JoinRoomRequest) returns (any)
 

@@ -37,6 +37,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: getRoomsHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodPost,
+					Path:    "/rooms",
+					Handler: createRoomHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash",
 					Handler: getRoomHandler(serverCtx),
