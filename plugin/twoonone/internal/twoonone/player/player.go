@@ -6,7 +6,6 @@ import (
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/card"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
-	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -121,7 +120,7 @@ func (p *Player) IncLoseCount() {
 	p.loseCountChanged++
 }
 
-func (p *Player) UpdateToDatabaseAndClean(logger logx.Logger) *types.AppError {
+func (p *Player) UpdateToDatabaseAndClean(logger logx.Logger) error {
 	if p.coinChanged > 0 {
 		if serr := db.UpdateUser(logger, p.GetId(), sql.IncCoin(p.coinChanged)); serr != nil {
 			return serr
