@@ -105,10 +105,10 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		if !callbackHandle(w, r) {
 			return
 		}
-	}
-	// 普通请求
-	if !handle(w, r) {
-		return
+	default: // 普通请求
+		if !handle(w, r) {
+			return
+		}
 	}
 	next(w, r)
 }
@@ -229,6 +229,17 @@ func handle(w http.ResponseWriter, r *http.Request) bool {
 }
 
 func loginHandle(w http.ResponseWriter, r *http.Request) bool {
+	// 登录验证
+	{
+		access_token, err := r.Cookie(types.COOKIE_KEY_access_token)
+		if err == nil {
+			if verifyToken(access_token.Value) {
+				w.WriteHeader(http.StatusNotAcceptable)
+				return false
+			}
+		}
+	}
+	//
 	session_id, ok := getSessionId(r)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
