@@ -206,11 +206,10 @@ func (r *APIRequest) StartRoom(req *twoonone_pb.StartRoomRequest) (resp any, err
 }
 
 func (r *APIRequest) CreateRoom(req *twoonone_pb.CreateRoomRequest) (resp any, err error) {
-	defer func() {
-		r.logger.Info(err == nil)
-		r.logger.Infof("%T", err)
-	}()
-	return createRoom(&twoonone_pb.CreateRoomRequest{})
+	resp, err = createRoom(&twoonone_pb.CreateRoomRequest{})
+	r.logger.Info(err == nil)
+	r.logger.Infof("%T", err)
+	return
 }
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {

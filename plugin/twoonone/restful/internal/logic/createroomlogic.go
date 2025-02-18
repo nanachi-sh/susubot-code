@@ -27,9 +27,8 @@ func NewCreateRoomLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Create
 func (l *CreateRoomLogic) CreateRoom() (resp any, err error) {
 	// todo: add your logic here and delete this line
 
-	defer func() {
-		l.Logger.Info(err == nil)
-		l.Logger.Infof("%T", err)
-	}()
-	return inside.NewAPIRequest(l.Logger).CreateRoom(&twoonone.CreateRoomRequest{})
+	resp, err = inside.NewAPIRequest(l.Logger).CreateRoom(&twoonone.CreateRoomRequest{})
+	l.Logger.Info(err == nil)
+	l.Logger.Infof("%T", err)
+	return
 }
