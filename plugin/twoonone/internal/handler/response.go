@@ -30,6 +30,5 @@ func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 		ret.Message = "OK"
 		ret.Data = resp
 	}
-	ret.Data = resp
 	httpx.WriteJsonCtx(r.Context(), w, statusCode, ret)
 }
