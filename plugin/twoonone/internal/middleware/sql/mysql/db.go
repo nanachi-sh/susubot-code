@@ -98,37 +98,37 @@ func UpdateGetDailyTime(n ...time.Time) database_type.Action {
 	return &db_action_update_getdaily_time{t}
 }
 
-func (s *db_action_inc_coin) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_inc_coin) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	if s.float64 < 0 {
 		s.float64 = 0
 	}
 	u.Coin += s.float64
 }
 
-func (s *db_action_dec_coin) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_dec_coin) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	if s.float64 < 0 {
 		s.float64 = 0
 	}
 	u.Coin -= s.float64
 }
 
-func (s *db_action_inc_wincount) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_inc_wincount) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	u.Wincount += int64(s.uint)
 }
 
-func (s *db_action_dec_wincount) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_dec_wincount) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	u.Wincount -= int64(s.uint)
 }
 
-func (s *db_action_inc_losecount) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_inc_losecount) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	u.Losecount += int64(s.uint)
 }
 
-func (s *db_action_dec_losecount) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_dec_losecount) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	u.Losecount -= int64(s.uint)
 }
 
-func (s *db_action_update_getdaily_time) Merge(logger logx.Logger, u *twoonone_model.UserTwoonone) {
+func (s *db_action_update_getdaily_time) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
 	u.LastGetdaliyTime = s.Time
 }
 
@@ -153,7 +153,7 @@ func (dbh *db_handler) CreateUser(logger logx.Logger, id string) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
-	if serr := createUser(logger, ctx, twoonone_model.UserTwoonone{
+	if serr := createUser(logger, ctx, twoonone_model.Twoonone{
 		Id:               id,
 		Wincount:         0,
 		Losecount:        0,
@@ -170,8 +170,8 @@ func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...data
 		logger.Error("invalid argument")
 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
 	}
-	u := func() twoonone_model.UserTwoonone {
-		u := new(twoonone_model.UserTwoonone)
+	u := func() twoonone_model.Twoonone {
+		u := new(twoonone_model.Twoonone)
 		for _, v := range actions {
 			v.Merge(logger, u)
 		}
@@ -199,7 +199,7 @@ func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) error {
 }
 
 func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.User, error) {
-	ut, err := func() (*twoonone_model.UserTwoonone, error) {
+	ut, err := func() (*twoonone_model.Twoonone, error) {
 		u, err := configs.Model_TwoOnOne.FindOne(ctx, id)
 		if err != nil {
 			if myerr, ok := err.(*mysql.MySQLError); ok {
@@ -233,12 +233,12 @@ func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.
 		return database_type.User{}, err
 	}
 	return database_type.User{
-		UserTwoonone: *ut,
-		UserPublic:   *up,
+		Twoonone:   *ut,
+		UserPublic: *up,
 	}, nil
 }
 
-func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) error {
+func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoonone) error {
 	if err := configs.Model_TwoOnOne.Update(ctx, &u); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
 			switch myerr.Number {
@@ -278,7 +278,7 @@ func deleteUser(logger logx.Logger, ctx context.Context, id string) error {
 	return nil
 }
 
-func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.UserTwoonone) error {
+func createUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoonone) error {
 	if _, err := configs.Model_TwoOnOne.Insert(ctx, &u); err != nil {
 		if myerr, ok := err.(*mysql.MySQLError); ok {
 			switch myerr.Number {

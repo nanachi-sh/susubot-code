@@ -248,8 +248,8 @@ func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*two
 	if err != nil {
 		return nil, err
 	}
-	if checkDailyCoin(u.UserTwoonone) {
-		if err := db.UpdateUser(logger, u.UserTwoonone.Id, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
+	if checkDailyCoin(u.Twoonone) {
+		if err := db.UpdateUser(logger, u.Twoonone.Id, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
 			return nil, err
 		}
 		return &twoonone_pb.GetDailyCoinResponse{}, nil
@@ -258,7 +258,7 @@ func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*two
 	}
 }
 
-func checkDailyCoin(u twoonone.UserTwoonone) bool {
+func checkDailyCoin(u twoonone.Twoonone) bool {
 	if u.LastGetdaliyTime.IsZero() { //第一次领取
 		return true
 	} else {

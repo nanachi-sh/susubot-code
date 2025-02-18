@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	twoonone_model.UserTwoonone
+	twoonone_model.Twoonone
 	UserPublic
 }
 
@@ -23,5 +23,5 @@ type DatabaseModel interface {
 }
 
 type Action interface {
-	Merge(logx.Logger, *twoonone_model.UserTwoonone)
+	Merge(logx.Logger, *twoonone_model.Twoonone)
 }

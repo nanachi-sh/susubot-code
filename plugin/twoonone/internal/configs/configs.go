@@ -48,7 +48,7 @@ var (
 	MIDDLEWARE_AuthHandlerStatus bool = true
 	MIDDLEWARE_SQLHandlerStatus  bool = true
 
-	Model_TwoOnOne twoononemodel.UserTwoononeModel
+	Model_TwoOnOne twoononemodel.TwoononeModel
 	Redis          *redis.Redis
 	LDAP           ldap.Client
 
@@ -196,7 +196,7 @@ func init() {
 // 初始化SQL Models
 func init() {
 	sqlconn := sqlx.NewMysql(fmt.Sprintf("%s:%s@tcp(%s:%d)/applications", DATABASE_USER, DATABASE_PASSWORD, DATABASE_IP, DATABASE_PORT))
-	Model_TwoOnOne = twoononemodel.NewUserTwoononeModel(sqlconn)
+	Model_TwoOnOne = twoononemodel.NewTwoononeModel(sqlconn)
 	Redis = redis.New(fmt.Sprintf("%s:%d", REDIS_IP, REDIS_PORT), redis.WithPass("lsusu"))
 	ldap_url := ""
 	if LDAP_TLS {
