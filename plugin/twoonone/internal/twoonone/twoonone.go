@@ -259,14 +259,14 @@ func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*two
 }
 
 func checkDailyCoin(u twoonone.Twoonone) bool {
-	if u.LastGetdaliyTime.IsZero() { //第一次领取
+	last_time := time.Unix(u.LastGetdaliyTime, 0)
+	if last_time.IsZero() { //第一次领取
 		return true
 	} else {
 		now := time.Now()
-		last := u.LastGetdaliyTime
 		// 判断是否为同一年同一月
-		if now.Month() == last.Month() && now.Year() == last.Year() {
-			return now.Day() > last.Day()
+		if now.Month() == last_time.Month() && now.Year() == last_time.Year() {
+			return now.Day() > last_time.Day()
 		} else {
 			//非同一年同一月必然不是同一天
 			return true

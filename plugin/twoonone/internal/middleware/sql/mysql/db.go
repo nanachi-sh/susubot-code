@@ -129,7 +129,7 @@ func (s *db_action_dec_losecount) Merge(logger logx.Logger, u *twoonone_model.Tw
 }
 
 func (s *db_action_update_getdaily_time) Merge(logger logx.Logger, u *twoonone_model.Twoonone) {
-	u.LastGetdaliyTime = s.Time
+	u.LastGetdaliyTime = s.Time.Unix()
 }
 
 func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.User, error) {
@@ -157,7 +157,7 @@ func (dbh *db_handler) CreateUser(logger logx.Logger, id string) error {
 		Id:               id,
 		Wincount:         0,
 		Losecount:        0,
-		LastGetdaliyTime: time.Time{},
+		LastGetdaliyTime: 0,
 		Coin:             0,
 	}); serr != nil {
 		return serr

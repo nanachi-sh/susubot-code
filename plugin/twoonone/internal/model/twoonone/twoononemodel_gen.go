@@ -9,7 +9,6 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/builder"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -37,11 +36,11 @@ type (
 	}
 
 	Twoonone struct {
-		Id               string    `db:"id"`
-		Wincount         int64     `db:"wincount"`
-		Losecount        int64     `db:"losecount"`
-		LastGetdaliyTime time.Time `db:"last_getdaliy_time"`
-		Coin             float64   `db:"coin"`
+		Id               string  `db:"id"`
+		Wincount         int64   `db:"wincount"`
+		Losecount        int64   `db:"losecount"`
+		LastGetdaliyTime int64   `db:"last_getdaliy_time"`
+		Coin             float64 `db:"coin"`
 	}
 )
 
