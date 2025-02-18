@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 type JSON_Response struct {
@@ -15,10 +15,10 @@ type JSON_Response struct {
 
 func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 	ret := new(JSON_Response)
+	statusCode := http.StatusOK
 	if err != nil {
 		if e, ok := err.(*types.AppError); ok {
-			fmt.Println(e)
-			w.WriteHeader(e.StatusCode())
+			statusCode = e.StatusCode()
 			ret.Code = int(e.Code)
 			ret.Message = e.Message()
 		} else {
@@ -29,4 +29,5 @@ func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 		ret.Code = 0
 		ret.Message = "OK"
 	}
+	httpx.WriteJson(w, statusCode, ret)
 }
