@@ -7,13 +7,15 @@ import (
 )
 
 type ServiceContext struct {
-	Config             config.Config
-	OIDCAuthMiddleware rest.Middleware
+	Config                   config.Config
+	OIDCAuthMiddleware       rest.Middleware
+	ResponseHeaderMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config:             c,
-		OIDCAuthMiddleware: middleware.NewOIDCAuthMiddleware().Handle,
+		Config:                   c,
+		OIDCAuthMiddleware:       middleware.NewOIDCAuthMiddleware().Handle,
+		ResponseHeaderMiddleware: middleware.NewResponseHeaderMiddleware().Handle,
 	}
 }

@@ -50,7 +50,8 @@ type StartRoomRequest {
 
 @server (
 	// 处理SSO认证，暂时全部请求均需认证
-	middleware: OIDCAuthMiddleware
+	// 响应头处理
+	middleware: OIDCAuthMiddleware,ResponseHeaderMiddleware
 )
 service twoonone-api {
 	@handler getRooms
