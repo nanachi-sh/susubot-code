@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -330,7 +329,7 @@ func callbackHandle(w http.ResponseWriter, r *http.Request) bool {
 }
 
 func formatCookie(key, value, domain string, expires_in int) *http.Cookie {
-	fmt.Println(key, value, domain, expires_in)
+	domain = ".unturned.fun"
 	return &http.Cookie{
 		Name:     key,
 		Value:    value,
