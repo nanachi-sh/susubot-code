@@ -14,7 +14,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.OIDCAuthMiddleware, serverCtx.ResponseHeaderMiddleware},
+			[]rest.Middleware{serverCtx.ResponseHeaderMiddleware, serverCtx.OIDCAuthMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
