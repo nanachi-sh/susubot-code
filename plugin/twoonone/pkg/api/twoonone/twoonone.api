@@ -1,14 +1,14 @@
 syntax = "v1"
 
 type Basic {
-	Name string `custom:"name"`
+	Name  string `custom:"name"`
 	Email string `custom:"email"`
 }
 
 type Extra {
-	WinCount int `custom:"wincount"`
-	LoseCount int `custom:"losecount"`
-	Coin float64 `custom:"coin"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type UserInfo {
@@ -21,7 +21,7 @@ type GetDailyCoinRequest {
 }
 
 type GetRoomRequest {
-	UI UserInfo
+	UI       UserInfo
 	RoomHash string `path:"room_hash"`
 }
 

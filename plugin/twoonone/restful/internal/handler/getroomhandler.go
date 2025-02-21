@@ -17,6 +17,10 @@ func getRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
+		if err := handler.ParseCustom(r, &req); err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
+			return
+		}
 
 		l := logic.NewGetRoomLogic(r.Context(), svcCtx)
 		resp, err := l.GetRoom(&req)

@@ -3,9 +3,9 @@
 
 package types
 
-type CallbackRequest struct {
-	AuthorizationCode string `path:"code"`
-	CodeVerifier      string `json:"code_verifier"`
+type Basic struct {
+	Name  string `custom:"name"`
+	Email string `custom:"email"`
 }
 
 type Card struct {
@@ -17,11 +17,18 @@ type ExitRoomRequest struct {
 	UserId   string `form:"user_id"`
 }
 
+type Extra struct {
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
+}
+
 type GetDailyCoinRequest struct {
 	UserId string `form:"user_id"`
 }
 
 type GetRoomRequest struct {
+	UI       UserInfo
 	RoomHash string `path:"room_hash"`
 }
 
@@ -54,4 +61,9 @@ type SendCardRequest struct {
 type StartRoomRequest struct {
 	RoomHash string `path:"room_hash"`
 	UserId   string `form:"user_id"`
+}
+
+type UserInfo struct {
+	Basic Basic
+	Extra Extra
 }
