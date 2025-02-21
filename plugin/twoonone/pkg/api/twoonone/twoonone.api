@@ -1,48 +1,61 @@
 syntax = "v1"
 
-type Basic {
-	Name  string `custom:"name"`
-	Email string `custom:"email"`
-}
-
-type Extra {
+type GetDailyCoinRequest {
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
 	LoseCount int     `custom:"losecount"`
 	Coin      float64 `custom:"coin"`
 }
 
-type UserInfo {
-	basic Basic
-	extra Extra
-}
-
-type GetDailyCoinRequest {
-	UserId string `form:"user_id"`
-}
-
 type GetRoomRequest {
-	UI       UserInfo
-	RoomHash string `path:"room_hash"`
+	RoomHash  string  `path:"room_hash"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type JoinRoomRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type ExitRoomRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type RobLandownerRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type NoRobLandownerRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type Card {
@@ -50,19 +63,34 @@ type Card {
 }
 
 type SendCardRequest {
-	RoomHash  string `path:"room_hash"`
-	UserId    string `form:"user_id"`
-	SendCards []Card `form:"sendcards"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	SendCards []Card  `form:"sendcards"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type NoSendCardRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type StartRoomRequest {
-	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	RoomHash  string  `path:"room_hash"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 @server (
