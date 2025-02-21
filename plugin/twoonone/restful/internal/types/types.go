@@ -18,21 +18,13 @@ type ExitRoomRequest struct {
 }
 
 type GetDailyCoinRequest struct {
-	UserId    string  `form:"user_id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	UserId string `form:"user_id"`
+	Name   string `custom:"name"`
+	Email  string `custom:"email"`
 }
 
 type GetRoomRequest struct {
-	RoomHash  string  `path:"room_hash"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount,optional"`
-	LoseCount int     `custom:"losecount,optional"`
-	Coin      float64 `custom:"coin,optional"`
+	RoomHash string `path:"room_hash"`
 }
 
 type JoinRoomRequest struct {
