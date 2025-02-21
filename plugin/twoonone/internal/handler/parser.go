@@ -46,7 +46,7 @@ func ParseCustom(r *http.Request, v any) error {
 					types.PARSE_CUSTOM_KEY_email: email,
 					types.PARSE_CUSTOM_KEY_name:  name,
 				},
-				&v,
+				v,
 			); err != nil {
 				return err
 			}
@@ -71,7 +71,7 @@ func ParseCustom(r *http.Request, v any) error {
 				types.PARSE_CUSTOM_KEY_losecount: v.LoseCount,
 				types.PARSE_CUSTOM_KEY_coin:      v.Coin,
 			},
-			&v,
+			v,
 		); err != nil {
 			return err
 		}
