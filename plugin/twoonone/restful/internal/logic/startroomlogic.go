@@ -4,7 +4,7 @@ import (
 	"context"
 
 	inside "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone"
-	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
+	pkg_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/types"
 
@@ -28,8 +28,8 @@ func NewStartRoomLogic(ctx context.Context, svcCtx *svc.ServiceContext) *StartRo
 func (l *StartRoomLogic) StartRoom(req *types.StartRoomRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
 
-	return inside.NewAPIRequest(l.Logger).StartRoom(&twoonone.StartRoomRequest{
+	return inside.NewAPIRequest(l.Logger).StartRoom(&pkg_types.StartRoomRequest{
 		RoomHash: req.RoomHash,
-		UserId:   "",
+		Extra:    pkg_types.Extra(req.Extra),
 	})
 }

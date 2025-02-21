@@ -4,7 +4,7 @@ import (
 	"context"
 
 	inside "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone"
-	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
+	pkg_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/types"
 
@@ -28,8 +28,8 @@ func NewNoRobLandownerLogic(ctx context.Context, svcCtx *svc.ServiceContext) *No
 func (l *NoRobLandownerLogic) NoRobLandowner(req *types.NoRobLandownerRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
 
-	return inside.NewAPIRequest(l.Logger).NoRobLandowner(&twoonone.NoRobLandownerRequest{
-		UserId:   "",
+	return inside.NewAPIRequest(l.Logger).NoRobLandowner(&pkg_types.NoRobLandownerRequest{
 		RoomHash: req.RoomHash,
+		Extra:    pkg_types.Extra(req.Extra),
 	})
 }
