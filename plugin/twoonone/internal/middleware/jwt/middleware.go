@@ -25,6 +25,7 @@ func update(w http.ResponseWriter, r *http.Request) bool {
 	user_id, _ := m["federated_claims"].(map[string]any)["user_id"].(string)
 	i, err := db.GetUser(xlogger, user_id)
 	if err != nil {
+		xlogger.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return false
 	}
@@ -46,6 +47,7 @@ func update(w http.ResponseWriter, r *http.Request) bool {
 		LastGetdaliyTime: i.LastGetdaliyTime,
 	})
 	if err != nil {
+		xlogger.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return false
 	}
@@ -66,6 +68,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 					return
 				}
 			default: //其他原因
+				xlogger.Error(err)
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
