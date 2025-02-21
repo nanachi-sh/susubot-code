@@ -18,7 +18,9 @@ type ExitRoomRequest struct {
 }
 
 type GetDailyCoinRequest struct {
-	UserId string `form:"user_id"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -27,7 +29,7 @@ type GetDailyCoinRequest struct {
 }
 
 type GetRoomRequest struct {
-	RoomHash string `path:"room_hash"`
+	RoomHash  string  `path:"room_hash"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`

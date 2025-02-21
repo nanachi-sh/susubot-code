@@ -28,7 +28,5 @@ func (l *CreateRoomLogic) CreateRoom() (resp any, err error) {
 	// todo: add your logic here and delete this line
 
 	resp, err = inside.NewAPIRequest(l.Logger).CreateRoom(&twoonone.CreateRoomRequest{})
-	l.Logger.Info(err == nil)
-	l.Logger.Infof("%T", err)
 	return
 }

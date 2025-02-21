@@ -1,13 +1,23 @@
 syntax = "v1"
 
 type GetDailyCoinRequest {
-	UserId string `form:"user_id"`
-	Name   string `custom:"name"`
-	Email  string `custom:"email"`
+	UserId    string  `form:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type GetRoomRequest {
-	RoomHash string `path:"room_hash"`
+	RoomHash  string  `path:"room_hash"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type JoinRoomRequest {
