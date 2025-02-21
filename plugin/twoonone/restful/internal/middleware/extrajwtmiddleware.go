@@ -1,6 +1,10 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/jwt"
+)
 
 type ExtraJWTMiddleware struct {
 }
@@ -14,6 +18,6 @@ func (m *ExtraJWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		// TODO generate middleware implement function, delete after code implementation
 
 		// Passthrough to next handler if need
-		next(w, r)
+		jwt.Handle(w, r, next)
 	}
 }
