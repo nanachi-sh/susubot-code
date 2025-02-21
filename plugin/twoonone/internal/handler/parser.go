@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -23,10 +24,12 @@ var (
 )
 
 func ParseCustom(r *http.Request, v any) error {
+	fmt.Println("in")
 	// 检查是否有access_token
 	{
 		c, err := r.Cookie(types.COOKIE_KEY_access_token)
 		if err == nil && c.Value != "" {
+			fmt.Println("access")
 			token_raw := c.Value
 			m := jwt.MapClaims{}
 			jwt.ParseWithClaims(token_raw, m, nil)
@@ -47,10 +50,12 @@ func ParseCustom(r *http.Request, v any) error {
 			); err != nil {
 				return err
 			}
+			fmt.Println("access ok")
 		}
 	}
 	// 检查是否有extra
 	if extra_raw := r.Header.Get("authorization"); extra_raw != "" {
+		fmt.Println("extra")
 		if len(extra_raw) < 10 {
 			return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "authorization format error")
 		}
@@ -70,6 +75,8 @@ func ParseCustom(r *http.Request, v any) error {
 		); err != nil {
 			return err
 		}
+		fmt.Println("extra ok")
 	}
+	fmt.Println("out")
 	return nil
 }
