@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/handler"
@@ -17,10 +18,14 @@ func getRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
+		fmt.Println(req)
+		fmt.Println(req.Email)
 		if err := handler.ParseCustom(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
+		fmt.Println(req)
+		fmt.Println(req.Email)
 
 		l := logic.NewGetRoomLogic(r.Context(), svcCtx)
 		resp, err := l.GetRoom(&req)
