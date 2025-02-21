@@ -48,7 +48,14 @@ func ParseCustom(r *http.Request, v any) error {
 			if !ok {
 				return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "从访问Token获取name失败")
 			}
-			user_id, ok = (m["federated_claims"].(map[string]any))["user_id"].(string)
+			if mi, ok := m["federated_claims"].(map[string]any); !ok {
+				return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "从访问Token获取federated_claims失败")
+			} else {
+				user_id, ok = mi["user_id"].(string)
+				if !ok {
+					return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "从federated_claims获取user_id失败")
+				}
+			}
 		}
 	}
 	// 检查是否有extra
