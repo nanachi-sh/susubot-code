@@ -30,7 +30,7 @@ func ParseCustom(r *http.Request, v any) error {
 		wincount           int
 		losecount          int
 		coin               float64
-		last_getdaliy_time float64
+		last_getdaliy_time int64
 
 		new_extra string
 	)
@@ -74,6 +74,7 @@ func ParseCustom(r *http.Request, v any) error {
 		wincount = v.WinCount
 		losecount = v.LoseCount
 		coin = v.Coin
+		last_getdaliy_time = v.LastGetdaliyTime
 	}
 	// 检查extra是否需更新
 	if need := r.Header.Get(types.HEADER_CUSTOM_KEY_extra_update); need != "" {
