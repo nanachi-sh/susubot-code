@@ -69,14 +69,16 @@ func ParseCustom(r *http.Request, v any) error {
 		coin = v.Coin
 		fmt.Println("extra ok")
 	}
+	m := map[string]any{
+		types.PARSE_CUSTOM_KEY_email:     email,
+		types.PARSE_CUSTOM_KEY_name:      name,
+		types.PARSE_CUSTOM_KEY_wincount:  wincount,
+		types.PARSE_CUSTOM_KEY_losecount: losecount,
+		types.PARSE_CUSTOM_KEY_coin:      coin,
+	}
+	fmt.Println(m)
 	if err := customUnmarshaler.Unmarshal(
-		map[string]any{
-			types.PARSE_CUSTOM_KEY_email:     email,
-			types.PARSE_CUSTOM_KEY_name:      name,
-			types.PARSE_CUSTOM_KEY_wincount:  wincount,
-			types.PARSE_CUSTOM_KEY_losecount: losecount,
-			types.PARSE_CUSTOM_KEY_coin:      coin,
-		},
+		m,
 		v,
 	); err != nil {
 		return err
