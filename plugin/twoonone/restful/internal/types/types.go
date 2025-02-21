@@ -9,7 +9,16 @@ type Card struct {
 
 type ExitRoomRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
+}
+
+type Extra struct {
+	UserId    string  `custom:"user_id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -18,16 +27,12 @@ type ExitRoomRequest struct {
 }
 
 type GetDailyCoinRequest struct {
-	UserId    string  `form:"user_id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	Extra Extra `custom:"extra"`
 }
 
 type GetRoomRequest struct {
 	RoomHash  string  `path:"room_hash"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -37,7 +42,7 @@ type GetRoomRequest struct {
 
 type JoinRoomRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -47,7 +52,7 @@ type JoinRoomRequest struct {
 
 type NoRobLandownerRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -57,7 +62,7 @@ type NoRobLandownerRequest struct {
 
 type NoSendCardRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -67,7 +72,7 @@ type NoSendCardRequest struct {
 
 type RobLandownerRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -77,8 +82,8 @@ type RobLandownerRequest struct {
 
 type SendCardRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
 	SendCards []Card  `form:"sendcards"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -88,7 +93,7 @@ type SendCardRequest struct {
 
 type StartRoomRequest struct {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`

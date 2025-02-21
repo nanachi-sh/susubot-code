@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -23,8 +24,9 @@ var (
 
 func ParseCustom(r *http.Request, v any) error {
 	var (
-		email string
-		name  string
+		user_id string
+		email   string
+		name    string
 
 		wincount  int
 		losecount int
@@ -46,6 +48,7 @@ func ParseCustom(r *http.Request, v any) error {
 			if !ok {
 				return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "从访问Token获取name失败")
 			}
+			user_id, ok = (m["federated_claims"].(map[string]any))["user_id"].(string)
 		}
 	}
 	// 检查是否有extra
@@ -64,12 +67,16 @@ func ParseCustom(r *http.Request, v any) error {
 		coin = v.Coin
 	}
 	m := map[string]any{
-		types.PARSE_CUSTOM_KEY_email:     email,
-		types.PARSE_CUSTOM_KEY_name:      name,
-		types.PARSE_CUSTOM_KEY_wincount:  wincount,
-		types.PARSE_CUSTOM_KEY_losecount: losecount,
-		types.PARSE_CUSTOM_KEY_coin:      coin,
+		types.PARSE_CUSTOM_INTO: map[string]any{
+			types.PARSE_CUSTOM_KEY_email:     email,
+			types.PARSE_CUSTOM_KEY_name:      name,
+			types.PARSE_CUSTOM_KEY_wincount:  wincount,
+			types.PARSE_CUSTOM_KEY_losecount: losecount,
+			types.PARSE_CUSTOM_KEY_coin:      coin,
+			types.PARSE_CUSTOM_KEY_user_id:   user_id,
+		},
 	}
+	fmt.Println(m)
 	if err := customUnmarshaler.Unmarshal(
 		m,
 		v,

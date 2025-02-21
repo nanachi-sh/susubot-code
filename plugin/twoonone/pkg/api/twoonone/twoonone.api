@@ -1,7 +1,7 @@
 syntax = "v1"
 
-type GetDailyCoinRequest {
-	UserId    string  `form:"user_id"`
+type Extra {
+	UserId    string  `custom:"user_id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -9,8 +9,13 @@ type GetDailyCoinRequest {
 	Coin      float64 `custom:"coin"`
 }
 
+type GetDailyCoinRequest {
+	extra Extra `custom:"extra"`
+}
+
 type GetRoomRequest {
 	RoomHash  string  `path:"room_hash"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -20,7 +25,7 @@ type GetRoomRequest {
 
 type JoinRoomRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -30,7 +35,7 @@ type JoinRoomRequest {
 
 type ExitRoomRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -40,7 +45,7 @@ type ExitRoomRequest {
 
 type RobLandownerRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -50,7 +55,7 @@ type RobLandownerRequest {
 
 type NoRobLandownerRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -64,8 +69,8 @@ type Card {
 
 type SendCardRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
 	SendCards []Card  `form:"sendcards"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -75,7 +80,7 @@ type SendCardRequest {
 
 type NoSendCardRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
@@ -85,7 +90,7 @@ type NoSendCardRequest {
 
 type StartRoomRequest {
 	RoomHash  string  `path:"room_hash"`
-	UserId    string  `form:"user_id"`
+	UserId    string  `custom:"id"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
 	WinCount  int     `custom:"wincount"`
