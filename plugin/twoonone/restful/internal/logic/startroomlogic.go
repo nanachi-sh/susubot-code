@@ -30,6 +30,6 @@ func (l *StartRoomLogic) StartRoom(req *types.StartRoomRequest) (resp any, err e
 
 	return inside.NewAPIRequest(l.Logger).StartRoom(&twoonone.StartRoomRequest{
 		RoomHash: req.RoomHash,
-		UserId:   req.UserId,
+		UserId:   "",
 	})
 }
