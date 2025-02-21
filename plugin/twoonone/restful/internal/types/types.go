@@ -30,9 +30,9 @@ type GetRoomRequest struct {
 	RoomHash  string  `path:"room_hash"`
 	Name      string  `custom:"name"`
 	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	WinCount  int     `custom:"wincount,optional"`
+	LoseCount int     `custom:"losecount,optional"`
+	Coin      float64 `custom:"coin,optional"`
 }
 
 type JoinRoomRequest struct {
