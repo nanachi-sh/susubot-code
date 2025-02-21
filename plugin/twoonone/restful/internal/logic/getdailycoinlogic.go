@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	inside "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
@@ -27,7 +28,7 @@ func NewGetDailyCoinLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetD
 
 func (l *GetDailyCoinLogic) GetDailyCoin(req *types.GetDailyCoinRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
-
+	fmt.Println(req)
 	return inside.NewAPIRequest(l.Logger).GetDailyCoin(&twoonone.GetDailyCoinRequest{
 		UserId: req.Extra.UserId,
 	})
