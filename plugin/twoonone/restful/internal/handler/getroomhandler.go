@@ -28,6 +28,7 @@ func getRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := logic.NewGetRoomLogic(r.Context(), svcCtx)
 		resp, err := l.GetRoom(&req)
+		fmt.Println(reflect.TypeOf(resp).Name())
 		if req.Extra.Extra_update {
 			m, ok := getExtraMap(resp)
 			if !ok {
