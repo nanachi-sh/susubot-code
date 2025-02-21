@@ -29,6 +29,6 @@ func (l *GetDailyCoinLogic) GetDailyCoin(req *types.GetDailyCoinRequest) (resp a
 	// todo: add your logic here and delete this line
 
 	return inside.NewAPIRequest(l.Logger).GetDailyCoin(&twoonone.GetDailyCoinRequest{
-		UserId: req.UserId,
+		UserId: req.Extra.UserId,
 	})
 }
