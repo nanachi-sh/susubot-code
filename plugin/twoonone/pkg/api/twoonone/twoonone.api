@@ -1,12 +1,13 @@
 syntax = "v1"
 
 type Extra {
-	UserId    string  `custom:"user_id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	UserId       string  `custom:"user_id"`
+	Name         string  `custom:"name"`
+	Email        string  `custom:"email"`
+	WinCount     int     `custom:"wincount"`
+	LoseCount    int     `custom:"losecount"`
+	Coin         float64 `custom:"coin"`
+	extra_update bool    `custom:"extra_update"`
 }
 
 type GetDailyCoinRequest {
@@ -59,10 +60,10 @@ type StartRoomRequest {
 }
 
 @server (
-	// 响应头添加
+	// 请求头检查与响应头修改
 	// 验证OIDC Token
 	// 签发与验证Extra JWT
-	middleware: ResponseHeaderMiddleware,OIDCAuthMiddleware,ExtraJWTMiddleware
+	middleware: HeaderMiddleware,OIDCAuthMiddleware,ExtraJWTMiddleware
 	prefix:     v1
 )
 service twoonone-api {

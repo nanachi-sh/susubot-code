@@ -27,7 +27,6 @@ func NewGetRoomLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetRoomLo
 
 func (l *GetRoomLogic) GetRoom(req *types.GetRoomRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
-	l.Logger.Info(req)
 	return inside.NewAPIRequest(l.Logger).GetRoom(&pkg_types.GetRoomRequest{
 		RoomHash: req.RoomHash,
 		Extra:    pkg_types.Extra(req.Extra),

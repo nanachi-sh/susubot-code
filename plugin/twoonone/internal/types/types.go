@@ -10,12 +10,17 @@ const (
 const (
 	PARSE_CUSTOM_INTO = "extra"
 
-	PARSE_CUSTOM_KEY_wincount  = "wincount"
-	PARSE_CUSTOM_KEY_losecount = "losecount"
-	PARSE_CUSTOM_KEY_coin      = "coin"
-	PARSE_CUSTOM_KEY_name      = "name"
-	PARSE_CUSTOM_KEY_email     = "email"
-	PARSE_CUSTOM_KEY_user_id   = "user_id"
+	PARSE_CUSTOM_KEY_wincount     = "wincount"
+	PARSE_CUSTOM_KEY_losecount    = "losecount"
+	PARSE_CUSTOM_KEY_coin         = "coin"
+	PARSE_CUSTOM_KEY_name         = "name"
+	PARSE_CUSTOM_KEY_email        = "email"
+	PARSE_CUSTOM_KEY_user_id      = "user_id"
+	PARSE_CUSTOM_KEY_extra_update = "extra_update"
+)
+
+const (
+	HEADER_CUSTOM_KEY_extra_update = "extra_update"
 )
 
 type JWT_EXTRA struct {

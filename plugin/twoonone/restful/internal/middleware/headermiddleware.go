@@ -6,14 +6,14 @@ import (
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/header"
 )
 
-type ResponseHeaderMiddleware struct {
+type HeaderMiddleware struct {
 }
 
-func NewResponseHeaderMiddleware() *ResponseHeaderMiddleware {
-	return &ResponseHeaderMiddleware{}
+func NewHeaderMiddleware() *HeaderMiddleware {
+	return &HeaderMiddleware{}
 }
 
-func (m *ResponseHeaderMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
+func (m *HeaderMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO generate middleware implement function, delete after code implementation
 

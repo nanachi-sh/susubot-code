@@ -20,6 +20,7 @@ var (
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// 检查是否存在extra
 	if extra_raw := r.Header.Get("authorization"); extra_raw != "" { //存在
+		// 检查是否有效
 		ok, err := verify(extra_raw)
 		if err != nil || !ok {
 			w.WriteHeader(http.StatusBadRequest)
@@ -57,6 +58,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 			return
 		}
 		r.Header.Add("authorization", "Bearer "+jwt_raw)
+		r.Header.Add(types.HEADER_CUSTOM_KEY_extra_update, "true")
 	}
 	next(w, r)
 }
