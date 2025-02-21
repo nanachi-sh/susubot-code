@@ -31,6 +31,6 @@ func (l *JoinRoomLogic) JoinRoom(req *types.JoinRoomRequest) (resp any, err erro
 
 	return inside.NewAPIRequest(l.Logger).JoinRoom(&twoonone.JoinRoomRequest{
 		RoomHash: req.RoomHash,
-		UserId:   req.UserId,
+		UserId:   "",
 	})
 }
