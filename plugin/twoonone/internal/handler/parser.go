@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -28,11 +27,12 @@ func ParseCustom(r *http.Request, v any) error {
 		email   string
 		name    string
 
-		wincount  int
-		losecount int
-		coin      float64
+		wincount           int
+		losecount          int
+		coin               float64
+		last_getdaliy_time float64
 
-		extra_update bool
+		new_extra string
 	)
 	// 检查是否有access_token
 	{
@@ -77,20 +77,20 @@ func ParseCustom(r *http.Request, v any) error {
 	}
 	// 检查extra是否需更新
 	if need := r.Header.Get(types.HEADER_CUSTOM_KEY_extra_update); need != "" {
-		extra_update = true
+		new_extra = r.Header.Get("authorization")[7:]
 	}
 	m := map[string]any{
 		types.PARSE_CUSTOM_INTO: map[string]any{
-			types.PARSE_CUSTOM_KEY_email:        email,
-			types.PARSE_CUSTOM_KEY_name:         name,
-			types.PARSE_CUSTOM_KEY_wincount:     wincount,
-			types.PARSE_CUSTOM_KEY_losecount:    losecount,
-			types.PARSE_CUSTOM_KEY_coin:         coin,
-			types.PARSE_CUSTOM_KEY_user_id:      user_id,
-			types.PARSE_CUSTOM_KEY_extra_update: extra_update,
+			types.PARSE_CUSTOM_KEY_email:              email,
+			types.PARSE_CUSTOM_KEY_name:               name,
+			types.PARSE_CUSTOM_KEY_wincount:           wincount,
+			types.PARSE_CUSTOM_KEY_losecount:          losecount,
+			types.PARSE_CUSTOM_KEY_coin:               coin,
+			types.PARSE_CUSTOM_KEY_user_id:            user_id,
+			types.PARSE_CUSTOM_KEY_new_extra:          new_extra,
+			types.PARSE_CUSTOM_KEY_last_getdaliy_time: last_getdaliy_time,
 		},
 	}
-	fmt.Println(m)
 	if err := customUnmarshaler.Unmarshal(
 		m,
 		v,

@@ -1,13 +1,9 @@
 package handler
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"reflect"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/handler"
-	pkg_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/logic"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/types"
@@ -28,30 +24,7 @@ func getRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := logic.NewGetRoomLogic(r.Context(), svcCtx)
 		resp, err := l.GetRoom(&req)
-		fmt.Println(resp == nil)
-		fmt.Println(resp)
-		if req.Extra.Extra_update {
-			m, ok := getExtraMap(resp)
-			if !ok {
-				httpx.ErrorCtx(r.Context(), w, errors.New("api handler error"))
-			}
-			m[pkg_types.EXTRA_KEY_extra] = w.Header().Get("authorization")[7:]
-		}
 
 		handler.Response(w, r, resp, err)
-	}
-}
-
-func getExtraMap(resp any) (map[string]string, bool) {
-	value := reflect.ValueOf(resp).Elem()
-	fmt.Println(value.Type().Name())
-	if extra := value.FieldByName("Extra"); !extra.IsNil() {
-		m, ok := extra.Interface().(map[string]string)
-		if !ok {
-			return nil, false
-		}
-		return m, true
-	} else {
-		return nil, false
 	}
 }

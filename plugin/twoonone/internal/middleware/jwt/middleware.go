@@ -40,9 +40,10 @@ func update(w http.ResponseWriter, r *http.Request) bool {
 			IssuedAt:  &jwt.NumericDate{Time: time.Now()},
 			ID:        "none",
 		},
-		WinCount:  int(i.Wincount),
-		LoseCount: int(i.Losecount),
-		Coin:      i.Coin,
+		WinCount:         int(i.Wincount),
+		LoseCount:        int(i.Losecount),
+		Coin:             i.Coin,
+		LastGetdaliyTime: i.LastGetdaliyTime,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

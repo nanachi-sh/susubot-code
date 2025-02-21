@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql"
-	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/model/twoonone"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/player"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/room"
+	internal_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/types"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -26,18 +26,18 @@ var (
 // 	return &Request{logger: l}
 // }
 
-// func (r *Request) CreateRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomResponse, error) {
+// func (r *Request) CreateRoom(in *types.CreateRoomRequest) (*twoonone_pb.CreateRoomResponse, error) {
 // 	return createRoom(in), nil
 // }
 
-// func (r *Request) ExitRoom(in *twoonone_pb.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, error) {
+// func (r *Request) ExitRoom(in *types.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, error) {
 // 	if in.PlayerId == "" || in.RoomHash == "" {
 // 		return &twoonone_pb.ExitRoomResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return exitRoom(r.logger, in), nil
 // }
 
-// func (r *Request) EventRoom(in *twoonone_pb.EventRoomRequest, stream twoonone_pb.Twoonone_EventRoomServer) error {
+// func (r *Request) EventRoom(in *types.EventRoomRequest, stream twoonone_pb.Twoonone_EventRoomServer) error {
 // 	if in.RoomHash == "" {
 // 		return status.Error(codes.InvalidArgument, "")
 // 	}
@@ -65,60 +65,60 @@ var (
 // 	}
 // }
 
-// func (r *Request) GetDailyCoin(in *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, error) {
+// func (r *Request) GetDailyCoin(in *types.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, error) {
 // 	if in.UserId == "" {
 // 		return &twoonone_pb.GetDailyCoinResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return getDailyCoin(r.logger, in), nil
 // }
 
-// func (r *Request) GetRoom(in *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
+// func (r *Request) GetRoom(in *types.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
 // 	if in.RoomHash == "" {
 // 		return &twoonone_pb.GetRoomResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return getRoom(r.logger, in), nil
 // }
 
-// func (r *Request) GetRooms(in *twoonone_pb.GetRoomsRequest) (*twoonone_pb.GetRoomsResponse, error) {
+// func (r *Request) GetRooms(in *types.GetRoomsRequest) (*twoonone_pb.GetRoomsResponse, error) {
 // 	return getRooms(), nil
 // }
 
-// func (r *Request) JoinRoom(in *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, error) {
+// func (r *Request) JoinRoom(in *types.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, error) {
 // 	if in.RoomHash == "" || in.UserId == "" {
 // 		return &twoonone_pb.JoinRoomResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return joinRoom(r.logger, in), nil
 // }
 
-// func (r *Request) RobLandowner(in *twoonone_pb.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, error) {
+// func (r *Request) RobLandowner(in *types.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, error) {
 // 	if in.PlayerId == "" || in.RoomHash == "" {
 // 		return &twoonone_pb.RobLandownerResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return robLandowner(r.logger, in), nil
 // }
 
-// func (r *Request) NoRobLandowner(in *twoonone_pb.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, error) {
+// func (r *Request) NoRobLandowner(in *types.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, error) {
 // 	if in.PlayerId == "" || in.RoomHash == "" {
 // 		return &twoonone_pb.NoRobLandownerResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return noRobLandowner(r.logger, in), nil
 // }
 
-// func (r *Request) SendCard(in *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResponse, error) {
+// func (r *Request) SendCard(in *types.SendCardRequest) (*twoonone_pb.SendCardResponse, error) {
 // 	if in.PlayerId == "" || in.RoomHash == "" || len(in.Sendcards) == 0 {
 // 		return &twoonone_pb.SendCardResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return sendCard(r.logger, in), nil
 // }
 
-// func (r *Request) NoSendCard(in *twoonone_pb.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, error) {
+// func (r *Request) NoSendCard(in *types.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, error) {
 // 	if in.PlayerId == "" || in.RoomHash == "" {
 // 		return &twoonone_pb.NoSendCardResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
 // 	return noSendCard(r.logger, in), nil
 // }
 
-// func (r *Request) StartRoom(in *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomResponse, error) {
+// func (r *Request) StartRoom(in *types.StartRoomRequest) (*twoonone_pb.StartRoomResponse, error) {
 // 	if in.RoomHash == "" {
 // 		return &twoonone_pb.StartRoomResponse{}, status.Error(codes.InvalidArgument, "")
 // 	}
@@ -135,78 +135,86 @@ func NewAPIRequest(l logx.Logger) *APIRequest {
 	}
 }
 
-func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (resp any, err error) {
+func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (any, error) {
 	if req.RoomHash == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
-	return getRoom(r.logger, req)
+	resp, err := getRoom(r.logger, req)
+	if err != nil {
+		return nil, err
+	}
+	if req.Extra.NewExtra != "" {
+		resp.Extra[internal_types.EXTRA_KEY_extra] = req.Extra.NewExtra
+	}
+	return resp, nil
 }
 
-func (r *APIRequest) ExitRoom(req *twoonone_pb.ExitRoomRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) ExitRoom(req *types.ExitRoomRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
-	return exitRoom(r.logger, req)
+	resp, err := exitRoom(r.logger, req)
+	if err != nil {
+		return nil, err
+	}
+	if req.Extra.NewExtra != "" {
+		resp.Extra[internal_types.EXTRA_KEY_extra] = req.Extra.NewExtra
+	}
+	return resp, nil
 }
 
-func (r *APIRequest) GetDailyCoin(req *twoonone_pb.GetDailyCoinRequest) (resp any, err error) {
-	if req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
-	}
+func (r *APIRequest) GetDailyCoin(req *types.GetDailyCoinRequest) (any, error) {
 	return getDailyCoin(r.logger, req)
 }
 
-func (r *APIRequest) GetRooms() (resp any, err error) {
+func (r *APIRequest) GetRooms() (any, error) {
 	return getRooms(), nil
 }
 
-func (r *APIRequest) JoinRoom(req *twoonone_pb.JoinRoomRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) JoinRoom(req *types.JoinRoomRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
 	return joinRoom(r.logger, req)
 }
 
-func (r *APIRequest) NoRobLandowner(req *twoonone_pb.NoRobLandownerRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) NoRobLandowner(req *types.NoRobLandownerRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
 	return noRobLandowner(r.logger, req)
 }
 
-func (r *APIRequest) NoSendCard(req *twoonone_pb.NoSendCardRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) NoSendCard(req *types.NoSendCardRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
 	return noSendCard(r.logger, req)
 }
 
-func (r *APIRequest) RobLandowner(req *twoonone_pb.RobLandownerRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) RobLandowner(req *types.RobLandownerRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
 	return robLandowner(r.logger, req)
 }
 
-func (r *APIRequest) SendCard(req *twoonone_pb.SendCardRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" || len(req.Sendcards) == 0 {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) SendCard(req *types.SendCardRequest) (any, error) {
+	if req.RoomHash == "" || len(req.SendCards) == 0 {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
 	return sendCard(r.logger, req)
 }
 
-func (r *APIRequest) StartRoom(req *twoonone_pb.StartRoomRequest) (resp any, err error) {
-	if req.RoomHash == "" || req.UserId == "" {
-		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
+func (r *APIRequest) StartRoom(req *types.StartRoomRequest) (any, error) {
+	if req.RoomHash == "" {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
-	return startRoom(r.logger, &twoonone_pb.StartRoomRequest{
-		RoomHash: req.RoomHash,
-		UserId:   req.UserId,
-	})
+	return startRoom(r.logger, req)
 }
 
-func (r *APIRequest) CreateRoom(req *twoonone_pb.CreateRoomRequest) (resp any, err error) {
-	return createRoom(&twoonone_pb.CreateRoomRequest{})
+func (r *APIRequest) CreateRoom() (any, error) {
+	return createRoom()
 }
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {
@@ -237,19 +245,25 @@ func findRoom(hash string) (*room.Room, bool) {
 	return nil, false
 }
 
+func parseCard(c []types.Card) []*twoonone_pb.Card {
+	cards := []*twoonone_pb.Card{}
+	for _, v := range c {
+		cards = append(cards, &twoonone_pb.Card{
+			Number: twoonone_pb.Card_Number(v.Number),
+		})
+	}
+	return cards
+}
+
 func getRooms() *twoonone_pb.GetRoomsResponse {
 	return &twoonone_pb.GetRoomsResponse{
 		RoomInfos: room.FormatInternalRooms2Protobuf(rooms),
 	}
 }
 
-func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, error) {
-	u, err := db.GetUser(logger, in.UserId)
-	if err != nil {
-		return nil, err
-	}
-	if checkDailyCoin(u) {
-		if err := db.UpdateUser(logger, u.Id, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
+func getDailyCoin(logger logx.Logger, in *types.GetDailyCoinRequest) (*twoonone_pb.GetDailyCoinResponse, error) {
+	if checkDailyCoin(in.Extra) {
+		if err := db.UpdateUser(logger, in.Extra.UserId, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
 			return nil, err
 		}
 		return &twoonone_pb.GetDailyCoinResponse{}, nil
@@ -258,8 +272,8 @@ func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*two
 	}
 }
 
-func checkDailyCoin(u twoonone.Twoonone) bool {
-	last_time := time.Unix(u.LastGetdaliyTime, 0)
+func checkDailyCoin(u types.Extra) bool {
+	last_time := time.Unix(u.LastGetDaliyTime, 0)
 	if last_time.IsZero() { //第一次领取
 		return true
 	} else {
@@ -284,7 +298,7 @@ func getRoom(logger logx.Logger, in *types.GetRoomRequest) (*twoonone_pb.GetRoom
 	}, nil
 }
 
-func createRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomResponse, error) {
+func createRoom() (*twoonone_pb.CreateRoomResponse, error) {
 	newRoom := room.New(200, 1)
 	rooms = append(rooms, newRoom)
 	return &twoonone_pb.CreateRoomResponse{
@@ -292,42 +306,37 @@ func createRoom(in *twoonone_pb.CreateRoomRequest) (*twoonone_pb.CreateRoomRespo
 	}, nil
 }
 
-func joinRoom(logger logx.Logger, in *twoonone_pb.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, error) {
+func joinRoom(logger logx.Logger, in *types.JoinRoomRequest) (*twoonone_pb.JoinRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	if _, ok := getPlayerFromRooms(in.UserId); ok {
+	if _, ok := getPlayerFromRooms(in.Extra.UserId); ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_EXISTED_A_ROOM, "")
 	}
-	u, err := db.GetUser(logger, in.UserId)
-	if err != nil {
-		return nil, err
-	}
-	// TEST
-	if serr := r.Join(logger, u.Id, "", u.Coin); serr != nil {
+	if err := r.Join(logger, in.Extra.UserId, in.Extra.Name, in.Extra.Coin); err != nil {
 		return nil, err
 	}
 	return &twoonone_pb.JoinRoomResponse{}, nil
 }
 
-func exitRoom(logger logx.Logger, in *twoonone_pb.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, error) {
+func exitRoom(logger logx.Logger, in *types.ExitRoomRequest) (*twoonone_pb.ExitRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	if err := r.Exit(logger, in.UserId); err != nil {
+	if err := r.Exit(logger, in.Extra.UserId); err != nil {
 		return nil, err
 	}
 	return &twoonone_pb.ExitRoomResponse{}, nil
 }
 
-func startRoom(logger logx.Logger, in *twoonone_pb.StartRoomRequest) (*twoonone_pb.StartRoomResponse, error) {
+func startRoom(logger logx.Logger, in *types.StartRoomRequest) (*twoonone_pb.StartRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	if _, ok := r.GetPlayer(in.UserId); !ok {
+	if _, ok := r.GetPlayer(in.Extra.UserId); !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST, "")
 	}
 	if err := r.Start(logger); err != nil {
@@ -336,12 +345,12 @@ func startRoom(logger logx.Logger, in *twoonone_pb.StartRoomRequest) (*twoonone_
 	return &twoonone_pb.StartRoomResponse{}, nil
 }
 
-func robLandowner(logger logx.Logger, in *twoonone_pb.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, error) {
+func robLandowner(logger logx.Logger, in *types.RobLandownerRequest) (*twoonone_pb.RobLandownerResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	p, ok := r.GetPlayer(in.UserId)
+	p, ok := r.GetPlayer(in.Extra.UserId)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST, "")
 	}
@@ -351,12 +360,12 @@ func robLandowner(logger logx.Logger, in *twoonone_pb.RobLandownerRequest) (*two
 	return &twoonone_pb.RobLandownerResponse{}, nil
 }
 
-func noRobLandowner(logger logx.Logger, in *twoonone_pb.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, error) {
+func noRobLandowner(logger logx.Logger, in *types.NoRobLandownerRequest) (*twoonone_pb.NoRobLandownerResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	p, ok := r.GetPlayer(in.UserId)
+	p, ok := r.GetPlayer(in.Extra.UserId)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST, "")
 	}
@@ -366,27 +375,28 @@ func noRobLandowner(logger logx.Logger, in *twoonone_pb.NoRobLandownerRequest) (
 	return &twoonone_pb.NoRobLandownerResponse{}, nil
 }
 
-func sendCard(logger logx.Logger, in *twoonone_pb.SendCardRequest) (*twoonone_pb.SendCardResponse, error) {
+func sendCard(logger logx.Logger, in *types.SendCardRequest) (*twoonone_pb.SendCardResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	p, ok := r.GetPlayer(in.UserId)
+	p, ok := r.GetPlayer(in.Extra.UserId)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST, "")
 	}
-	if err := r.SendCard(logger, p, in.Sendcards); err != nil {
+	scs := parseCard(in.SendCards)
+	if err := r.SendCard(logger, p, scs); err != nil {
 		return nil, err
 	}
 	return &twoonone_pb.SendCardResponse{}, nil
 }
 
-func noSendCard(logger logx.Logger, in *twoonone_pb.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, error) {
+func noSendCard(logger logx.Logger, in *types.NoSendCardRequest) (*twoonone_pb.NoSendCardResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
-	p, ok := r.GetPlayer(in.UserId)
+	p, ok := r.GetPlayer(in.Extra.UserId)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST, "")
 	}

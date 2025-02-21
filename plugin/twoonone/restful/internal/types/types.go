@@ -13,13 +13,14 @@ type ExitRoomRequest struct {
 }
 
 type Extra struct {
-	UserId       string  `custom:"user_id"`
-	Name         string  `custom:"name"`
-	Email        string  `custom:"email"`
-	WinCount     int     `custom:"wincount"`
-	LoseCount    int     `custom:"losecount"`
-	Coin         float64 `custom:"coin"`
-	Extra_update bool    `custom:"extra_update"`
+	UserId           string  `custom:"user_id"`
+	Name             string  `custom:"name"`
+	Email            string  `custom:"email"`
+	WinCount         int     `custom:"wincount"`
+	LoseCount        int     `custom:"losecount"`
+	Coin             float64 `custom:"coin"`
+	LastGetDaliyTime int64   `custom:"last_getdaliy_time"`
+	NewExtra         string  `custom:"new_extra"`
 }
 
 type GetDailyCoinRequest struct {

@@ -34,13 +34,3 @@ func (l *SendCardLogic) SendCard(req *types.SendCardRequest) (resp any, err erro
 		Sendcards: parseCard(req.SendCards),
 	})
 }
-
-func parseCard(c []types.Card) []*twoonone.Card {
-	cards := []*twoonone.Card{}
-	for _, v := range c {
-		cards = append(cards, &twoonone.Card{
-			Number: twoonone.Card_Number(v.Number),
-		})
-	}
-	return cards
-}

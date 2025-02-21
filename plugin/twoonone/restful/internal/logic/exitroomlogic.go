@@ -27,7 +27,6 @@ func NewExitRoomLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ExitRoom
 
 func (l *ExitRoomLogic) ExitRoom(req *types.ExitRoomRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
-
 	return inside.NewAPIRequest(l.Logger).ExitRoom(&twoonone.ExitRoomRequest{
 		RoomHash: req.RoomHash,
 		UserId:   "",
