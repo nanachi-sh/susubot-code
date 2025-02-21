@@ -198,12 +198,7 @@ message GetRoomsResponse {
     repeated RoomInfo room_infos = 1;
 }
 
-message RoomEventHandshake {
-    string room_hash = 1;
-    string user_id = 2;
-}
-
-message EventRoomResponse {
+message RoomEventResponse {
     message RoomJoinPlayer {
         PlayerInfo joiner_info = 1;
         repeated PlayerInfo player_infos = 2;
