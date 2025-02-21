@@ -10,6 +10,7 @@ type ServiceContext struct {
 	Config                   config.Config
 	OIDCAuthMiddleware       rest.Middleware
 	ResponseHeaderMiddleware rest.Middleware
+	ExtraJWTMiddleware       rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -17,5 +18,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:                   c,
 		OIDCAuthMiddleware:       middleware.NewOIDCAuthMiddleware().Handle,
 		ResponseHeaderMiddleware: middleware.NewResponseHeaderMiddleware().Handle,
+		ExtraJWTMiddleware:       middleware.NewExtraJWTMiddleware().Handle,
 	}
 }
