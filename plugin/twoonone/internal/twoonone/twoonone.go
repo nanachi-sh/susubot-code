@@ -248,8 +248,8 @@ func getDailyCoin(logger logx.Logger, in *twoonone_pb.GetDailyCoinRequest) (*two
 	if err != nil {
 		return nil, err
 	}
-	if checkDailyCoin(u.Twoonone) {
-		if err := db.UpdateUser(logger, u.Twoonone.Id, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
+	if checkDailyCoin(u) {
+		if err := db.UpdateUser(logger, u.Id, sql.IncCoin(500), sql.UpdateGetDailyTime()); err != nil {
 			return nil, err
 		}
 		return &twoonone_pb.GetDailyCoinResponse{}, nil
@@ -304,7 +304,8 @@ func joinRoom(logger logx.Logger, in *twoonone_pb.JoinRoomRequest) (*twoonone_pb
 	if err != nil {
 		return nil, err
 	}
-	if serr := r.Join(logger, u.UserPublic.Id, u.Name, u.Coin); serr != nil {
+	// TEST
+	if serr := r.Join(logger, u.Id, "", u.Coin); serr != nil {
 		return nil, err
 	}
 	return &twoonone_pb.JoinRoomResponse{}, nil

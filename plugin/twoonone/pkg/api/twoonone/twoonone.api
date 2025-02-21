@@ -1,10 +1,27 @@
 syntax = "v1"
 
+type Basic {
+	Name string `custom:"name"`
+	Email string `custom:"email"`
+}
+
+type Extra {
+	WinCount int `custom:"wincount"`
+	LoseCount int `custom:"losecount"`
+	Coin float64 `custom:"coin"`
+}
+
+type UserInfo {
+	basic Basic
+	extra Extra
+}
+
 type GetDailyCoinRequest {
 	UserId string `form:"user_id"`
 }
 
 type GetRoomRequest {
+	UI UserInfo
 	RoomHash string `path:"room_hash"`
 }
 
@@ -52,6 +69,7 @@ type StartRoomRequest {
 	// 处理SSO认证，暂时全部请求均需认证
 	// 响应头处理
 	middleware: ResponseHeaderMiddleware,OIDCAuthMiddleware
+	prefix:     v1
 )
 service twoonone-api {
 	@handler getRooms
@@ -86,11 +104,5 @@ service twoonone-api {
 
 	@handler startRoom
 	post /rooms/:room_hash/start (StartRoomRequest) returns (any)
-
-	@handler callback
-	get /callback
-
-	@handler login
-	get /login
 }
 

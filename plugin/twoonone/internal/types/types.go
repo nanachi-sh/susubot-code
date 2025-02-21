@@ -1,24 +1,23 @@
 package types
 
+import "github.com/golang-jwt/jwt/v4"
+
 const (
-	COOKIE_KEY_session_id   = "session_id"
 	COOKIE_KEY_access_token = "access_token"
 	COOKIE_KEY_id_token     = "id_token"
 )
 
 const (
-	REDIS_KEY_SESSION_refresh_token = "refresh_token" //
-	REDIS_KEY_SESSION_expires_at    = "expires_at"    //timestamp
-	REDIS_KEY_SESSION_State         = "state"         //oidc
-	REDIS_KEY_SESSION_valid         = "valid"
+	PARSE_CUSTOM_KEY_wincount  = "wincount"
+	PARSE_CUSTOM_KEY_losecount = "losecount"
+	PARSE_CUSTOM_KEY_coin      = "coin"
+	PARSE_CUSTOM_KEY_name      = "name"
+	PARSE_CUSTOM_KEY_email     = "email"
 )
 
-const (
-	LDAP_DN = "ou=user,dc=unturned,dc=fun"
-)
-
-type REDIS_KEY_SESSION struct {
-	RefreshToken *string
-	ExpiresAt    *int64
-	State        *string
+type JWT_EXTRA struct {
+	jwt.RegisteredClaims
+	WinCount  int     `json:"winc"`
+	LoseCount int     `json:"losec"`
+	Coin      float64 `json:"coin"`
 }

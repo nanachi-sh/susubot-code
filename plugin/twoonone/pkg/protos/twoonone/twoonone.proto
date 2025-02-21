@@ -100,17 +100,22 @@ message RoomInfo {
     optional PlayerInfo operator_now = 7;
 }
 
+// Extra List:
+// "extra": 值为应用额外信息，格式为JWT，客户端无需(也无法)校验，必须携带，当客户端未携带extra或extra失效的情况下会产生
+
 message GetRoomRequest {
     string room_hash = 1;
 }
 
 message GetRoomResponse {
+    map<string, string> extra = 100;
     RoomInfo room_info = 1;
 }
 
 message CreateRoomRequest{}
 
 message CreateRoomResponse {
+    map<string, string> extra = 100;
     string room_hash = 1;
 }
 
@@ -119,28 +124,36 @@ message JoinRoomRequest {
     string user_id = 2;
 }
 
-message JoinRoomResponse{}
+message JoinRoomResponse{
+    map<string, string> extra = 100;
+}
 
 message ExitRoomRequest {
     string user_id = 1;
     string room_hash = 2;
 }
 
-message ExitRoomResponse{}
+message ExitRoomResponse{
+    map<string, string> extra = 100;
+}
 
 message RobLandownerRequest {
     string user_id = 1;
     string room_hash = 2;
 }
 
-message RobLandownerResponse{}
+message RobLandownerResponse{
+    map<string, string> extra = 100;
+}
 
 message NoRobLandownerRequest {
     string user_id = 1;
     string room_hash = 2;
 }
 
-message NoRobLandownerResponse{}
+message NoRobLandownerResponse{
+    map<string, string> extra = 100;
+}
 
 message SendCardRequest {
     string user_id = 1;
@@ -148,31 +161,40 @@ message SendCardRequest {
     repeated Card sendcards = 3;
 }
 
-message SendCardResponse{}
+message SendCardResponse{
+    map<string, string> extra = 100;
+}
 
 message NoSendCardRequest {
     string user_id = 1;
     string room_hash = 2;
 }
 
-message NoSendCardResponse{}
+message NoSendCardResponse{
+    map<string, string> extra = 100;
+}
 
 message GetDailyCoinRequest {
     string user_id = 1;
 }
 
-message GetDailyCoinResponse{}
+message GetDailyCoinResponse{
+    map<string, string> extra = 100;
+}
 
 message StartRoomRequest {
     string room_hash = 1;
     string user_id = 2;
 }
 
-message StartRoomResponse{}
+message StartRoomResponse{
+    map<string, string> extra = 100;
+}
 
 message GetRoomsRequest{}
 
 message GetRoomsResponse {
+    map<string, string> extra = 100;
     repeated RoomInfo room_infos = 1;
 }
 

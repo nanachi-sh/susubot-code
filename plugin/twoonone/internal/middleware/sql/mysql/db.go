@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/configs"
-	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql/ldap"
 	twoonone_model "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/model/twoonone"
 	database_type "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/types/database"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
@@ -131,16 +130,16 @@ func (s *db_action_update_getdaily_time) Merge(logger logx.Logger, u *twoonone_m
 	u.LastGetdaliyTime = s.Time.Unix()
 }
 
-func (dbh *db_handler) GetUser(logger logx.Logger, id string) (database_type.User, error) {
+func (dbh *db_handler) GetUser(logger logx.Logger, id string) (twoonone_model.Twoonone, error) {
 	if id == "" {
 		logger.Error("invalid argument")
-		return database_type.User{}, pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
+		return twoonone_model.Twoonone{}, pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	u, err := getUser(logger, ctx, id)
 	if err != nil {
-		return database_type.User{}, err
+		return twoonone_model.Twoonone{}, err
 	}
 	return u, nil
 }
@@ -174,7 +173,7 @@ func (dbh *db_handler) DeleteUser(logger logx.Logger, id string) error {
 	return pkg_types.NewError(twoonone_pb.Error_ERROR_UNKNOWN, "不支持操作")
 }
 
-func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.User, error) {
+func getUser(logger logx.Logger, ctx context.Context, id string) (twoonone_model.Twoonone, error) {
 	ut, err := func() (*twoonone_model.Twoonone, error) {
 		u, err := configs.Model_TwoOnOne.FindOne(ctx, id)
 		if err != nil {
@@ -196,22 +195,9 @@ func getUser(logger logx.Logger, ctx context.Context, id string) (database_type.
 		return u, nil
 	}()
 	if err != nil {
-		return database_type.User{}, err
+		return twoonone_model.Twoonone{}, err
 	}
-	up, err := func() (*database_type.UserPublic, error) {
-		u, err := ldap.FindUser(logger, id)
-		if err != nil {
-			return nil, err
-		}
-		return &u, nil
-	}()
-	if err != nil {
-		return database_type.User{}, err
-	}
-	return database_type.User{
-		Twoonone:   *ut,
-		UserPublic: *up,
-	}, nil
+	return *ut, nil
 }
 
 func updateUser(logger logx.Logger, ctx context.Context, u twoonone_model.Twoonone) error {

@@ -5,11 +5,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type User struct {
-	twoonone_model.Twoonone
-	UserPublic
-}
-
 type UserPublic struct {
 	Id   string
 	Name string
@@ -17,7 +12,7 @@ type UserPublic struct {
 
 type DatabaseModel interface {
 	CreateUser(logger logx.Logger, id string) error
-	GetUser(logger logx.Logger, id string) (User, error)
+	GetUser(logger logx.Logger, id string) (twoonone_model.Twoonone, error)
 	DeleteUser(logger logx.Logger, id string) error
 	UpdateUser(logger logx.Logger, id string, actions ...Action) error
 }

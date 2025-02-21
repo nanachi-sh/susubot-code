@@ -28,11 +28,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/login",
-					Handler: loginHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodGet,
 					Path:    "/rooms",
 					Handler: getRoomsHandler(serverCtx),
 				},
@@ -83,5 +78,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
+		rest.WithPrefix("/v1"),
 	)
 }

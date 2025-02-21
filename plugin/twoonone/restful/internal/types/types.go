@@ -3,6 +3,11 @@
 
 package types
 
+type CallbackRequest struct {
+	AuthorizationCode string `path:"code"`
+	CodeVerifier      string `json:"code_verifier"`
+}
+
 type Card struct {
 	Number int `form:"number,range=[0:14]"`
 }
