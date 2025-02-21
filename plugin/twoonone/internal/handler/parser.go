@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -23,7 +22,6 @@ var (
 )
 
 func ParseCustom(r *http.Request, v any) error {
-	fmt.Println("in")
 	var (
 		email string
 		name  string
@@ -36,7 +34,6 @@ func ParseCustom(r *http.Request, v any) error {
 	{
 		c, err := r.Cookie(types.COOKIE_KEY_access_token)
 		if err == nil && c.Value != "" {
-			fmt.Println("access")
 			token_raw := c.Value
 			m := jwt.MapClaims{}
 			jwt.ParseWithClaims(token_raw, m, nil)
@@ -49,12 +46,10 @@ func ParseCustom(r *http.Request, v any) error {
 			if !ok {
 				return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "从访问Token获取name失败")
 			}
-			fmt.Println("access ok")
 		}
 	}
 	// 检查是否有extra
 	if extra_raw := r.Header.Get("authorization"); extra_raw != "" {
-		fmt.Println("extra")
 		if len(extra_raw) < 10 {
 			return pkg_types.NewError(twoonone.Error_ERROR_UNDEFINED, "authorization format error")
 		}
@@ -67,7 +62,6 @@ func ParseCustom(r *http.Request, v any) error {
 		wincount = v.WinCount
 		losecount = v.LoseCount
 		coin = v.Coin
-		fmt.Println("extra ok")
 	}
 	m := map[string]any{
 		types.PARSE_CUSTOM_KEY_email:     email,
@@ -76,13 +70,11 @@ func ParseCustom(r *http.Request, v any) error {
 		types.PARSE_CUSTOM_KEY_losecount: losecount,
 		types.PARSE_CUSTOM_KEY_coin:      coin,
 	}
-	fmt.Println(m)
 	if err := customUnmarshaler.Unmarshal(
 		m,
 		v,
 	); err != nil {
 		return err
 	}
-	fmt.Println("out")
 	return nil
 }
