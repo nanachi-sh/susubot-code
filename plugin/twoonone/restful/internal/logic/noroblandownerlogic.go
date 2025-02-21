@@ -29,7 +29,7 @@ func (l *NoRobLandownerLogic) NoRobLandowner(req *types.NoRobLandownerRequest) (
 	// todo: add your logic here and delete this line
 
 	return inside.NewAPIRequest(l.Logger).NoRobLandowner(&twoonone.NoRobLandownerRequest{
-		UserId:   req.UserId,
+		UserId:   "",
 		RoomHash: req.RoomHash,
 	})
 }

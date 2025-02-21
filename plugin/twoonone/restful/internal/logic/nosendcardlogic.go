@@ -29,7 +29,7 @@ func (l *NoSendCardLogic) NoSendCard(req *types.NoSendCardRequest) (resp any, er
 	// todo: add your logic here and delete this line
 
 	return inside.NewAPIRequest(l.Logger).NoSendCard(&twoonone.NoSendCardRequest{
-		UserId:   req.UserId,
+		UserId:   "",
 		RoomHash: req.RoomHash,
 	})
 }

@@ -29,7 +29,7 @@ func (l *SendCardLogic) SendCard(req *types.SendCardRequest) (resp any, err erro
 	// todo: add your logic here and delete this line
 
 	return inside.NewAPIRequest(l.Logger).SendCard(&twoonone.SendCardRequest{
-		UserId:    req.UserId,
+		UserId:    "",
 		RoomHash:  req.RoomHash,
 		Sendcards: parseCard(req.SendCards),
 	})

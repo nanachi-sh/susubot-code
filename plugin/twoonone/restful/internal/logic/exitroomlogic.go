@@ -30,6 +30,6 @@ func (l *ExitRoomLogic) ExitRoom(req *types.ExitRoomRequest) (resp any, err erro
 
 	return inside.NewAPIRequest(l.Logger).ExitRoom(&twoonone.ExitRoomRequest{
 		RoomHash: req.RoomHash,
-		UserId:   req.UserId,
+		UserId:   "",
 	})
 }
