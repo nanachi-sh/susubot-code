@@ -135,13 +135,6 @@ func NewAPIRequest(l logx.Logger) *APIRequest {
 	}
 }
 
-func setToMap(m map[string]string, key, value string) {
-	if m == nil {
-		m = make(map[string]string)
-	}
-	m[key] = value
-}
-
 func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (any, error) {
 	if req.RoomHash == "" {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
@@ -151,7 +144,10 @@ func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (any, error) {
 		return nil, err
 	}
 	if req.Extra.NewExtra != "" {
-		setToMap(resp.Extra, internal_types.EXTRA_KEY_extra, req.Extra.NewExtra)
+		if resp.Extra == nil {
+			resp.Extra = map[string]string{}
+		}
+		resp.Extra[internal_types.EXTRA_KEY_extra] = req.Extra.NewExtra
 	}
 	return resp, nil
 }
@@ -165,7 +161,10 @@ func (r *APIRequest) ExitRoom(req *types.ExitRoomRequest) (any, error) {
 		return nil, err
 	}
 	if req.Extra.NewExtra != "" {
-		setToMap(resp.Extra, internal_types.EXTRA_KEY_extra, req.Extra.NewExtra)
+		if resp.Extra == nil {
+			resp.Extra = map[string]string{}
+		}
+		resp.Extra[internal_types.EXTRA_KEY_extra] = req.Extra.NewExtra
 	}
 	return resp, nil
 }
