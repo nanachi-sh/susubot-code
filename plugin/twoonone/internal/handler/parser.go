@@ -18,7 +18,7 @@ const (
 var (
 	customUnmarshaler = mapping.NewUnmarshaler(
 		customKey,
-		mapping.WithDefault(),
+		mapping.WithOpaqueKeys(),
 	)
 )
 
