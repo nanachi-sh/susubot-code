@@ -37,13 +37,13 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 			return
 		}
 		// 有效时间跟随访问token
-		exp := time.Unix(m["exp"].(int64), 0)
+		exp, _ := m.GetExpirationTime()
 		jwt_raw, err := sign(types.JWT_EXTRA{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    "none",
 				Subject:   "none",
 				Audience:  jwt.ClaimStrings{},
-				ExpiresAt: &jwt.NumericDate{Time: exp},
+				ExpiresAt: &jwt.NumericDate{Time: exp.Time},
 				NotBefore: &jwt.NumericDate{Time: time.Now()},
 				IssuedAt:  &jwt.NumericDate{Time: time.Now()},
 				ID:        "none",
