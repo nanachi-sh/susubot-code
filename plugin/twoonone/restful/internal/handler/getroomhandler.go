@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 
@@ -41,6 +42,9 @@ func getRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func getExtraMap(resp any) (map[string]string, bool) {
 	value := reflect.ValueOf(resp).Elem()
+	for _, v := range value.MapKeys() {
+		fmt.Println(v.Type().Name())
+	}
 	if extra := value.FieldByName("Extra"); !extra.IsNil() {
 		m, ok := extra.Interface().(map[string]string)
 		if !ok {

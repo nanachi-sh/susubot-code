@@ -139,9 +139,7 @@ func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (resp any, err error) {
 	if req.RoomHash == "" {
 		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
-	ret, err := getRoom(r.logger, req)
-	resp = ret
-	return
+	return getRoom(r.logger, req)
 }
 
 func (r *APIRequest) ExitRoom(req *twoonone_pb.ExitRoomRequest) (resp any, err error) {
