@@ -6,6 +6,7 @@ import (
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/handler"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/logic"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func getRoomsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

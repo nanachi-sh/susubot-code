@@ -14,53 +14,28 @@ type GetDailyCoinRequest {
 }
 
 type GetRoomRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type JoinRoomRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type ExitRoomRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type RobLandownerRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type NoRobLandownerRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type Card {
@@ -68,40 +43,26 @@ type Card {
 }
 
 type SendCardRequest {
-	RoomHash  string  `path:"room_hash"`
-	SendCards []Card  `form:"sendcards"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash  string `path:"room_hash"`
+	SendCards []Card `form:"sendcards"`
+	extra     Extra  `custom:"extra"`
 }
 
 type NoSendCardRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 type StartRoomRequest {
-	RoomHash  string  `path:"room_hash"`
-	UserId    string  `custom:"id"`
-	Name      string  `custom:"name"`
-	Email     string  `custom:"email"`
-	WinCount  int     `custom:"wincount"`
-	LoseCount int     `custom:"losecount"`
-	Coin      float64 `custom:"coin"`
+	RoomHash string `path:"room_hash"`
+	extra    Extra  `custom:"extra"`
 }
 
 @server (
-	// 处理SSO认证，暂时全部请求均需认证
-	// 响应头处理
-	middleware: ResponseHeaderMiddleware,OIDCAuthMiddleware
+	// 响应头添加
+	// 验证OIDC Token
+	// 签发与验证Extra JWT
+	middleware: ResponseHeaderMiddleware,OIDCAuthMiddleware,ExtraJWTMiddleware
 	prefix:     v1
 )
 service twoonone-api {
@@ -109,7 +70,7 @@ service twoonone-api {
 	get /rooms returns (any)
 
 	@handler getDailyCoin
-	post /get_daliy_coin (GetDailyCoinRequest) returns (any)
+	get /get_daliy_coin (GetDailyCoinRequest) returns (any)
 
 	@handler getRoom
 	get /rooms/:room_hash (GetRoomRequest) returns (any)
@@ -118,24 +79,24 @@ service twoonone-api {
 	post /rooms returns (any)
 
 	@handler joinRoom
-	post /rooms/:room_hash/join (JoinRoomRequest) returns (any)
+	get /rooms/:room_hash/join (JoinRoomRequest) returns (any)
 
 	@handler exitRoom
-	post /rooms/:room_hash/exit (ExitRoomRequest) returns (any)
+	get /rooms/:room_hash/exit (ExitRoomRequest) returns (any)
 
 	@handler robLandowner
-	post /rooms/:room_hash/play/robLandowner (RobLandownerRequest) returns (any)
+	get /rooms/:room_hash/play/robLandowner (RobLandownerRequest) returns (any)
 
 	@handler noRobLandowner
-	post /rooms/:room_hash/play/noRobLandowner (NoRobLandownerRequest) returns (any)
+	get /rooms/:room_hash/play/noRobLandowner (NoRobLandownerRequest) returns (any)
 
 	@handler sendCard
 	post /rooms/:room_hash/play/sendCard (SendCardRequest) returns (any)
 
 	@handler noSendCard
-	post /rooms/:room_hash/play/noSendCard (NoSendCardRequest) returns (any)
+	get /rooms/:room_hash/play/noSendCard (NoSendCardRequest) returns (any)
 
 	@handler startRoom
-	post /rooms/:room_hash/start (StartRoomRequest) returns (any)
+	get /rooms/:room_hash/start (StartRoomRequest) returns (any)
 }
 

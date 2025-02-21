@@ -14,10 +14,10 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.ResponseHeaderMiddleware, serverCtx.OIDCAuthMiddleware},
+			[]rest.Middleware{serverCtx.ResponseHeaderMiddleware, serverCtx.OIDCAuthMiddleware, serverCtx.ExtraJWTMiddleware},
 			[]rest.Route{
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/get_daliy_coin",
 					Handler: getDailyCoinHandler(serverCtx),
 				},
@@ -37,27 +37,27 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: getRoomHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/exit",
 					Handler: exitRoomHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/join",
 					Handler: joinRoomHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/play/noRobLandowner",
 					Handler: noRobLandownerHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/play/noSendCard",
 					Handler: noSendCardHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/play/robLandowner",
 					Handler: robLandownerHandler(serverCtx),
 				},
@@ -67,7 +67,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: sendCardHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
+					Method:  http.MethodGet,
 					Path:    "/rooms/:room_hash/start",
 					Handler: startRoomHandler(serverCtx),
 				},

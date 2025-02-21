@@ -3,55 +3,60 @@
 
 package types
 
-type CallbackRequest struct {
-	AuthorizationCode string `path:"code"`
-	CodeVerifier      string `json:"code_verifier"`
-}
-
 type Card struct {
 	Number int `form:"number,range=[0:14]"`
 }
 
 type ExitRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
+}
+
+type Extra struct {
+	UserId    string  `custom:"user_id"`
+	Name      string  `custom:"name"`
+	Email     string  `custom:"email"`
+	WinCount  int     `custom:"wincount"`
+	LoseCount int     `custom:"losecount"`
+	Coin      float64 `custom:"coin"`
 }
 
 type GetDailyCoinRequest struct {
-	UserId string `form:"user_id"`
+	Extra Extra `custom:"extra"`
 }
 
 type GetRoomRequest struct {
 	RoomHash string `path:"room_hash"`
+	Extra    Extra  `custom:"extra"`
 }
 
 type JoinRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
 }
 
 type NoRobLandownerRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
 }
 
 type NoSendCardRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
 }
 
 type RobLandownerRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
 }
 
 type SendCardRequest struct {
 	RoomHash  string `path:"room_hash"`
-	UserId    string `form:"user_id"`
 	SendCards []Card `form:"sendcards"`
+	Extra     Extra  `custom:"extra"`
 }
 
 type StartRoomRequest struct {
 	RoomHash string `path:"room_hash"`
-	UserId   string `form:"user_id"`
+	Extra    Extra  `custom:"extra"`
 }

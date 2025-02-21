@@ -1,6 +1,7 @@
 package twoonone
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -135,10 +136,11 @@ func NewAPIRequest(l logx.Logger) *APIRequest {
 	}
 }
 
-func (r *APIRequest) GetRoom(req *twoonone_pb.GetRoomRequest) (resp any, err error) {
+func (r *APIRequest) GetRoom(req *types.GetRoomRequest) (resp any, err error) {
 	if req.RoomHash == "" {
 		err = types.NewError(twoonone_pb.Error_ERROR_INVALID_ARGUMENT, "", http.StatusBadRequest)
 	}
+	fmt.Println(req)
 	return getRoom(r.logger, req)
 }
 
@@ -274,7 +276,7 @@ func checkDailyCoin(u twoonone.Twoonone) bool {
 	}
 }
 
-func getRoom(logger logx.Logger, in *twoonone_pb.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
+func getRoom(logger logx.Logger, in *types.GetRoomRequest) (*twoonone_pb.GetRoomResponse, error) {
 	r, ok := findRoom(in.RoomHash)
 	if !ok {
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")

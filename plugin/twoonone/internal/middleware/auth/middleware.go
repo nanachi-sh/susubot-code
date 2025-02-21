@@ -15,16 +15,12 @@ import (
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/configs"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/types"
 	"github.com/zeromicro/go-zero/core/logx"
-	"golang.org/x/oauth2"
 )
 
 var (
 	once sync.Once
 
-	provider *oidc.Provider
-	verifier *oidc.IDTokenVerifier
-	jwks     *jwk.Cache
-	o2cfg    oauth2.Config
+	jwks *jwk.Cache
 
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 
@@ -43,16 +39,6 @@ func initialize() {
 	if err := provider.Claims(&claims); err != nil {
 		logger.Fatalln(err)
 	}
-	o2cfg = oauth2.Config{
-		ClientID:     configs.OIDC_CLIENT_ID,
-		ClientSecret: configs.OIDC_CLIENT_SECRET,
-		Endpoint:     provider.Endpoint(),
-		RedirectURL:  configs.OIDC_REDIRECT,
-		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile", "email"},
-	}
-	verifier = provider.Verifier(&oidc.Config{
-		ClientID: configs.OIDC_CLIENT_ID,
-	})
 	{
 		c, err := jwk.NewCache(context.Background(), httprc.NewClient())
 		if err != nil {
@@ -73,13 +59,13 @@ func initialize() {
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	once.Do(initialize)
 
-	if r.URL.Path == "/v1/callback" {
-		next(w, r)
+	access_token, err := r.Cookie(types.COOKIE_KEY_access_token)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
-	// 与OIDC认证相关
-	if !handle(w, r) {
+	if !verifyToken(access_token.Value) {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	next(w, r)
@@ -96,7 +82,8 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 // }
 
 func verifyToken(token_raw string) bool {
-	token, err := jwt.Parse(token_raw, func(t *jwt.Token) (interface{}, error) {
+	m := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(token_raw, m, func(t *jwt.Token) (interface{}, error) {
 		set, err := jwks.Lookup(context.Background(), claims.JWKSUri)
 		if err != nil {
 			return nil, err
@@ -119,34 +106,27 @@ func verifyToken(token_raw string) bool {
 		xlogger.Error(err)
 		return false
 	}
+	// 验证access_token是否包含email, name, user_id
+	ok := func() bool {
+		if _, ok := m["email"]; !ok {
+			return false
+		}
+		if _, ok := m["name"]; !ok {
+			return false
+		}
+		if mi, ok := m["federated_claims"].(map[string]any); !ok {
+			return false
+		} else {
+			if _, ok := mi["user_id"]; !ok {
+				return false
+			}
+		}
+		return true
+	}()
+	if !ok {
+		return false
+	}
 	return token.Valid
-}
-
-func handle(w http.ResponseWriter, r *http.Request) bool {
-	access_token, err := r.Cookie(types.COOKIE_KEY_access_token)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return false
-	}
-	if !verifyToken(access_token.Value) {
-		w.WriteHeader(http.StatusUnauthorized)
-		return false
-	}
-	// 检查是否存在extra
-	if extra_raw := r.Header.Get("authorization"); extra_raw != "" {
-		extra, err := jwt.Parse(extra_raw, func(t *jwt.Token) (interface{}, error) {
-			return []byte(configs.JWT_SignKey), nil
-		})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return false
-		}
-		if !extra.Valid {
-			w.WriteHeader(http.StatusBadRequest)
-			return false
-		}
-	}
-	return true
 }
 
 // func loginHandle(w http.ResponseWriter, r *http.Request) bool {
@@ -176,16 +156,16 @@ func handle(w http.ResponseWriter, r *http.Request) bool {
 // 	return true
 // }
 
-func formatCookie(key, value, domain string, expires_in int) *http.Cookie {
-	domain = ".unturned.fun"
-	return &http.Cookie{
-		Name:     key,
-		Value:    value,
-		Path:     "/",
-		Domain:   domain,
-		MaxAge:   expires_in,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-	}
-}
+// func formatCookie(key, value, domain string, expires_in int) *http.Cookie {
+// 	domain = ".unturned.fun"
+// 	return &http.Cookie{
+// 		Name:     key,
+// 		Value:    value,
+// 		Path:     "/",
+// 		Domain:   domain,
+// 		MaxAge:   expires_in,
+// 		Secure:   true,
+// 		HttpOnly: true,
+// 		SameSite: http.SameSiteNoneMode,
+// 	}
+// }
