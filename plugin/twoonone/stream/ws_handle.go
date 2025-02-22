@@ -51,6 +51,11 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			// 桌事件结束
 			return
 		}
+		if ep := e.GetRoomExitPlayer(); ep != nil {
+			if ep.LeaverInfo.User.Id == req.Extra.UserId {
+				return
+			}
+		}
 		resp, _ := handler.Generate(e, nil)
 		if err := conn.WriteJSON(resp); err != nil {
 			logger.Error(err)
