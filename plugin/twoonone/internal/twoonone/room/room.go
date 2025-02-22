@@ -28,7 +28,7 @@ type Room struct {
 	multiple       int
 	sendCards      []*SendCard
 	landownerCards [3]card.Card
-	event          *event.EventStream
+	event          event.EventStream
 }
 
 type SendCard struct {
@@ -97,9 +97,9 @@ func (r *Room) Join(logger logx.Logger, id, name string, coin float64) error {
 		},
 	})
 	r.players = append(r.players, p)
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoomJoinPlayer_{
-			RoomJoinPlayer: &twoonone_pb.EventRoomResponse_RoomJoinPlayer{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomJoinPlayer_{
+			RoomJoinPlayer: &twoonone_pb.RoomEventResponse_RoomJoinPlayer{
 				JoinerInfo:  player.FormatInternalPlayer2Protobuf(p),
 				PlayerInfos: player.FormatInternalPlayers2Protobuf(r.players),
 			},
@@ -119,9 +119,9 @@ func (r *Room) Exit(logger logx.Logger, playerId string) error {
 		return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST_PLAYER, "")
 	}
 	r.delete(playerId)
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoomExitPlayer_{
-			RoomExitPlayer: &twoonone_pb.EventRoomResponse_RoomExitPlayer{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomExitPlayer_{
+			RoomExitPlayer: &twoonone_pb.RoomEventResponse_RoomExitPlayer{
 				LeaverInfo:  player.FormatInternalPlayer2Protobuf(p),
 				PlayerInfos: player.FormatInternalPlayers2Protobuf(r.players),
 			},
@@ -158,9 +158,9 @@ func (r *Room) Start(logger logx.Logger) error {
 	})
 	// 进入下一阶段
 	r.startRobLandowner()
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoomStarted_{
-			RoomStarted: &twoonone_pb.EventRoomResponse_RoomStarted{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomStarted_{
+			RoomStarted: &twoonone_pb.RoomEventResponse_RoomStarted{
 				NextOperatorInfo: player.FormatInternalPlayer2Protobuf(r.operatorNow),
 			},
 		},
@@ -193,9 +193,9 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	p.SetRobLandownerAction(twoonone_pb.RobLandownerInfo_ACTION_ROB)
 	if len(r.getRobLandowners()) > len(robs) {
 		r.multiple *= 2
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_RoblandownerContinuousRob{
-				RoblandownerContinuousRob: &twoonone_pb.EventRoomResponse_RobLandownerContinuousRob{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_RoblandownerContinuousRob{
+				RoblandownerContinuousRob: &twoonone_pb.RoomEventResponse_RobLandownerContinuousRob{
 					Multiple: int32(r.multiple),
 				},
 			},
@@ -215,9 +215,9 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 			})
 			r.landowner = takes[0]
 		}
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_RoomRobLandowner_{
-				RoomRobLandowner: &twoonone_pb.EventRoomResponse_RoomRobLandowner{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_RoomRobLandowner_{
+				RoomRobLandowner: &twoonone_pb.RoomEventResponse_RoomRobLandowner{
 					OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 					NextOperatorInfo: nil,
 				},
@@ -225,9 +225,9 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 		})
 	} else { //还有未参与
 		next := r.nextRobLandownerOperator()
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_RoomRobLandowner_{
-				RoomRobLandowner: &twoonone_pb.EventRoomResponse_RoomRobLandowner{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_RoomRobLandowner_{
+				RoomRobLandowner: &twoonone_pb.RoomEventResponse_RoomRobLandowner{
 					OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 					NextOperatorInfo: player.FormatInternalPlayer2Protobuf(next),
 				},
@@ -236,9 +236,9 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 		return nil
 	}
 	r.startSendCard()
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoblandownerIntoSendingcard{
-			RoblandownerIntoSendingcard: &twoonone_pb.EventRoomResponse_RobLandownerIntoSendingCard{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoblandownerIntoSendingcard{
+			RoblandownerIntoSendingcard: &twoonone_pb.RoomEventResponse_RobLandownerIntoSendingCard{
 				SendcarderInfo: player.FormatInternalPlayer2Protobuf(r.operatorNow),
 				LandownerCards: card.FormatInternalCards2Protobuf(r.landownerCards[:]),
 			},
@@ -274,9 +274,9 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 			})
 			r.landowner = takes[0]
 		}
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_RoomNorobLandowner{
-				RoomNorobLandowner: &twoonone_pb.EventRoomResponse_RoomNoRobLandowner{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_RoomNorobLandowner{
+				RoomNorobLandowner: &twoonone_pb.RoomEventResponse_RoomNoRobLandowner{
 					OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 					NextOperatorInfo: nil,
 				},
@@ -284,9 +284,9 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 		})
 	} else { //还有未参与
 		next := r.nextRobLandownerOperator()
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_RoomNorobLandowner{
-				RoomNorobLandowner: &twoonone_pb.EventRoomResponse_RoomNoRobLandowner{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_RoomNorobLandowner{
+				RoomNorobLandowner: &twoonone_pb.RoomEventResponse_RoomNoRobLandowner{
 					OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 					NextOperatorInfo: player.FormatInternalPlayer2Protobuf(next),
 				},
@@ -295,9 +295,9 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 		return nil
 	}
 	r.startSendCard()
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoblandownerIntoSendingcard{
-			RoblandownerIntoSendingcard: &twoonone_pb.EventRoomResponse_RobLandownerIntoSendingCard{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoblandownerIntoSendingcard{
+			RoblandownerIntoSendingcard: &twoonone_pb.RoomEventResponse_RobLandownerIntoSendingCard{
 				SendcarderInfo: player.FormatInternalPlayer2Protobuf(r.operatorNow),
 				LandownerCards: card.FormatInternalCards2Protobuf(r.landownerCards[:]),
 			},
@@ -407,9 +407,9 @@ func (r *Room) noSendCard(logger logx.Logger, p *player.Player) error {
 	}
 	next := r.nextSendCardOperator()
 	r.operatorNow = next
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoomNoSendcard{
-			RoomNoSendcard: &twoonone_pb.EventRoomResponse_RoomNoSendCard{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomNoSendcard{
+			RoomNoSendcard: &twoonone_pb.RoomEventResponse_RoomNoSendCard{
 				OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 				NextOperatorInfo: player.FormatInternalPlayer2Protobuf(next),
 			},
@@ -418,7 +418,7 @@ func (r *Room) noSendCard(logger logx.Logger, p *player.Player) error {
 	return nil
 }
 
-func (r *Room) GetEvent() *event.EventStream {
+func (r *Room) GetEvent() event.EventStream {
 	return r.event
 }
 
@@ -436,8 +436,8 @@ func (r *Room) gameFinish(logger logx.Logger) error {
 	if winis == twoonone_pb.Role_ROLE_LANDOWNER {
 		if len(r.farmers[0].GetCards()) == 17 && len(r.farmers[1].GetCards()) == 17 {
 			r.multiple *= 2
-			r.event.Emit(&twoonone_pb.EventRoomResponse{Body: &twoonone_pb.EventRoomResponse_SendcardSpringNotice{
-				SendcardSpringNotice: &twoonone_pb.EventRoomResponse_SendCardSpringNotice{
+			r.event.Emit(&twoonone_pb.RoomEventResponse{Body: &twoonone_pb.RoomEventResponse_SendcardSpringNotice{
+				SendcardSpringNotice: &twoonone_pb.RoomEventResponse_SendCardSpringNotice{
 					Multiple: int32(r.multiple),
 				},
 			}})
@@ -465,17 +465,17 @@ func (r *Room) gameFinish(logger logx.Logger) error {
 			return serr
 		}
 	}
-	r.event.Emit(&twoonone_pb.EventRoomResponse{Body: &twoonone_pb.EventRoomResponse_GameFinish_{
-		GameFinish: &twoonone_pb.EventRoomResponse_GameFinish{
-			LandownerInfo: &twoonone_pb.EventRoomResponse_GameFinish_PlayerInfoExtra{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{Body: &twoonone_pb.RoomEventResponse_GameFinish_{
+		GameFinish: &twoonone_pb.RoomEventResponse_GameFinish{
+			LandownerInfo: &twoonone_pb.RoomEventResponse_GameFinish_PlayerInfoExtra{
 				PlayerInfo: player.FormatInternalPlayer2Protobuf(r.landowner),
 				HandCards:  card.FormatInternalCards2Protobuf(r.landowner.GetCards()),
 			},
-			Farmer1Info: &twoonone_pb.EventRoomResponse_GameFinish_PlayerInfoExtra{
+			Farmer1Info: &twoonone_pb.RoomEventResponse_GameFinish_PlayerInfoExtra{
 				PlayerInfo: player.FormatInternalPlayer2Protobuf(r.farmers[0]),
 				HandCards:  card.FormatInternalCards2Protobuf(r.farmers[0].GetCards()),
 			},
-			Farmer2Info: &twoonone_pb.EventRoomResponse_GameFinish_PlayerInfoExtra{
+			Farmer2Info: &twoonone_pb.RoomEventResponse_GameFinish_PlayerInfoExtra{
 				PlayerInfo: player.FormatInternalPlayer2Protobuf(r.farmers[1]),
 				HandCards:  card.FormatInternalCards2Protobuf(r.farmers[1].GetCards()),
 			},
@@ -495,15 +495,15 @@ func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []
 		r.multiple *= 2
 		switch ct {
 		case twoonone_pb.CardType_CARD_TYPE_BOOM:
-			r.event.Emit(&twoonone_pb.EventRoomResponse{Body: &twoonone_pb.EventRoomResponse_SendcardBoomNotice{
-				SendcardBoomNotice: &twoonone_pb.EventRoomResponse_SendCardBoomNotice{
+			r.event.Emit(&twoonone_pb.RoomEventResponse{Body: &twoonone_pb.RoomEventResponse_SendcardBoomNotice{
+				SendcardBoomNotice: &twoonone_pb.RoomEventResponse_SendCardBoomNotice{
 					Multiple:       int32(r.multiple),
 					SendcarderInfo: player.FormatInternalPlayer2Protobuf(p),
 				},
 			}})
 		case twoonone_pb.CardType_CARD_TYPE_KING_BOOM:
-			r.event.Emit(&twoonone_pb.EventRoomResponse{Body: &twoonone_pb.EventRoomResponse_SendcardKingboomNotice{
-				SendcardKingboomNotice: &twoonone_pb.EventRoomResponse_SendCardKingBoomNotice{
+			r.event.Emit(&twoonone_pb.RoomEventResponse{Body: &twoonone_pb.RoomEventResponse_SendcardKingboomNotice{
+				SendcardKingboomNotice: &twoonone_pb.RoomEventResponse_SendCardKingBoomNotice{
 					Multiple:       int32(r.multiple),
 					SendcarderInfo: player.FormatInternalPlayer2Protobuf(p),
 				},
@@ -519,9 +519,9 @@ func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []
 	})
 	next := r.nextSendCardOperator()
 	r.operatorNow = next
-	r.event.Emit(&twoonone_pb.EventRoomResponse{
-		Body: &twoonone_pb.EventRoomResponse_RoomSendcard{
-			RoomSendcard: &twoonone_pb.EventRoomResponse_RoomSendCard{
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomSendcard{
+			RoomSendcard: &twoonone_pb.RoomEventResponse_RoomSendCard{
 				OperatorInfo:     player.FormatInternalPlayer2Protobuf(p),
 				NextOperatorInfo: player.FormatInternalPlayer2Protobuf(next),
 				Sendcards:        card.FormatInternalCards2Protobuf(sendcards),
@@ -530,9 +530,9 @@ func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []
 	})
 	switch l := len(p.GetCards()); l {
 	case 1, 2:
-		r.event.Emit(&twoonone_pb.EventRoomResponse{
-			Body: &twoonone_pb.EventRoomResponse_SendcardCardnumberNotice{
-				SendcardCardnumberNotice: &twoonone_pb.EventRoomResponse_SendCardCardNumberNotice{
+		r.event.Emit(&twoonone_pb.RoomEventResponse{
+			Body: &twoonone_pb.RoomEventResponse_SendcardCardnumberNotice{
+				SendcardCardnumberNotice: &twoonone_pb.RoomEventResponse_SendCardCardNumberNotice{
 					Number:           int32(l),
 					NoticeTargetInfo: player.FormatInternalPlayer2Protobuf(p),
 				},

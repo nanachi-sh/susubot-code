@@ -75,4 +75,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithPrefix("/v1"),
 	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.HeaderMiddleware, serverCtx.OIDCAuthMiddleware, serverCtx.ExtraJWTMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/ws",
+					Handler: NOEDIT_wsHandler(serverCtx),
+				},
+			}...,
+		),
+	)
 }

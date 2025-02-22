@@ -39,6 +39,7 @@ func init() {
 		int32(twoonone_pb.Error_ERROR_PLAYER_EXISTED_A_ROOM):                        "玩家已在一个房间内",
 		int32(twoonone_pb.Error_ERROR_PLAYER_COIN_LT_ROOM_COIN):                     "玩家豆子数少于房间底分",
 		int32(twoonone_pb.Error_ERROR_PLAYER_IS_ONLY_OPERATOR):                      "玩家为唯一可操作者",
+		int32(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST_ANY_ROOM):                     "玩家不在任意房间内",
 	}
 }
 

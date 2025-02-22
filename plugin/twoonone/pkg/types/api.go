@@ -62,3 +62,7 @@ type StartRoomRequest struct {
 	RoomHash string `path:"room_hash"`
 	Extra    Extra  `custom:"extra"`
 }
+
+type WebsocketHandShake struct {
+	Extra Extra `custom:"extra"`
+}

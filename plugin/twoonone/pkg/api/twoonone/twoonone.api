@@ -60,6 +60,10 @@ type StartRoomRequest {
 	extra    Extra  `custom:"extra"`
 }
 
+type WebsocketHandShake {
+	extra Extra `custom:"extra"`
+}
+
 @server (
 	// 请求头检查与响应头修改
 	// 验证OIDC Token
@@ -100,5 +104,17 @@ service twoonone-api {
 
 	@handler startRoom
 	get /rooms/:room_hash/start (StartRoomRequest) returns (any)
+}
+
+// no prefix
+@server (
+	// 请求头检查与响应头修改
+	// 验证OIDC Token
+	// 签发与验证Extra JWT
+	middleware: HeaderMiddleware,OIDCAuthMiddleware,ExtraJWTMiddleware
+)
+service twoonone-api {
+	@handler NOEDIT_ws
+	get /ws (WebsocketHandShake)
 }
 

@@ -13,7 +13,7 @@ type JSON_Response struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
+func Generate(resp any, err error) (any, int) {
 	ret := new(JSON_Response)
 	statusCode := http.StatusOK
 	if err != nil {
@@ -30,5 +30,10 @@ func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
 		ret.Message = "OK"
 		ret.Data = resp
 	}
+	return ret, statusCode
+}
+
+func Response(w http.ResponseWriter, r *http.Request, resp any, err error) {
+	ret, statusCode := Generate(resp, err)
 	httpx.WriteJsonCtx(r.Context(), w, statusCode, ret)
 }

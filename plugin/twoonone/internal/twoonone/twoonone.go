@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql"
+	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/event"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/player"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone/room"
 	internal_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/types"
@@ -221,6 +222,23 @@ func (r *APIRequest) StartRoom(req *types.StartRoomRequest) (any, error) {
 
 func (r *APIRequest) CreateRoom() (any, error) {
 	return createRoom()
+}
+
+func (r *APIRequest) RoomEvent(req *types.Extra) (event.EventStream, error) {
+	return roomEvent(req)
+}
+
+func roomEvent(req *types.Extra) (event.EventStream, error) {
+	p, ok := getPlayerFromRooms(req.UserId)
+	if !ok {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_EXIST_ANY_ROOM, "")
+	}
+	hash := p.GetRoomHash()
+	r, ok := findRoom(hash)
+	if !ok {
+		return nil, types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "桌未找到，异常错误")
+	}
+	return r.GetEvent(), nil
 }
 
 func getPlayerFromRooms(id string) (*player.Player, bool) {
