@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -24,6 +25,7 @@ var (
 func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	//
 	logger := logx.WithContext(r.Context())
+	fmt.Println(r.Header)
 	// 升级为websocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
