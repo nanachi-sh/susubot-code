@@ -21,7 +21,6 @@ var (
 	DEBUG bool
 
 	HTTPAPI_LISTEN_PORT   int
-	WEBSOCKET_LISTEN_PORT int
 
 	DATABASE_IP       netip.Addr
 	DATABASE_PORT     int
@@ -54,11 +53,6 @@ func init() {
 		logger.Fatalf("HTTP API监听端口获取失败，err: %v", err)
 	}
 	HTTPAPI_LISTEN_PORT = int(port)
-	port, err = utils.EnvPortToPort("WEBSOCKET_LISTEN_PORT")
-	if err != nil {
-		logger.Fatalf("WEBSOCKET_LISTEN_PORT获取失败，err: %v", err)
-	}
-	WEBSOCKET_LISTEN_PORT = int(port)
 
 	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
