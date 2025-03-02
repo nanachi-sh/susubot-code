@@ -73,6 +73,7 @@ message PlayerInfo {
     message TableInfo {
         string room_hash = 1;
         RobLandownerInfo roblandowner_info = 2;
+        Role role = 3;
     }
     message UserInfo {
         string id = 1;

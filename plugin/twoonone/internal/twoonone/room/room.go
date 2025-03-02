@@ -1108,6 +1108,7 @@ func (r *Room) nextRobLandownerOperator() *player.Player {
 func (r *Room) startSendCard() {
 	// 为地主发牌
 	lo := r.GetLandowner()
+	lo.SetRole(twoonone_pb.Role_ROLE_LANDOWNER)
 	lo.AddCards(r.landownerCards[:])
 	// 设置农民
 	for _, v := range r.GetPlayers() {
@@ -1115,8 +1116,10 @@ func (r *Room) startSendCard() {
 			switch {
 			case r.farmers[0] == nil:
 				r.farmers[0] = v
+				r.farmers[0].SetRole(twoonone_pb.Role_ROLE_FARMER)
 			case r.farmers[1] == nil:
 				r.farmers[1] = v
+				r.farmers[1].SetRole(twoonone_pb.Role_ROLE_FARMER)
 			}
 		}
 	}

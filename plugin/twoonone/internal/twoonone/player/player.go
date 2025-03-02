@@ -22,6 +22,7 @@ type Player struct {
 	roomHash         string
 	cards            []card.Card
 	robLandownerInfo twoonone_pb.RobLandownerInfo
+	role             twoonone_pb.Role
 
 	coinChanged      float64
 	winCountChanged  int
@@ -116,6 +117,14 @@ func (p *Player) IncWinCount() {
 	p.winCountChanged++
 }
 
+func (p *Player) GetRole() twoonone_pb.Role {
+	return p.role
+}
+
+func (p *Player) SetRole(r twoonone_pb.Role) {
+	p.role = r
+}
+
 func (p *Player) IncLoseCount() {
 	p.loseCountChanged++
 }
@@ -172,6 +181,7 @@ func FormatInternalPlayer2Protobuf(x *Player) *twoonone_pb.PlayerInfo {
 		Table: &twoonone_pb.PlayerInfo_TableInfo{
 			RoomHash:         x.roomHash,
 			RoblandownerInfo: &x.robLandownerInfo,
+			Role:             x.role,
 		},
 	}
 }
