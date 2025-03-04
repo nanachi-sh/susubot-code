@@ -30,7 +30,7 @@ const (
 
 func FormatInternalCard2Protobuf(c Card) *twoonone_pb.Card {
 	return &twoonone_pb.Card{
-		Number: twoonone_pb.Card_Number(c.Number),
+		Number: twoonone_pb.Card_Number(c.Number + 1),
 	}
 }
 
@@ -44,7 +44,7 @@ func FormatInternalCards2Protobuf(cs []Card) []*twoonone_pb.Card {
 
 func FormatProtobuf2InternalCard(c *twoonone_pb.Card) Card {
 	return Card{
-		Number: CardNumber(c.Number),
+		Number: CardNumber(c.Number - 1),
 	}
 }
 
