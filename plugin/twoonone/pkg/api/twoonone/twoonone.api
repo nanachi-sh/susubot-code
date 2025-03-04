@@ -50,7 +50,7 @@ type Card {
 
 type SendCardRequest {
 	RoomHash  string `path:"room_hash"`
-	SendCards []Card `form:"sendcards"`
+	SendCards []Card `json:"sendcards"`
 	extra     Extra  `custom:"extra"`
 }
 

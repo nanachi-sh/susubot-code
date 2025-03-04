@@ -58,7 +58,7 @@ type RobLandownerRequest struct {
 
 type SendCardRequest struct {
 	RoomHash  string `path:"room_hash"`
-	SendCards []Card `form:"sendcards"`
+	SendCards []Card `json:"sendcards"`
 	Extra     Extra  `custom:"extra"`
 }
 
