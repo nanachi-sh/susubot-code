@@ -4,7 +4,7 @@
 package types
 
 type Card struct {
-	Number int `form:"number,range=[0:14]"`
+	Number int `form:"number,range=[0:15]"`
 }
 
 type ExitRoomRequest struct {

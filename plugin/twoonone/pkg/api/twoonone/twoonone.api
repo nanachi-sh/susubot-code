@@ -45,7 +45,7 @@ type NoRobLandownerRequest {
 }
 
 type Card {
-	Number int `form:"number,range=[0:14]"`
+	Number int `form:"number,range=[0:15]"`
 }
 
 type SendCardRequest {
