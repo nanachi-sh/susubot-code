@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql"
@@ -191,6 +192,8 @@ func FULLINFO_FormatInternalPlayer2Protobuf(x *Player) *twoonone_pb.PlayerInfoFu
 		return nil
 	}
 	pi := FormatInternalPlayer2Protobuf(x)
+	fmt.Println(x.cards)
+	fmt.Println(card.FormatInternalCards2Protobuf(x.cards))
 	return &twoonone_pb.PlayerInfoFull{
 		User:  pi.User,
 		Table: pi.Table,
