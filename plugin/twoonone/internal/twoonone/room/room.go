@@ -1265,10 +1265,9 @@ func FormatInternalRoom2Protobuf(x *Room, player_id string) *twoonone_pb.RoomInf
 	self := &twoonone_pb.PlayerInfoFull{}
 	if player_id != "" {
 		i_p, ok := x.GetPlayer(player_id)
-		if !ok {
-			return nil
+		if ok {
+			self = player.FULLINFO_FormatInternalPlayer2Protobuf(i_p)
 		}
-		self = player.FULLINFO_FormatInternalPlayer2Protobuf(i_p)
 	}
 	return &twoonone_pb.RoomInfo{
 		Hash:        x.hash,
