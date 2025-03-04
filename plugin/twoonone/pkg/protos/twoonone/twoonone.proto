@@ -84,6 +84,16 @@ message PlayerInfo {
     PlayerInfo.TableInfo table = 2;
 }
 
+message PlayerInfoFull {
+    message ExtraInfo {
+        repeated Card hand_cards = 1;
+    }
+
+    PlayerInfo.UserInfo user = 1;
+    PlayerInfo.TableInfo table = 2;
+    PlayerInfoFull.ExtraInfo extra = 3;
+}
+
 enum RoomStage {
     ROOM_STAGE_UNKNOWN = 0;
     ROOM_STAGE_WAITTING_START = 1;
@@ -99,6 +109,7 @@ message RoomInfo {
     RoomStage stage = 5;
     repeated SendCard sendcards = 6;
     optional PlayerInfo operator_now = 7;
+    PlayerInfoFull self = 8;
 }
 
 // Extra List:
@@ -229,7 +240,6 @@ message RoomEventResponse {
         PlayerInfo next_operator_info = 2;
     }
     
-
     message RobLandownerIntoSendingCard {
         PlayerInfo sendcarder_info = 1;
         repeated Card landowner_cards = 2;

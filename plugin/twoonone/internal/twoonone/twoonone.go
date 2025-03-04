@@ -174,8 +174,8 @@ func (r *APIRequest) GetDailyCoin(req *types.GetDailyCoinRequest) (any, error) {
 	return getDailyCoin(r.logger, req)
 }
 
-func (r *APIRequest) GetRooms() (any, error) {
-	return getRooms(), nil
+func (r *APIRequest) GetRooms(in *types.GetRoomsRequest) (any, error) {
+	return getRooms(in), nil
 }
 
 func (r *APIRequest) JoinRoom(req *types.JoinRoomRequest) (any, error) {
@@ -279,9 +279,9 @@ func parseCard(c []types.Card) []*twoonone_pb.Card {
 	return cards
 }
 
-func getRooms() *twoonone_pb.GetRoomsResponse {
+func getRooms(in *types.GetRoomsRequest) *twoonone_pb.GetRoomsResponse {
 	return &twoonone_pb.GetRoomsResponse{
-		RoomInfos: room.FormatInternalRooms2Protobuf(rooms),
+		RoomInfos: room.FormatInternalRooms2Protobuf(rooms, in.Extra.UserId),
 	}
 }
 
@@ -318,7 +318,7 @@ func getRoom(logger logx.Logger, in *types.GetRoomRequest) (*twoonone_pb.GetRoom
 		return nil, types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST, "")
 	}
 	return &twoonone_pb.GetRoomResponse{
-		RoomInfo: room.FormatInternalRoom2Protobuf(r),
+		RoomInfo: room.FormatInternalRoom2Protobuf(r, in.Extra.UserId),
 	}, nil
 }
 

@@ -15,6 +15,10 @@ type GetDailyCoinRequest {
 	extra Extra `custom:"extra"`
 }
 
+type GetRoomsRequest {
+	extra Extra `custom:"extra"`
+}
+
 type GetRoomRequest {
 	RoomHash string `path:"room_hash"`
 	extra    Extra  `custom:"extra"`
@@ -73,7 +77,7 @@ type WebsocketHandShake {
 )
 service twoonone-api {
 	@handler getRooms
-	get /rooms returns (any)
+	get /rooms (GetRoomsRequest) returns (any)
 
 	@handler getDailyCoin
 	get /get_daliy_coin (GetDailyCoinRequest) returns (any)

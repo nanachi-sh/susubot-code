@@ -564,6 +564,66 @@ func (x *PlayerInfo) GetTable() *PlayerInfo_TableInfo {
 	return nil
 }
 
+type PlayerInfoFull struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	User          *PlayerInfo_UserInfo      `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Table         *PlayerInfo_TableInfo     `protobuf:"bytes,2,opt,name=table,proto3" json:"table,omitempty"`
+	Extra         *PlayerInfoFull_ExtraInfo `protobuf:"bytes,3,opt,name=extra,proto3" json:"extra,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlayerInfoFull) Reset() {
+	*x = PlayerInfoFull{}
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlayerInfoFull) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlayerInfoFull) ProtoMessage() {}
+
+func (x *PlayerInfoFull) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlayerInfoFull.ProtoReflect.Descriptor instead.
+func (*PlayerInfoFull) Descriptor() ([]byte, []int) {
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *PlayerInfoFull) GetUser() *PlayerInfo_UserInfo {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *PlayerInfoFull) GetTable() *PlayerInfo_TableInfo {
+	if x != nil {
+		return x.Table
+	}
+	return nil
+}
+
+func (x *PlayerInfoFull) GetExtra() *PlayerInfoFull_ExtraInfo {
+	if x != nil {
+		return x.Extra
+	}
+	return nil
+}
+
 type RoomInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Hash          string                 `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
@@ -573,13 +633,14 @@ type RoomInfo struct {
 	Stage         RoomStage              `protobuf:"varint,5,opt,name=stage,proto3,enum=twoonone.RoomStage" json:"stage,omitempty"`
 	Sendcards     []*SendCard            `protobuf:"bytes,6,rep,name=sendcards,proto3" json:"sendcards,omitempty"`
 	OperatorNow   *PlayerInfo            `protobuf:"bytes,7,opt,name=operator_now,json=operatorNow,proto3,oneof" json:"operator_now,omitempty"`
+	Self          *PlayerInfoFull        `protobuf:"bytes,8,opt,name=self,proto3" json:"self,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RoomInfo) Reset() {
 	*x = RoomInfo{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[4]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -591,7 +652,7 @@ func (x *RoomInfo) String() string {
 func (*RoomInfo) ProtoMessage() {}
 
 func (x *RoomInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[4]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -604,7 +665,7 @@ func (x *RoomInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomInfo.ProtoReflect.Descriptor instead.
 func (*RoomInfo) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{4}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RoomInfo) GetHash() string {
@@ -656,6 +717,13 @@ func (x *RoomInfo) GetOperatorNow() *PlayerInfo {
 	return nil
 }
 
+func (x *RoomInfo) GetSelf() *PlayerInfoFull {
+	if x != nil {
+		return x.Self
+	}
+	return nil
+}
+
 type GetRoomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomHash      string                 `protobuf:"bytes,1,opt,name=room_hash,json=roomHash,proto3" json:"room_hash,omitempty"`
@@ -665,7 +733,7 @@ type GetRoomRequest struct {
 
 func (x *GetRoomRequest) Reset() {
 	*x = GetRoomRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[5]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -677,7 +745,7 @@ func (x *GetRoomRequest) String() string {
 func (*GetRoomRequest) ProtoMessage() {}
 
 func (x *GetRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[5]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -690,7 +758,7 @@ func (x *GetRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRoomRequest.ProtoReflect.Descriptor instead.
 func (*GetRoomRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{5}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetRoomRequest) GetRoomHash() string {
@@ -710,7 +778,7 @@ type GetRoomResponse struct {
 
 func (x *GetRoomResponse) Reset() {
 	*x = GetRoomResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[6]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -722,7 +790,7 @@ func (x *GetRoomResponse) String() string {
 func (*GetRoomResponse) ProtoMessage() {}
 
 func (x *GetRoomResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[6]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +803,7 @@ func (x *GetRoomResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRoomResponse.ProtoReflect.Descriptor instead.
 func (*GetRoomResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{6}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetRoomResponse) GetExtra() map[string]string {
@@ -760,7 +828,7 @@ type CreateRoomRequest struct {
 
 func (x *CreateRoomRequest) Reset() {
 	*x = CreateRoomRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[7]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -772,7 +840,7 @@ func (x *CreateRoomRequest) String() string {
 func (*CreateRoomRequest) ProtoMessage() {}
 
 func (x *CreateRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[7]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -785,7 +853,7 @@ func (x *CreateRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRoomRequest.ProtoReflect.Descriptor instead.
 func (*CreateRoomRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{7}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{8}
 }
 
 type CreateRoomResponse struct {
@@ -798,7 +866,7 @@ type CreateRoomResponse struct {
 
 func (x *CreateRoomResponse) Reset() {
 	*x = CreateRoomResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[8]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -810,7 +878,7 @@ func (x *CreateRoomResponse) String() string {
 func (*CreateRoomResponse) ProtoMessage() {}
 
 func (x *CreateRoomResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[8]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -823,7 +891,7 @@ func (x *CreateRoomResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRoomResponse.ProtoReflect.Descriptor instead.
 func (*CreateRoomResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{8}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CreateRoomResponse) GetExtra() map[string]string {
@@ -850,7 +918,7 @@ type JoinRoomRequest struct {
 
 func (x *JoinRoomRequest) Reset() {
 	*x = JoinRoomRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[9]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +930,7 @@ func (x *JoinRoomRequest) String() string {
 func (*JoinRoomRequest) ProtoMessage() {}
 
 func (x *JoinRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[9]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +943,7 @@ func (x *JoinRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinRoomRequest.ProtoReflect.Descriptor instead.
 func (*JoinRoomRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{9}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *JoinRoomRequest) GetRoomHash() string {
@@ -901,7 +969,7 @@ type JoinRoomResponse struct {
 
 func (x *JoinRoomResponse) Reset() {
 	*x = JoinRoomResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[10]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -913,7 +981,7 @@ func (x *JoinRoomResponse) String() string {
 func (*JoinRoomResponse) ProtoMessage() {}
 
 func (x *JoinRoomResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[10]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -926,7 +994,7 @@ func (x *JoinRoomResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinRoomResponse.ProtoReflect.Descriptor instead.
 func (*JoinRoomResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{10}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *JoinRoomResponse) GetExtra() map[string]string {
@@ -946,7 +1014,7 @@ type ExitRoomRequest struct {
 
 func (x *ExitRoomRequest) Reset() {
 	*x = ExitRoomRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[11]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -958,7 +1026,7 @@ func (x *ExitRoomRequest) String() string {
 func (*ExitRoomRequest) ProtoMessage() {}
 
 func (x *ExitRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[11]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -971,7 +1039,7 @@ func (x *ExitRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExitRoomRequest.ProtoReflect.Descriptor instead.
 func (*ExitRoomRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{11}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ExitRoomRequest) GetUserId() string {
@@ -997,7 +1065,7 @@ type ExitRoomResponse struct {
 
 func (x *ExitRoomResponse) Reset() {
 	*x = ExitRoomResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[12]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1009,7 +1077,7 @@ func (x *ExitRoomResponse) String() string {
 func (*ExitRoomResponse) ProtoMessage() {}
 
 func (x *ExitRoomResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[12]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1022,7 +1090,7 @@ func (x *ExitRoomResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExitRoomResponse.ProtoReflect.Descriptor instead.
 func (*ExitRoomResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{12}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ExitRoomResponse) GetExtra() map[string]string {
@@ -1042,7 +1110,7 @@ type RobLandownerRequest struct {
 
 func (x *RobLandownerRequest) Reset() {
 	*x = RobLandownerRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[13]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1054,7 +1122,7 @@ func (x *RobLandownerRequest) String() string {
 func (*RobLandownerRequest) ProtoMessage() {}
 
 func (x *RobLandownerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[13]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1067,7 +1135,7 @@ func (x *RobLandownerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RobLandownerRequest.ProtoReflect.Descriptor instead.
 func (*RobLandownerRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{13}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *RobLandownerRequest) GetUserId() string {
@@ -1093,7 +1161,7 @@ type RobLandownerResponse struct {
 
 func (x *RobLandownerResponse) Reset() {
 	*x = RobLandownerResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[14]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1105,7 +1173,7 @@ func (x *RobLandownerResponse) String() string {
 func (*RobLandownerResponse) ProtoMessage() {}
 
 func (x *RobLandownerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[14]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1118,7 +1186,7 @@ func (x *RobLandownerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RobLandownerResponse.ProtoReflect.Descriptor instead.
 func (*RobLandownerResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{14}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *RobLandownerResponse) GetExtra() map[string]string {
@@ -1138,7 +1206,7 @@ type NoRobLandownerRequest struct {
 
 func (x *NoRobLandownerRequest) Reset() {
 	*x = NoRobLandownerRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[15]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1150,7 +1218,7 @@ func (x *NoRobLandownerRequest) String() string {
 func (*NoRobLandownerRequest) ProtoMessage() {}
 
 func (x *NoRobLandownerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[15]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1163,7 +1231,7 @@ func (x *NoRobLandownerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NoRobLandownerRequest.ProtoReflect.Descriptor instead.
 func (*NoRobLandownerRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{15}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *NoRobLandownerRequest) GetUserId() string {
@@ -1189,7 +1257,7 @@ type NoRobLandownerResponse struct {
 
 func (x *NoRobLandownerResponse) Reset() {
 	*x = NoRobLandownerResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[16]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1201,7 +1269,7 @@ func (x *NoRobLandownerResponse) String() string {
 func (*NoRobLandownerResponse) ProtoMessage() {}
 
 func (x *NoRobLandownerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[16]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1214,7 +1282,7 @@ func (x *NoRobLandownerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NoRobLandownerResponse.ProtoReflect.Descriptor instead.
 func (*NoRobLandownerResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{16}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *NoRobLandownerResponse) GetExtra() map[string]string {
@@ -1235,7 +1303,7 @@ type SendCardRequest struct {
 
 func (x *SendCardRequest) Reset() {
 	*x = SendCardRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[17]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1247,7 +1315,7 @@ func (x *SendCardRequest) String() string {
 func (*SendCardRequest) ProtoMessage() {}
 
 func (x *SendCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[17]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1260,7 +1328,7 @@ func (x *SendCardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendCardRequest.ProtoReflect.Descriptor instead.
 func (*SendCardRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{17}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SendCardRequest) GetUserId() string {
@@ -1293,7 +1361,7 @@ type SendCardResponse struct {
 
 func (x *SendCardResponse) Reset() {
 	*x = SendCardResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[18]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1305,7 +1373,7 @@ func (x *SendCardResponse) String() string {
 func (*SendCardResponse) ProtoMessage() {}
 
 func (x *SendCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[18]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1318,7 +1386,7 @@ func (x *SendCardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendCardResponse.ProtoReflect.Descriptor instead.
 func (*SendCardResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{18}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *SendCardResponse) GetExtra() map[string]string {
@@ -1338,7 +1406,7 @@ type NoSendCardRequest struct {
 
 func (x *NoSendCardRequest) Reset() {
 	*x = NoSendCardRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[19]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1350,7 +1418,7 @@ func (x *NoSendCardRequest) String() string {
 func (*NoSendCardRequest) ProtoMessage() {}
 
 func (x *NoSendCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[19]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1431,7 @@ func (x *NoSendCardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NoSendCardRequest.ProtoReflect.Descriptor instead.
 func (*NoSendCardRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{19}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *NoSendCardRequest) GetUserId() string {
@@ -1389,7 +1457,7 @@ type NoSendCardResponse struct {
 
 func (x *NoSendCardResponse) Reset() {
 	*x = NoSendCardResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[20]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1401,7 +1469,7 @@ func (x *NoSendCardResponse) String() string {
 func (*NoSendCardResponse) ProtoMessage() {}
 
 func (x *NoSendCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[20]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1414,7 +1482,7 @@ func (x *NoSendCardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NoSendCardResponse.ProtoReflect.Descriptor instead.
 func (*NoSendCardResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{20}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *NoSendCardResponse) GetExtra() map[string]string {
@@ -1433,7 +1501,7 @@ type GetDailyCoinRequest struct {
 
 func (x *GetDailyCoinRequest) Reset() {
 	*x = GetDailyCoinRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[21]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1445,7 +1513,7 @@ func (x *GetDailyCoinRequest) String() string {
 func (*GetDailyCoinRequest) ProtoMessage() {}
 
 func (x *GetDailyCoinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[21]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1458,7 +1526,7 @@ func (x *GetDailyCoinRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDailyCoinRequest.ProtoReflect.Descriptor instead.
 func (*GetDailyCoinRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{21}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetDailyCoinRequest) GetUserId() string {
@@ -1477,7 +1545,7 @@ type GetDailyCoinResponse struct {
 
 func (x *GetDailyCoinResponse) Reset() {
 	*x = GetDailyCoinResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[22]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1489,7 +1557,7 @@ func (x *GetDailyCoinResponse) String() string {
 func (*GetDailyCoinResponse) ProtoMessage() {}
 
 func (x *GetDailyCoinResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[22]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1502,7 +1570,7 @@ func (x *GetDailyCoinResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDailyCoinResponse.ProtoReflect.Descriptor instead.
 func (*GetDailyCoinResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{22}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetDailyCoinResponse) GetExtra() map[string]string {
@@ -1522,7 +1590,7 @@ type StartRoomRequest struct {
 
 func (x *StartRoomRequest) Reset() {
 	*x = StartRoomRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[23]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1534,7 +1602,7 @@ func (x *StartRoomRequest) String() string {
 func (*StartRoomRequest) ProtoMessage() {}
 
 func (x *StartRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[23]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1547,7 +1615,7 @@ func (x *StartRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartRoomRequest.ProtoReflect.Descriptor instead.
 func (*StartRoomRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{23}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *StartRoomRequest) GetRoomHash() string {
@@ -1573,7 +1641,7 @@ type StartRoomResponse struct {
 
 func (x *StartRoomResponse) Reset() {
 	*x = StartRoomResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[24]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1585,7 +1653,7 @@ func (x *StartRoomResponse) String() string {
 func (*StartRoomResponse) ProtoMessage() {}
 
 func (x *StartRoomResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[24]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1598,7 +1666,7 @@ func (x *StartRoomResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartRoomResponse.ProtoReflect.Descriptor instead.
 func (*StartRoomResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{24}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *StartRoomResponse) GetExtra() map[string]string {
@@ -1616,7 +1684,7 @@ type GetRoomsRequest struct {
 
 func (x *GetRoomsRequest) Reset() {
 	*x = GetRoomsRequest{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[25]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1628,7 +1696,7 @@ func (x *GetRoomsRequest) String() string {
 func (*GetRoomsRequest) ProtoMessage() {}
 
 func (x *GetRoomsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[25]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1641,7 +1709,7 @@ func (x *GetRoomsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRoomsRequest.ProtoReflect.Descriptor instead.
 func (*GetRoomsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{25}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{26}
 }
 
 type GetRoomsResponse struct {
@@ -1654,7 +1722,7 @@ type GetRoomsResponse struct {
 
 func (x *GetRoomsResponse) Reset() {
 	*x = GetRoomsResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[26]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1666,7 +1734,7 @@ func (x *GetRoomsResponse) String() string {
 func (*GetRoomsResponse) ProtoMessage() {}
 
 func (x *GetRoomsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[26]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1679,7 +1747,7 @@ func (x *GetRoomsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRoomsResponse.ProtoReflect.Descriptor instead.
 func (*GetRoomsResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{26}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetRoomsResponse) GetExtra() map[string]string {
@@ -1721,7 +1789,7 @@ type RoomEventResponse struct {
 
 func (x *RoomEventResponse) Reset() {
 	*x = RoomEventResponse{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[27]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1733,7 +1801,7 @@ func (x *RoomEventResponse) String() string {
 func (*RoomEventResponse) ProtoMessage() {}
 
 func (x *RoomEventResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[27]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1746,7 +1814,7 @@ func (x *RoomEventResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RoomEventResponse) GetBody() isRoomEventResponse_Body {
@@ -1981,7 +2049,7 @@ type PlayerInfo_TableInfo struct {
 
 func (x *PlayerInfo_TableInfo) Reset() {
 	*x = PlayerInfo_TableInfo{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[28]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1993,7 +2061,7 @@ func (x *PlayerInfo_TableInfo) String() string {
 func (*PlayerInfo_TableInfo) ProtoMessage() {}
 
 func (x *PlayerInfo_TableInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[28]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2040,7 +2108,7 @@ type PlayerInfo_UserInfo struct {
 
 func (x *PlayerInfo_UserInfo) Reset() {
 	*x = PlayerInfo_UserInfo{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[29]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2052,7 +2120,7 @@ func (x *PlayerInfo_UserInfo) String() string {
 func (*PlayerInfo_UserInfo) ProtoMessage() {}
 
 func (x *PlayerInfo_UserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[29]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2082,6 +2150,50 @@ func (x *PlayerInfo_UserInfo) GetName() string {
 	return ""
 }
 
+type PlayerInfoFull_ExtraInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	HandCards     []*Card                `protobuf:"bytes,1,rep,name=hand_cards,json=handCards,proto3" json:"hand_cards,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlayerInfoFull_ExtraInfo) Reset() {
+	*x = PlayerInfoFull_ExtraInfo{}
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlayerInfoFull_ExtraInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlayerInfoFull_ExtraInfo) ProtoMessage() {}
+
+func (x *PlayerInfoFull_ExtraInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlayerInfoFull_ExtraInfo.ProtoReflect.Descriptor instead.
+func (*PlayerInfoFull_ExtraInfo) Descriptor() ([]byte, []int) {
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{4, 0}
+}
+
+func (x *PlayerInfoFull_ExtraInfo) GetHandCards() []*Card {
+	if x != nil {
+		return x.HandCards
+	}
+	return nil
+}
+
 type RoomEventResponse_RoomJoinPlayer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JoinerInfo    *PlayerInfo            `protobuf:"bytes,1,opt,name=joiner_info,json=joinerInfo,proto3" json:"joiner_info,omitempty"`
@@ -2092,7 +2204,7 @@ type RoomEventResponse_RoomJoinPlayer struct {
 
 func (x *RoomEventResponse_RoomJoinPlayer) Reset() {
 	*x = RoomEventResponse_RoomJoinPlayer{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[41]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2104,7 +2216,7 @@ func (x *RoomEventResponse_RoomJoinPlayer) String() string {
 func (*RoomEventResponse_RoomJoinPlayer) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomJoinPlayer) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[41]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2117,7 +2229,7 @@ func (x *RoomEventResponse_RoomJoinPlayer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_RoomJoinPlayer.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomJoinPlayer) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 0}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 0}
 }
 
 func (x *RoomEventResponse_RoomJoinPlayer) GetJoinerInfo() *PlayerInfo {
@@ -2144,7 +2256,7 @@ type RoomEventResponse_RoomExitPlayer struct {
 
 func (x *RoomEventResponse_RoomExitPlayer) Reset() {
 	*x = RoomEventResponse_RoomExitPlayer{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[42]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2156,7 +2268,7 @@ func (x *RoomEventResponse_RoomExitPlayer) String() string {
 func (*RoomEventResponse_RoomExitPlayer) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomExitPlayer) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[42]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2169,7 +2281,7 @@ func (x *RoomEventResponse_RoomExitPlayer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_RoomExitPlayer.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomExitPlayer) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 1}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 1}
 }
 
 func (x *RoomEventResponse_RoomExitPlayer) GetLeaverInfo() *PlayerInfo {
@@ -2195,7 +2307,7 @@ type RoomEventResponse_RoomStarted struct {
 
 func (x *RoomEventResponse_RoomStarted) Reset() {
 	*x = RoomEventResponse_RoomStarted{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[43]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2207,7 +2319,7 @@ func (x *RoomEventResponse_RoomStarted) String() string {
 func (*RoomEventResponse_RoomStarted) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomStarted) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[43]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2220,7 +2332,7 @@ func (x *RoomEventResponse_RoomStarted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_RoomStarted.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomStarted) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 2}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 2}
 }
 
 func (x *RoomEventResponse_RoomStarted) GetNextOperatorInfo() *PlayerInfo {
@@ -2240,7 +2352,7 @@ type RoomEventResponse_RoomRobLandowner struct {
 
 func (x *RoomEventResponse_RoomRobLandowner) Reset() {
 	*x = RoomEventResponse_RoomRobLandowner{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[44]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2252,7 +2364,7 @@ func (x *RoomEventResponse_RoomRobLandowner) String() string {
 func (*RoomEventResponse_RoomRobLandowner) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomRobLandowner) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[44]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2265,7 +2377,7 @@ func (x *RoomEventResponse_RoomRobLandowner) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use RoomEventResponse_RoomRobLandowner.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomRobLandowner) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 3}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 3}
 }
 
 func (x *RoomEventResponse_RoomRobLandowner) GetOperatorInfo() *PlayerInfo {
@@ -2292,7 +2404,7 @@ type RoomEventResponse_RoomNoRobLandowner struct {
 
 func (x *RoomEventResponse_RoomNoRobLandowner) Reset() {
 	*x = RoomEventResponse_RoomNoRobLandowner{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[45]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2304,7 +2416,7 @@ func (x *RoomEventResponse_RoomNoRobLandowner) String() string {
 func (*RoomEventResponse_RoomNoRobLandowner) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomNoRobLandowner) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[45]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2317,7 +2429,7 @@ func (x *RoomEventResponse_RoomNoRobLandowner) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use RoomEventResponse_RoomNoRobLandowner.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomNoRobLandowner) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 4}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 4}
 }
 
 func (x *RoomEventResponse_RoomNoRobLandowner) GetOperatorInfo() *PlayerInfo {
@@ -2345,7 +2457,7 @@ type RoomEventResponse_RoomSendCard struct {
 
 func (x *RoomEventResponse_RoomSendCard) Reset() {
 	*x = RoomEventResponse_RoomSendCard{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[46]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2357,7 +2469,7 @@ func (x *RoomEventResponse_RoomSendCard) String() string {
 func (*RoomEventResponse_RoomSendCard) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomSendCard) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[46]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2370,7 +2482,7 @@ func (x *RoomEventResponse_RoomSendCard) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_RoomSendCard.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomSendCard) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 5}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 5}
 }
 
 func (x *RoomEventResponse_RoomSendCard) GetOperatorInfo() *PlayerInfo {
@@ -2404,7 +2516,7 @@ type RoomEventResponse_RoomNoSendCard struct {
 
 func (x *RoomEventResponse_RoomNoSendCard) Reset() {
 	*x = RoomEventResponse_RoomNoSendCard{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[47]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2416,7 +2528,7 @@ func (x *RoomEventResponse_RoomNoSendCard) String() string {
 func (*RoomEventResponse_RoomNoSendCard) ProtoMessage() {}
 
 func (x *RoomEventResponse_RoomNoSendCard) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[47]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2429,7 +2541,7 @@ func (x *RoomEventResponse_RoomNoSendCard) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_RoomNoSendCard.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RoomNoSendCard) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 6}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 6}
 }
 
 func (x *RoomEventResponse_RoomNoSendCard) GetOperatorInfo() *PlayerInfo {
@@ -2456,7 +2568,7 @@ type RoomEventResponse_RobLandownerIntoSendingCard struct {
 
 func (x *RoomEventResponse_RobLandownerIntoSendingCard) Reset() {
 	*x = RoomEventResponse_RobLandownerIntoSendingCard{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[48]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2468,7 +2580,7 @@ func (x *RoomEventResponse_RobLandownerIntoSendingCard) String() string {
 func (*RoomEventResponse_RobLandownerIntoSendingCard) ProtoMessage() {}
 
 func (x *RoomEventResponse_RobLandownerIntoSendingCard) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[48]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2481,7 +2593,7 @@ func (x *RoomEventResponse_RobLandownerIntoSendingCard) ProtoReflect() protorefl
 
 // Deprecated: Use RoomEventResponse_RobLandownerIntoSendingCard.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RobLandownerIntoSendingCard) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 7}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 7}
 }
 
 func (x *RoomEventResponse_RobLandownerIntoSendingCard) GetSendcarderInfo() *PlayerInfo {
@@ -2507,7 +2619,7 @@ type RoomEventResponse_RobLandownerContinuousRob struct {
 
 func (x *RoomEventResponse_RobLandownerContinuousRob) Reset() {
 	*x = RoomEventResponse_RobLandownerContinuousRob{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[49]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2519,7 +2631,7 @@ func (x *RoomEventResponse_RobLandownerContinuousRob) String() string {
 func (*RoomEventResponse_RobLandownerContinuousRob) ProtoMessage() {}
 
 func (x *RoomEventResponse_RobLandownerContinuousRob) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[49]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2532,7 +2644,7 @@ func (x *RoomEventResponse_RobLandownerContinuousRob) ProtoReflect() protoreflec
 
 // Deprecated: Use RoomEventResponse_RobLandownerContinuousRob.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_RobLandownerContinuousRob) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 8}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 8}
 }
 
 func (x *RoomEventResponse_RobLandownerContinuousRob) GetMultiple() int32 {
@@ -2551,7 +2663,7 @@ type RoomEventResponse_SendCardSpringNotice struct {
 
 func (x *RoomEventResponse_SendCardSpringNotice) Reset() {
 	*x = RoomEventResponse_SendCardSpringNotice{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[50]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2563,7 +2675,7 @@ func (x *RoomEventResponse_SendCardSpringNotice) String() string {
 func (*RoomEventResponse_SendCardSpringNotice) ProtoMessage() {}
 
 func (x *RoomEventResponse_SendCardSpringNotice) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[50]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2576,7 +2688,7 @@ func (x *RoomEventResponse_SendCardSpringNotice) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use RoomEventResponse_SendCardSpringNotice.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_SendCardSpringNotice) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 9}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 9}
 }
 
 func (x *RoomEventResponse_SendCardSpringNotice) GetMultiple() int32 {
@@ -2596,7 +2708,7 @@ type RoomEventResponse_SendCardBoomNotice struct {
 
 func (x *RoomEventResponse_SendCardBoomNotice) Reset() {
 	*x = RoomEventResponse_SendCardBoomNotice{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[51]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2608,7 +2720,7 @@ func (x *RoomEventResponse_SendCardBoomNotice) String() string {
 func (*RoomEventResponse_SendCardBoomNotice) ProtoMessage() {}
 
 func (x *RoomEventResponse_SendCardBoomNotice) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[51]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2621,7 +2733,7 @@ func (x *RoomEventResponse_SendCardBoomNotice) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use RoomEventResponse_SendCardBoomNotice.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_SendCardBoomNotice) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 10}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 10}
 }
 
 func (x *RoomEventResponse_SendCardBoomNotice) GetMultiple() int32 {
@@ -2648,7 +2760,7 @@ type RoomEventResponse_SendCardKingBoomNotice struct {
 
 func (x *RoomEventResponse_SendCardKingBoomNotice) Reset() {
 	*x = RoomEventResponse_SendCardKingBoomNotice{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[52]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2660,7 +2772,7 @@ func (x *RoomEventResponse_SendCardKingBoomNotice) String() string {
 func (*RoomEventResponse_SendCardKingBoomNotice) ProtoMessage() {}
 
 func (x *RoomEventResponse_SendCardKingBoomNotice) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[52]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2673,7 +2785,7 @@ func (x *RoomEventResponse_SendCardKingBoomNotice) ProtoReflect() protoreflect.M
 
 // Deprecated: Use RoomEventResponse_SendCardKingBoomNotice.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_SendCardKingBoomNotice) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 11}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 11}
 }
 
 func (x *RoomEventResponse_SendCardKingBoomNotice) GetMultiple() int32 {
@@ -2700,7 +2812,7 @@ type RoomEventResponse_SendCardCardNumberNotice struct {
 
 func (x *RoomEventResponse_SendCardCardNumberNotice) Reset() {
 	*x = RoomEventResponse_SendCardCardNumberNotice{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[53]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2712,7 +2824,7 @@ func (x *RoomEventResponse_SendCardCardNumberNotice) String() string {
 func (*RoomEventResponse_SendCardCardNumberNotice) ProtoMessage() {}
 
 func (x *RoomEventResponse_SendCardCardNumberNotice) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[53]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2725,7 +2837,7 @@ func (x *RoomEventResponse_SendCardCardNumberNotice) ProtoReflect() protoreflect
 
 // Deprecated: Use RoomEventResponse_SendCardCardNumberNotice.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_SendCardCardNumberNotice) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 12}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 12}
 }
 
 func (x *RoomEventResponse_SendCardCardNumberNotice) GetNumber() int32 {
@@ -2754,7 +2866,7 @@ type RoomEventResponse_GameFinish struct {
 
 func (x *RoomEventResponse_GameFinish) Reset() {
 	*x = RoomEventResponse_GameFinish{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[54]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2766,7 +2878,7 @@ func (x *RoomEventResponse_GameFinish) String() string {
 func (*RoomEventResponse_GameFinish) ProtoMessage() {}
 
 func (x *RoomEventResponse_GameFinish) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[54]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2779,7 +2891,7 @@ func (x *RoomEventResponse_GameFinish) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomEventResponse_GameFinish.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_GameFinish) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 13}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 13}
 }
 
 func (x *RoomEventResponse_GameFinish) GetLandownerInfo() *RoomEventResponse_GameFinish_PlayerInfoExtra {
@@ -2820,7 +2932,7 @@ type RoomEventResponse_GameFinish_PlayerInfoExtra struct {
 
 func (x *RoomEventResponse_GameFinish_PlayerInfoExtra) Reset() {
 	*x = RoomEventResponse_GameFinish_PlayerInfoExtra{}
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[55]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2832,7 +2944,7 @@ func (x *RoomEventResponse_GameFinish_PlayerInfoExtra) String() string {
 func (*RoomEventResponse_GameFinish_PlayerInfoExtra) ProtoMessage() {}
 
 func (x *RoomEventResponse_GameFinish_PlayerInfoExtra) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[55]
+	mi := &file_pkg_protos_twoonone_twoonone_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2845,7 +2957,7 @@ func (x *RoomEventResponse_GameFinish_PlayerInfoExtra) ProtoReflect() protorefle
 
 // Deprecated: Use RoomEventResponse_GameFinish_PlayerInfoExtra.ProtoReflect.Descriptor instead.
 func (*RoomEventResponse_GameFinish_PlayerInfoExtra) Descriptor() ([]byte, []int) {
-	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{27, 13, 0}
+	return file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP(), []int{28, 13, 0}
 }
 
 func (x *RoomEventResponse_GameFinish_PlayerInfoExtra) GetPlayerInfo() *PlayerInfo {
@@ -2927,26 +3039,44 @@ var file_pkg_protos_twoonone_twoonone_proto_rawDesc = []byte{
 	0x6e, 0x65, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x04, 0x72, 0x6f, 0x6c, 0x65, 0x1a, 0x2e, 0x0a,
 	0x08, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d,
-	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0xbe, 0x02,
-	0x0a, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61,
-	0x73, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x37,
-	0x0a, 0x0c, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x5f, 0x69, 0x6e, 0x66, 0x6f, 0x73, 0x18, 0x02,
-	0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e,
-	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0b, 0x70, 0x6c, 0x61, 0x79,
-	0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x62, 0x61, 0x73, 0x69, 0x63,
-	0x5f, 0x63, 0x6f, 0x69, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x09, 0x62, 0x61, 0x73,
-	0x69, 0x63, 0x43, 0x6f, 0x69, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x70,
-	0x6c, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x6d, 0x75, 0x6c, 0x74, 0x69, 0x70,
-	0x6c, 0x65, 0x12, 0x29, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x67, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28,
-	0x0e, 0x32, 0x13, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x52, 0x6f, 0x6f,
-	0x6d, 0x53, 0x74, 0x61, 0x67, 0x65, 0x52, 0x05, 0x73, 0x74, 0x61, 0x67, 0x65, 0x12, 0x30, 0x0a,
-	0x09, 0x73, 0x65, 0x6e, 0x64, 0x63, 0x61, 0x72, 0x64, 0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x0b,
-	0x32, 0x12, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x53, 0x65, 0x6e, 0x64,
-	0x43, 0x61, 0x72, 0x64, 0x52, 0x09, 0x73, 0x65, 0x6e, 0x64, 0x63, 0x61, 0x72, 0x64, 0x73, 0x12,
-	0x3c, 0x0a, 0x0c, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x6e, 0x6f, 0x77, 0x18,
-	0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65,
-	0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x48, 0x00, 0x52, 0x0b, 0x6f,
-	0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x4e, 0x6f, 0x77, 0x88, 0x01, 0x01, 0x42, 0x0f, 0x0a,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0xef, 0x01,
+	0x0a, 0x0e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x46, 0x75, 0x6c, 0x6c,
+	0x12, 0x31, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1d,
+	0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
+	0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x75,
+	0x73, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x05, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x1e, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x50, 0x6c,
+	0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x54, 0x61, 0x62, 0x6c, 0x65, 0x49, 0x6e,
+	0x66, 0x6f, 0x52, 0x05, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x38, 0x0a, 0x05, 0x65, 0x78, 0x74,
+	0x72, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e,
+	0x6f, 0x6e, 0x65, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x46, 0x75,
+	0x6c, 0x6c, 0x2e, 0x45, 0x78, 0x74, 0x72, 0x61, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x65, 0x78,
+	0x74, 0x72, 0x61, 0x1a, 0x3a, 0x0a, 0x09, 0x45, 0x78, 0x74, 0x72, 0x61, 0x49, 0x6e, 0x66, 0x6f,
+	0x12, 0x2d, 0x0a, 0x0a, 0x68, 0x61, 0x6e, 0x64, 0x5f, 0x63, 0x61, 0x72, 0x64, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e,
+	0x43, 0x61, 0x72, 0x64, 0x52, 0x09, 0x68, 0x61, 0x6e, 0x64, 0x43, 0x61, 0x72, 0x64, 0x73, 0x22,
+	0xec, 0x02, 0x0a, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04,
+	0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68,
+	0x12, 0x37, 0x0a, 0x0c, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x5f, 0x69, 0x6e, 0x66, 0x6f, 0x73,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e,
+	0x65, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0b, 0x70, 0x6c,
+	0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x62, 0x61, 0x73,
+	0x69, 0x63, 0x5f, 0x63, 0x6f, 0x69, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x09, 0x62,
+	0x61, 0x73, 0x69, 0x63, 0x43, 0x6f, 0x69, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x75, 0x6c, 0x74,
+	0x69, 0x70, 0x6c, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x6d, 0x75, 0x6c, 0x74,
+	0x69, 0x70, 0x6c, 0x65, 0x12, 0x29, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x67, 0x65, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x13, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x52,
+	0x6f, 0x6f, 0x6d, 0x53, 0x74, 0x61, 0x67, 0x65, 0x52, 0x05, 0x73, 0x74, 0x61, 0x67, 0x65, 0x12,
+	0x30, 0x0a, 0x09, 0x73, 0x65, 0x6e, 0x64, 0x63, 0x61, 0x72, 0x64, 0x73, 0x18, 0x06, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x12, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x53, 0x65,
+	0x6e, 0x64, 0x43, 0x61, 0x72, 0x64, 0x52, 0x09, 0x73, 0x65, 0x6e, 0x64, 0x63, 0x61, 0x72, 0x64,
+	0x73, 0x12, 0x3c, 0x0a, 0x0c, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x6e, 0x6f,
+	0x77, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f,
+	0x6e, 0x65, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x48, 0x00, 0x52,
+	0x0b, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x4e, 0x6f, 0x77, 0x88, 0x01, 0x01, 0x12,
+	0x2c, 0x0a, 0x04, 0x73, 0x65, 0x6c, 0x66, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e,
+	0x74, 0x77, 0x6f, 0x6f, 0x6e, 0x6f, 0x6e, 0x65, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49,
+	0x6e, 0x66, 0x6f, 0x46, 0x75, 0x6c, 0x6c, 0x52, 0x04, 0x73, 0x65, 0x6c, 0x66, 0x42, 0x0f, 0x0a,
 	0x0d, 0x5f, 0x6f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x6e, 0x6f, 0x77, 0x22, 0x2d,
 	0x0a, 0x0e, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x12, 0x1b, 0x0a, 0x09, 0x72, 0x6f, 0x6f, 0x6d, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20,
@@ -3373,7 +3503,7 @@ func file_pkg_protos_twoonone_twoonone_proto_rawDescGZIP() []byte {
 }
 
 var file_pkg_protos_twoonone_twoonone_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_pkg_protos_twoonone_twoonone_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
+var file_pkg_protos_twoonone_twoonone_proto_msgTypes = make([]protoimpl.MessageInfo, 58)
 var file_pkg_protos_twoonone_twoonone_proto_goTypes = []any{
 	(Role)(0),                                // 0: twoonone.Role
 	(CardType)(0),                            // 1: twoonone.CardType
@@ -3384,58 +3514,60 @@ var file_pkg_protos_twoonone_twoonone_proto_goTypes = []any{
 	(*RobLandownerInfo)(nil),                 // 6: twoonone.RobLandownerInfo
 	(*SendCard)(nil),                         // 7: twoonone.SendCard
 	(*PlayerInfo)(nil),                       // 8: twoonone.PlayerInfo
-	(*RoomInfo)(nil),                         // 9: twoonone.RoomInfo
-	(*GetRoomRequest)(nil),                   // 10: twoonone.GetRoomRequest
-	(*GetRoomResponse)(nil),                  // 11: twoonone.GetRoomResponse
-	(*CreateRoomRequest)(nil),                // 12: twoonone.CreateRoomRequest
-	(*CreateRoomResponse)(nil),               // 13: twoonone.CreateRoomResponse
-	(*JoinRoomRequest)(nil),                  // 14: twoonone.JoinRoomRequest
-	(*JoinRoomResponse)(nil),                 // 15: twoonone.JoinRoomResponse
-	(*ExitRoomRequest)(nil),                  // 16: twoonone.ExitRoomRequest
-	(*ExitRoomResponse)(nil),                 // 17: twoonone.ExitRoomResponse
-	(*RobLandownerRequest)(nil),              // 18: twoonone.RobLandownerRequest
-	(*RobLandownerResponse)(nil),             // 19: twoonone.RobLandownerResponse
-	(*NoRobLandownerRequest)(nil),            // 20: twoonone.NoRobLandownerRequest
-	(*NoRobLandownerResponse)(nil),           // 21: twoonone.NoRobLandownerResponse
-	(*SendCardRequest)(nil),                  // 22: twoonone.SendCardRequest
-	(*SendCardResponse)(nil),                 // 23: twoonone.SendCardResponse
-	(*NoSendCardRequest)(nil),                // 24: twoonone.NoSendCardRequest
-	(*NoSendCardResponse)(nil),               // 25: twoonone.NoSendCardResponse
-	(*GetDailyCoinRequest)(nil),              // 26: twoonone.GetDailyCoinRequest
-	(*GetDailyCoinResponse)(nil),             // 27: twoonone.GetDailyCoinResponse
-	(*StartRoomRequest)(nil),                 // 28: twoonone.StartRoomRequest
-	(*StartRoomResponse)(nil),                // 29: twoonone.StartRoomResponse
-	(*GetRoomsRequest)(nil),                  // 30: twoonone.GetRoomsRequest
-	(*GetRoomsResponse)(nil),                 // 31: twoonone.GetRoomsResponse
-	(*RoomEventResponse)(nil),                // 32: twoonone.RoomEventResponse
-	(*PlayerInfo_TableInfo)(nil),             // 33: twoonone.PlayerInfo.TableInfo
-	(*PlayerInfo_UserInfo)(nil),              // 34: twoonone.PlayerInfo.UserInfo
-	nil,                                      // 35: twoonone.GetRoomResponse.ExtraEntry
-	nil,                                      // 36: twoonone.CreateRoomResponse.ExtraEntry
-	nil,                                      // 37: twoonone.JoinRoomResponse.ExtraEntry
-	nil,                                      // 38: twoonone.ExitRoomResponse.ExtraEntry
-	nil,                                      // 39: twoonone.RobLandownerResponse.ExtraEntry
-	nil,                                      // 40: twoonone.NoRobLandownerResponse.ExtraEntry
-	nil,                                      // 41: twoonone.SendCardResponse.ExtraEntry
-	nil,                                      // 42: twoonone.NoSendCardResponse.ExtraEntry
-	nil,                                      // 43: twoonone.GetDailyCoinResponse.ExtraEntry
-	nil,                                      // 44: twoonone.StartRoomResponse.ExtraEntry
-	nil,                                      // 45: twoonone.GetRoomsResponse.ExtraEntry
-	(*RoomEventResponse_RoomJoinPlayer)(nil), // 46: twoonone.RoomEventResponse.RoomJoinPlayer
-	(*RoomEventResponse_RoomExitPlayer)(nil), // 47: twoonone.RoomEventResponse.RoomExitPlayer
-	(*RoomEventResponse_RoomStarted)(nil),    // 48: twoonone.RoomEventResponse.RoomStarted
-	(*RoomEventResponse_RoomRobLandowner)(nil),            // 49: twoonone.RoomEventResponse.RoomRobLandowner
-	(*RoomEventResponse_RoomNoRobLandowner)(nil),          // 50: twoonone.RoomEventResponse.RoomNoRobLandowner
-	(*RoomEventResponse_RoomSendCard)(nil),                // 51: twoonone.RoomEventResponse.RoomSendCard
-	(*RoomEventResponse_RoomNoSendCard)(nil),              // 52: twoonone.RoomEventResponse.RoomNoSendCard
-	(*RoomEventResponse_RobLandownerIntoSendingCard)(nil), // 53: twoonone.RoomEventResponse.RobLandownerIntoSendingCard
-	(*RoomEventResponse_RobLandownerContinuousRob)(nil),   // 54: twoonone.RoomEventResponse.RobLandownerContinuousRob
-	(*RoomEventResponse_SendCardSpringNotice)(nil),        // 55: twoonone.RoomEventResponse.SendCardSpringNotice
-	(*RoomEventResponse_SendCardBoomNotice)(nil),          // 56: twoonone.RoomEventResponse.SendCardBoomNotice
-	(*RoomEventResponse_SendCardKingBoomNotice)(nil),      // 57: twoonone.RoomEventResponse.SendCardKingBoomNotice
-	(*RoomEventResponse_SendCardCardNumberNotice)(nil),    // 58: twoonone.RoomEventResponse.SendCardCardNumberNotice
-	(*RoomEventResponse_GameFinish)(nil),                  // 59: twoonone.RoomEventResponse.GameFinish
-	(*RoomEventResponse_GameFinish_PlayerInfoExtra)(nil),  // 60: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
+	(*PlayerInfoFull)(nil),                   // 9: twoonone.PlayerInfoFull
+	(*RoomInfo)(nil),                         // 10: twoonone.RoomInfo
+	(*GetRoomRequest)(nil),                   // 11: twoonone.GetRoomRequest
+	(*GetRoomResponse)(nil),                  // 12: twoonone.GetRoomResponse
+	(*CreateRoomRequest)(nil),                // 13: twoonone.CreateRoomRequest
+	(*CreateRoomResponse)(nil),               // 14: twoonone.CreateRoomResponse
+	(*JoinRoomRequest)(nil),                  // 15: twoonone.JoinRoomRequest
+	(*JoinRoomResponse)(nil),                 // 16: twoonone.JoinRoomResponse
+	(*ExitRoomRequest)(nil),                  // 17: twoonone.ExitRoomRequest
+	(*ExitRoomResponse)(nil),                 // 18: twoonone.ExitRoomResponse
+	(*RobLandownerRequest)(nil),              // 19: twoonone.RobLandownerRequest
+	(*RobLandownerResponse)(nil),             // 20: twoonone.RobLandownerResponse
+	(*NoRobLandownerRequest)(nil),            // 21: twoonone.NoRobLandownerRequest
+	(*NoRobLandownerResponse)(nil),           // 22: twoonone.NoRobLandownerResponse
+	(*SendCardRequest)(nil),                  // 23: twoonone.SendCardRequest
+	(*SendCardResponse)(nil),                 // 24: twoonone.SendCardResponse
+	(*NoSendCardRequest)(nil),                // 25: twoonone.NoSendCardRequest
+	(*NoSendCardResponse)(nil),               // 26: twoonone.NoSendCardResponse
+	(*GetDailyCoinRequest)(nil),              // 27: twoonone.GetDailyCoinRequest
+	(*GetDailyCoinResponse)(nil),             // 28: twoonone.GetDailyCoinResponse
+	(*StartRoomRequest)(nil),                 // 29: twoonone.StartRoomRequest
+	(*StartRoomResponse)(nil),                // 30: twoonone.StartRoomResponse
+	(*GetRoomsRequest)(nil),                  // 31: twoonone.GetRoomsRequest
+	(*GetRoomsResponse)(nil),                 // 32: twoonone.GetRoomsResponse
+	(*RoomEventResponse)(nil),                // 33: twoonone.RoomEventResponse
+	(*PlayerInfo_TableInfo)(nil),             // 34: twoonone.PlayerInfo.TableInfo
+	(*PlayerInfo_UserInfo)(nil),              // 35: twoonone.PlayerInfo.UserInfo
+	(*PlayerInfoFull_ExtraInfo)(nil),         // 36: twoonone.PlayerInfoFull.ExtraInfo
+	nil,                                      // 37: twoonone.GetRoomResponse.ExtraEntry
+	nil,                                      // 38: twoonone.CreateRoomResponse.ExtraEntry
+	nil,                                      // 39: twoonone.JoinRoomResponse.ExtraEntry
+	nil,                                      // 40: twoonone.ExitRoomResponse.ExtraEntry
+	nil,                                      // 41: twoonone.RobLandownerResponse.ExtraEntry
+	nil,                                      // 42: twoonone.NoRobLandownerResponse.ExtraEntry
+	nil,                                      // 43: twoonone.SendCardResponse.ExtraEntry
+	nil,                                      // 44: twoonone.NoSendCardResponse.ExtraEntry
+	nil,                                      // 45: twoonone.GetDailyCoinResponse.ExtraEntry
+	nil,                                      // 46: twoonone.StartRoomResponse.ExtraEntry
+	nil,                                      // 47: twoonone.GetRoomsResponse.ExtraEntry
+	(*RoomEventResponse_RoomJoinPlayer)(nil), // 48: twoonone.RoomEventResponse.RoomJoinPlayer
+	(*RoomEventResponse_RoomExitPlayer)(nil), // 49: twoonone.RoomEventResponse.RoomExitPlayer
+	(*RoomEventResponse_RoomStarted)(nil),    // 50: twoonone.RoomEventResponse.RoomStarted
+	(*RoomEventResponse_RoomRobLandowner)(nil),            // 51: twoonone.RoomEventResponse.RoomRobLandowner
+	(*RoomEventResponse_RoomNoRobLandowner)(nil),          // 52: twoonone.RoomEventResponse.RoomNoRobLandowner
+	(*RoomEventResponse_RoomSendCard)(nil),                // 53: twoonone.RoomEventResponse.RoomSendCard
+	(*RoomEventResponse_RoomNoSendCard)(nil),              // 54: twoonone.RoomEventResponse.RoomNoSendCard
+	(*RoomEventResponse_RobLandownerIntoSendingCard)(nil), // 55: twoonone.RoomEventResponse.RobLandownerIntoSendingCard
+	(*RoomEventResponse_RobLandownerContinuousRob)(nil),   // 56: twoonone.RoomEventResponse.RobLandownerContinuousRob
+	(*RoomEventResponse_SendCardSpringNotice)(nil),        // 57: twoonone.RoomEventResponse.SendCardSpringNotice
+	(*RoomEventResponse_SendCardBoomNotice)(nil),          // 58: twoonone.RoomEventResponse.SendCardBoomNotice
+	(*RoomEventResponse_SendCardKingBoomNotice)(nil),      // 59: twoonone.RoomEventResponse.SendCardKingBoomNotice
+	(*RoomEventResponse_SendCardCardNumberNotice)(nil),    // 60: twoonone.RoomEventResponse.SendCardCardNumberNotice
+	(*RoomEventResponse_GameFinish)(nil),                  // 61: twoonone.RoomEventResponse.GameFinish
+	(*RoomEventResponse_GameFinish_PlayerInfoExtra)(nil),  // 62: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
 }
 var file_pkg_protos_twoonone_twoonone_proto_depIdxs = []int32{
 	3,  // 0: twoonone.Card.number:type_name -> twoonone.Card.Number
@@ -3443,72 +3575,77 @@ var file_pkg_protos_twoonone_twoonone_proto_depIdxs = []int32{
 	8,  // 2: twoonone.SendCard.sender_info:type_name -> twoonone.PlayerInfo
 	5,  // 3: twoonone.SendCard.sendcards:type_name -> twoonone.Card
 	1,  // 4: twoonone.SendCard.sendcard_type:type_name -> twoonone.CardType
-	34, // 5: twoonone.PlayerInfo.user:type_name -> twoonone.PlayerInfo.UserInfo
-	33, // 6: twoonone.PlayerInfo.table:type_name -> twoonone.PlayerInfo.TableInfo
-	8,  // 7: twoonone.RoomInfo.player_infos:type_name -> twoonone.PlayerInfo
-	2,  // 8: twoonone.RoomInfo.stage:type_name -> twoonone.RoomStage
-	7,  // 9: twoonone.RoomInfo.sendcards:type_name -> twoonone.SendCard
-	8,  // 10: twoonone.RoomInfo.operator_now:type_name -> twoonone.PlayerInfo
-	35, // 11: twoonone.GetRoomResponse.extra:type_name -> twoonone.GetRoomResponse.ExtraEntry
-	9,  // 12: twoonone.GetRoomResponse.room_info:type_name -> twoonone.RoomInfo
-	36, // 13: twoonone.CreateRoomResponse.extra:type_name -> twoonone.CreateRoomResponse.ExtraEntry
-	37, // 14: twoonone.JoinRoomResponse.extra:type_name -> twoonone.JoinRoomResponse.ExtraEntry
-	38, // 15: twoonone.ExitRoomResponse.extra:type_name -> twoonone.ExitRoomResponse.ExtraEntry
-	39, // 16: twoonone.RobLandownerResponse.extra:type_name -> twoonone.RobLandownerResponse.ExtraEntry
-	40, // 17: twoonone.NoRobLandownerResponse.extra:type_name -> twoonone.NoRobLandownerResponse.ExtraEntry
-	5,  // 18: twoonone.SendCardRequest.sendcards:type_name -> twoonone.Card
-	41, // 19: twoonone.SendCardResponse.extra:type_name -> twoonone.SendCardResponse.ExtraEntry
-	42, // 20: twoonone.NoSendCardResponse.extra:type_name -> twoonone.NoSendCardResponse.ExtraEntry
-	43, // 21: twoonone.GetDailyCoinResponse.extra:type_name -> twoonone.GetDailyCoinResponse.ExtraEntry
-	44, // 22: twoonone.StartRoomResponse.extra:type_name -> twoonone.StartRoomResponse.ExtraEntry
-	45, // 23: twoonone.GetRoomsResponse.extra:type_name -> twoonone.GetRoomsResponse.ExtraEntry
-	9,  // 24: twoonone.GetRoomsResponse.room_infos:type_name -> twoonone.RoomInfo
-	53, // 25: twoonone.RoomEventResponse.roblandowner_into_sendingcard:type_name -> twoonone.RoomEventResponse.RobLandownerIntoSendingCard
-	54, // 26: twoonone.RoomEventResponse.roblandowner_continuous_rob:type_name -> twoonone.RoomEventResponse.RobLandownerContinuousRob
-	55, // 27: twoonone.RoomEventResponse.sendcard_spring_notice:type_name -> twoonone.RoomEventResponse.SendCardSpringNotice
-	56, // 28: twoonone.RoomEventResponse.sendcard_boom_notice:type_name -> twoonone.RoomEventResponse.SendCardBoomNotice
-	57, // 29: twoonone.RoomEventResponse.sendcard_kingboom_notice:type_name -> twoonone.RoomEventResponse.SendCardKingBoomNotice
-	59, // 30: twoonone.RoomEventResponse.game_finish:type_name -> twoonone.RoomEventResponse.GameFinish
-	58, // 31: twoonone.RoomEventResponse.sendcard_cardnumber_notice:type_name -> twoonone.RoomEventResponse.SendCardCardNumberNotice
-	46, // 32: twoonone.RoomEventResponse.room_join_player:type_name -> twoonone.RoomEventResponse.RoomJoinPlayer
-	47, // 33: twoonone.RoomEventResponse.room_exit_player:type_name -> twoonone.RoomEventResponse.RoomExitPlayer
-	48, // 34: twoonone.RoomEventResponse.room_started:type_name -> twoonone.RoomEventResponse.RoomStarted
-	49, // 35: twoonone.RoomEventResponse.room_rob_landowner:type_name -> twoonone.RoomEventResponse.RoomRobLandowner
-	50, // 36: twoonone.RoomEventResponse.room_norob_landowner:type_name -> twoonone.RoomEventResponse.RoomNoRobLandowner
-	51, // 37: twoonone.RoomEventResponse.room_sendcard:type_name -> twoonone.RoomEventResponse.RoomSendCard
-	52, // 38: twoonone.RoomEventResponse.room_no_sendcard:type_name -> twoonone.RoomEventResponse.RoomNoSendCard
-	6,  // 39: twoonone.PlayerInfo.TableInfo.roblandowner_info:type_name -> twoonone.RobLandownerInfo
-	0,  // 40: twoonone.PlayerInfo.TableInfo.role:type_name -> twoonone.Role
-	8,  // 41: twoonone.RoomEventResponse.RoomJoinPlayer.joiner_info:type_name -> twoonone.PlayerInfo
-	8,  // 42: twoonone.RoomEventResponse.RoomJoinPlayer.player_infos:type_name -> twoonone.PlayerInfo
-	8,  // 43: twoonone.RoomEventResponse.RoomExitPlayer.leaver_info:type_name -> twoonone.PlayerInfo
-	8,  // 44: twoonone.RoomEventResponse.RoomExitPlayer.player_infos:type_name -> twoonone.PlayerInfo
-	8,  // 45: twoonone.RoomEventResponse.RoomStarted.next_operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 46: twoonone.RoomEventResponse.RoomRobLandowner.operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 47: twoonone.RoomEventResponse.RoomRobLandowner.next_operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 48: twoonone.RoomEventResponse.RoomNoRobLandowner.operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 49: twoonone.RoomEventResponse.RoomNoRobLandowner.next_operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 50: twoonone.RoomEventResponse.RoomSendCard.operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 51: twoonone.RoomEventResponse.RoomSendCard.next_operator_info:type_name -> twoonone.PlayerInfo
-	5,  // 52: twoonone.RoomEventResponse.RoomSendCard.sendcards:type_name -> twoonone.Card
-	8,  // 53: twoonone.RoomEventResponse.RoomNoSendCard.operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 54: twoonone.RoomEventResponse.RoomNoSendCard.next_operator_info:type_name -> twoonone.PlayerInfo
-	8,  // 55: twoonone.RoomEventResponse.RobLandownerIntoSendingCard.sendcarder_info:type_name -> twoonone.PlayerInfo
-	5,  // 56: twoonone.RoomEventResponse.RobLandownerIntoSendingCard.landowner_cards:type_name -> twoonone.Card
-	8,  // 57: twoonone.RoomEventResponse.SendCardBoomNotice.sendcarder_info:type_name -> twoonone.PlayerInfo
-	8,  // 58: twoonone.RoomEventResponse.SendCardKingBoomNotice.sendcarder_info:type_name -> twoonone.PlayerInfo
-	8,  // 59: twoonone.RoomEventResponse.SendCardCardNumberNotice.notice_target_info:type_name -> twoonone.PlayerInfo
-	60, // 60: twoonone.RoomEventResponse.GameFinish.landowner_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
-	60, // 61: twoonone.RoomEventResponse.GameFinish.farmer1_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
-	60, // 62: twoonone.RoomEventResponse.GameFinish.farmer2_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
-	0,  // 63: twoonone.RoomEventResponse.GameFinish.Winner:type_name -> twoonone.Role
-	8,  // 64: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra.player_info:type_name -> twoonone.PlayerInfo
-	5,  // 65: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra.hand_cards:type_name -> twoonone.Card
-	66, // [66:66] is the sub-list for method output_type
-	66, // [66:66] is the sub-list for method input_type
-	66, // [66:66] is the sub-list for extension type_name
-	66, // [66:66] is the sub-list for extension extendee
-	0,  // [0:66] is the sub-list for field type_name
+	35, // 5: twoonone.PlayerInfo.user:type_name -> twoonone.PlayerInfo.UserInfo
+	34, // 6: twoonone.PlayerInfo.table:type_name -> twoonone.PlayerInfo.TableInfo
+	35, // 7: twoonone.PlayerInfoFull.user:type_name -> twoonone.PlayerInfo.UserInfo
+	34, // 8: twoonone.PlayerInfoFull.table:type_name -> twoonone.PlayerInfo.TableInfo
+	36, // 9: twoonone.PlayerInfoFull.extra:type_name -> twoonone.PlayerInfoFull.ExtraInfo
+	8,  // 10: twoonone.RoomInfo.player_infos:type_name -> twoonone.PlayerInfo
+	2,  // 11: twoonone.RoomInfo.stage:type_name -> twoonone.RoomStage
+	7,  // 12: twoonone.RoomInfo.sendcards:type_name -> twoonone.SendCard
+	8,  // 13: twoonone.RoomInfo.operator_now:type_name -> twoonone.PlayerInfo
+	9,  // 14: twoonone.RoomInfo.self:type_name -> twoonone.PlayerInfoFull
+	37, // 15: twoonone.GetRoomResponse.extra:type_name -> twoonone.GetRoomResponse.ExtraEntry
+	10, // 16: twoonone.GetRoomResponse.room_info:type_name -> twoonone.RoomInfo
+	38, // 17: twoonone.CreateRoomResponse.extra:type_name -> twoonone.CreateRoomResponse.ExtraEntry
+	39, // 18: twoonone.JoinRoomResponse.extra:type_name -> twoonone.JoinRoomResponse.ExtraEntry
+	40, // 19: twoonone.ExitRoomResponse.extra:type_name -> twoonone.ExitRoomResponse.ExtraEntry
+	41, // 20: twoonone.RobLandownerResponse.extra:type_name -> twoonone.RobLandownerResponse.ExtraEntry
+	42, // 21: twoonone.NoRobLandownerResponse.extra:type_name -> twoonone.NoRobLandownerResponse.ExtraEntry
+	5,  // 22: twoonone.SendCardRequest.sendcards:type_name -> twoonone.Card
+	43, // 23: twoonone.SendCardResponse.extra:type_name -> twoonone.SendCardResponse.ExtraEntry
+	44, // 24: twoonone.NoSendCardResponse.extra:type_name -> twoonone.NoSendCardResponse.ExtraEntry
+	45, // 25: twoonone.GetDailyCoinResponse.extra:type_name -> twoonone.GetDailyCoinResponse.ExtraEntry
+	46, // 26: twoonone.StartRoomResponse.extra:type_name -> twoonone.StartRoomResponse.ExtraEntry
+	47, // 27: twoonone.GetRoomsResponse.extra:type_name -> twoonone.GetRoomsResponse.ExtraEntry
+	10, // 28: twoonone.GetRoomsResponse.room_infos:type_name -> twoonone.RoomInfo
+	55, // 29: twoonone.RoomEventResponse.roblandowner_into_sendingcard:type_name -> twoonone.RoomEventResponse.RobLandownerIntoSendingCard
+	56, // 30: twoonone.RoomEventResponse.roblandowner_continuous_rob:type_name -> twoonone.RoomEventResponse.RobLandownerContinuousRob
+	57, // 31: twoonone.RoomEventResponse.sendcard_spring_notice:type_name -> twoonone.RoomEventResponse.SendCardSpringNotice
+	58, // 32: twoonone.RoomEventResponse.sendcard_boom_notice:type_name -> twoonone.RoomEventResponse.SendCardBoomNotice
+	59, // 33: twoonone.RoomEventResponse.sendcard_kingboom_notice:type_name -> twoonone.RoomEventResponse.SendCardKingBoomNotice
+	61, // 34: twoonone.RoomEventResponse.game_finish:type_name -> twoonone.RoomEventResponse.GameFinish
+	60, // 35: twoonone.RoomEventResponse.sendcard_cardnumber_notice:type_name -> twoonone.RoomEventResponse.SendCardCardNumberNotice
+	48, // 36: twoonone.RoomEventResponse.room_join_player:type_name -> twoonone.RoomEventResponse.RoomJoinPlayer
+	49, // 37: twoonone.RoomEventResponse.room_exit_player:type_name -> twoonone.RoomEventResponse.RoomExitPlayer
+	50, // 38: twoonone.RoomEventResponse.room_started:type_name -> twoonone.RoomEventResponse.RoomStarted
+	51, // 39: twoonone.RoomEventResponse.room_rob_landowner:type_name -> twoonone.RoomEventResponse.RoomRobLandowner
+	52, // 40: twoonone.RoomEventResponse.room_norob_landowner:type_name -> twoonone.RoomEventResponse.RoomNoRobLandowner
+	53, // 41: twoonone.RoomEventResponse.room_sendcard:type_name -> twoonone.RoomEventResponse.RoomSendCard
+	54, // 42: twoonone.RoomEventResponse.room_no_sendcard:type_name -> twoonone.RoomEventResponse.RoomNoSendCard
+	6,  // 43: twoonone.PlayerInfo.TableInfo.roblandowner_info:type_name -> twoonone.RobLandownerInfo
+	0,  // 44: twoonone.PlayerInfo.TableInfo.role:type_name -> twoonone.Role
+	5,  // 45: twoonone.PlayerInfoFull.ExtraInfo.hand_cards:type_name -> twoonone.Card
+	8,  // 46: twoonone.RoomEventResponse.RoomJoinPlayer.joiner_info:type_name -> twoonone.PlayerInfo
+	8,  // 47: twoonone.RoomEventResponse.RoomJoinPlayer.player_infos:type_name -> twoonone.PlayerInfo
+	8,  // 48: twoonone.RoomEventResponse.RoomExitPlayer.leaver_info:type_name -> twoonone.PlayerInfo
+	8,  // 49: twoonone.RoomEventResponse.RoomExitPlayer.player_infos:type_name -> twoonone.PlayerInfo
+	8,  // 50: twoonone.RoomEventResponse.RoomStarted.next_operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 51: twoonone.RoomEventResponse.RoomRobLandowner.operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 52: twoonone.RoomEventResponse.RoomRobLandowner.next_operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 53: twoonone.RoomEventResponse.RoomNoRobLandowner.operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 54: twoonone.RoomEventResponse.RoomNoRobLandowner.next_operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 55: twoonone.RoomEventResponse.RoomSendCard.operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 56: twoonone.RoomEventResponse.RoomSendCard.next_operator_info:type_name -> twoonone.PlayerInfo
+	5,  // 57: twoonone.RoomEventResponse.RoomSendCard.sendcards:type_name -> twoonone.Card
+	8,  // 58: twoonone.RoomEventResponse.RoomNoSendCard.operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 59: twoonone.RoomEventResponse.RoomNoSendCard.next_operator_info:type_name -> twoonone.PlayerInfo
+	8,  // 60: twoonone.RoomEventResponse.RobLandownerIntoSendingCard.sendcarder_info:type_name -> twoonone.PlayerInfo
+	5,  // 61: twoonone.RoomEventResponse.RobLandownerIntoSendingCard.landowner_cards:type_name -> twoonone.Card
+	8,  // 62: twoonone.RoomEventResponse.SendCardBoomNotice.sendcarder_info:type_name -> twoonone.PlayerInfo
+	8,  // 63: twoonone.RoomEventResponse.SendCardKingBoomNotice.sendcarder_info:type_name -> twoonone.PlayerInfo
+	8,  // 64: twoonone.RoomEventResponse.SendCardCardNumberNotice.notice_target_info:type_name -> twoonone.PlayerInfo
+	62, // 65: twoonone.RoomEventResponse.GameFinish.landowner_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
+	62, // 66: twoonone.RoomEventResponse.GameFinish.farmer1_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
+	62, // 67: twoonone.RoomEventResponse.GameFinish.farmer2_info:type_name -> twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra
+	0,  // 68: twoonone.RoomEventResponse.GameFinish.Winner:type_name -> twoonone.Role
+	8,  // 69: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra.player_info:type_name -> twoonone.PlayerInfo
+	5,  // 70: twoonone.RoomEventResponse.GameFinish.PlayerInfoExtra.hand_cards:type_name -> twoonone.Card
+	71, // [71:71] is the sub-list for method output_type
+	71, // [71:71] is the sub-list for method input_type
+	71, // [71:71] is the sub-list for extension type_name
+	71, // [71:71] is the sub-list for extension extendee
+	0,  // [0:71] is the sub-list for field type_name
 }
 
 func init() { file_pkg_protos_twoonone_twoonone_proto_init() }
@@ -3516,8 +3653,8 @@ func file_pkg_protos_twoonone_twoonone_proto_init() {
 	if File_pkg_protos_twoonone_twoonone_proto != nil {
 		return
 	}
-	file_pkg_protos_twoonone_twoonone_proto_msgTypes[4].OneofWrappers = []any{}
-	file_pkg_protos_twoonone_twoonone_proto_msgTypes[27].OneofWrappers = []any{
+	file_pkg_protos_twoonone_twoonone_proto_msgTypes[5].OneofWrappers = []any{}
+	file_pkg_protos_twoonone_twoonone_proto_msgTypes[28].OneofWrappers = []any{
 		(*RoomEventResponse_RoblandownerIntoSendingcard)(nil),
 		(*RoomEventResponse_RoblandownerContinuousRob)(nil),
 		(*RoomEventResponse_SendcardSpringNotice)(nil),
@@ -3539,7 +3676,7 @@ func file_pkg_protos_twoonone_twoonone_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkg_protos_twoonone_twoonone_proto_rawDesc,
 			NumEnums:      5,
-			NumMessages:   56,
+			NumMessages:   58,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

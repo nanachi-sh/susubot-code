@@ -32,6 +32,10 @@ type GetRoomRequest struct {
 	Extra    Extra  `custom:"extra"`
 }
 
+type GetRoomsRequest struct {
+	Extra Extra `custom:"extra"`
+}
+
 type JoinRoomRequest struct {
 	RoomHash string `path:"room_hash"`
 	Extra    Extra  `custom:"extra"`

@@ -1258,9 +1258,17 @@ func (r *Room) GetLandownerCard() [3]card.Card {
 	return r.landownerCards
 }
 
-func FormatInternalRoom2Protobuf(x *Room) *twoonone_pb.RoomInfo {
+func FormatInternalRoom2Protobuf(x *Room, player_id string) *twoonone_pb.RoomInfo {
 	if x == nil {
 		return nil
+	}
+	self := &twoonone_pb.PlayerInfoFull{}
+	if player_id != "" {
+		i_p, ok := x.GetPlayer(player_id)
+		if !ok {
+			return nil
+		}
+		self = player.FULLINFO_FormatInternalPlayer2Protobuf(i_p)
 	}
 	return &twoonone_pb.RoomInfo{
 		Hash:        x.hash,
@@ -1270,6 +1278,7 @@ func FormatInternalRoom2Protobuf(x *Room) *twoonone_pb.RoomInfo {
 		Stage:       x.stage,
 		Sendcards:   formatInternalSendCards2Protobuf(x.sendCards),
 		OperatorNow: player.FormatInternalPlayer2Protobuf(x.operatorNow),
+		Self:        self,
 	}
 }
 
@@ -1297,13 +1306,13 @@ func formatInternalSendCards2Protobuf(xs []*SendCard) []*twoonone_pb.SendCard {
 	return ret
 }
 
-func FormatInternalRooms2Protobuf(xs []*Room) []*twoonone_pb.RoomInfo {
+func FormatInternalRooms2Protobuf(xs []*Room, player_id string) []*twoonone_pb.RoomInfo {
 	if xs == nil {
 		return nil
 	}
 	ret := []*twoonone_pb.RoomInfo{}
 	for _, v := range xs {
-		ret = append(ret, FormatInternalRoom2Protobuf(v))
+		ret = append(ret, FormatInternalRoom2Protobuf(v, player_id))
 	}
 	return ret
 }

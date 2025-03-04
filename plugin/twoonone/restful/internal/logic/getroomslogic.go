@@ -4,7 +4,9 @@ import (
 	"context"
 
 	inside "github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/twoonone"
+	pkg_types "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/types"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
+	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -23,8 +25,10 @@ func NewGetRoomsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetRooms
 	}
 }
 
-func (l *GetRoomsLogic) GetRooms() (resp any, err error) {
+func (l *GetRoomsLogic) GetRooms(req *types.GetRoomsRequest) (resp any, err error) {
 	// todo: add your logic here and delete this line
 
-	return inside.NewAPIRequest(l.Logger).GetRooms()
+	return inside.NewAPIRequest(l.Logger).GetRooms(&pkg_types.GetRoomsRequest{
+		Extra: pkg_types.Extra(req.Extra),
+	})
 }

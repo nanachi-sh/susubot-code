@@ -186,6 +186,20 @@ func FormatInternalPlayer2Protobuf(x *Player) *twoonone_pb.PlayerInfo {
 	}
 }
 
+func FULLINFO_FormatInternalPlayer2Protobuf(x *Player) *twoonone_pb.PlayerInfoFull {
+	if x == nil {
+		return nil
+	}
+	pi := FormatInternalPlayer2Protobuf(x)
+	return &twoonone_pb.PlayerInfoFull{
+		User:  pi.User,
+		Table: pi.Table,
+		Extra: &twoonone_pb.PlayerInfoFull_ExtraInfo{
+			HandCards: card.FormatInternalCards2Protobuf(x.cards),
+		},
+	}
+}
+
 func FormatInternalPlayers2Protobuf(xs []*Player) []*twoonone_pb.PlayerInfo {
 	if xs == nil {
 		return nil
