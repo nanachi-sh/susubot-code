@@ -291,6 +291,7 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 	} else { //还有未参与
 		fmt.Println("s5")
 		next := r.nextRobLandownerOperator()
+		r.operatorNow = next
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
 			Body: &twoonone_pb.RoomEventResponse_RoomNorobLandowner{
 				RoomNorobLandowner: &twoonone_pb.RoomEventResponse_RoomNoRobLandowner{
