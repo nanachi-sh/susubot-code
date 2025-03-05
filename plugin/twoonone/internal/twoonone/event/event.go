@@ -85,7 +85,7 @@ func (e *eventStream) emits() {
 			time.Sleep(time.Millisecond * 20)
 			continue
 		}
-		if e.now != nil {
+		if e.now.Value(myevent{}) != nil {
 			continue
 		}
 		resp := e.events[len(e.events)-1]
