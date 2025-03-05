@@ -3,12 +3,9 @@ package event
 import (
 	"context"
 	"sync"
+	"time"
 
 	twoonone_pb "github.com/nanachi-sh/susubot-code/plugin/twoonone/pkg/protos/twoonone"
-)
-
-var (
-	events []*eventStream
 )
 
 type EventStream interface {
@@ -18,6 +15,8 @@ type EventStream interface {
 }
 
 type eventStream struct {
+	events []*twoonone_pb.RoomEventResponse
+
 	roomHash string
 	read     sync.RWMutex
 	wait     sync.RWMutex
@@ -35,6 +34,7 @@ func NewEventStream(roomHash string) EventStream {
 		now:      context.Background(),
 	}
 	es.read.Lock()
+	es.emits()
 	return es
 }
 
@@ -62,11 +62,40 @@ func (e *eventStream) Read() (*twoonone_pb.RoomEventResponse, bool) {
 }
 
 func (e *eventStream) Emit(resp *twoonone_pb.RoomEventResponse) {
-	e.wait.RLock()
-	e.wait.RUnlock()
+	if e.close {
+		return
+	}
+	// 空队列，且上一个emit已处理完
+	if e.now.Value(myevent{}) == nil && len(e.events) == 0 {
+		e.emit(resp)
+	} else {
+		e.events = append(e.events, resp)
+	}
+}
+
+func (e *eventStream) emit(resp *twoonone_pb.RoomEventResponse) {
 	e.now = context.WithValue(e.now, myevent{}, resp)
-	e.read.TryLock()
 	e.read.Unlock()
+}
+
+func (e *eventStream) emits() {
+	for {
+		time.Sleep(time.Millisecond)
+		if len(e.events) == 0 {
+			time.Sleep(time.Millisecond * 20)
+			continue
+		}
+		if e.now != nil {
+			continue
+		}
+		resp := e.events[len(e.events)-1]
+		if len(e.events) == 1 {
+			e.events = []*twoonone_pb.RoomEventResponse{}
+		} else {
+			e.events = e.events[:len(e.events)-1]
+		}
+		e.emit(resp)
+	}
 }
 
 func (e *eventStream) Close() {
