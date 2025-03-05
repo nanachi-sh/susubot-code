@@ -347,6 +347,9 @@ func (r *Room) NoSendCard(logger logx.Logger, p *player.Player) error {
 	if r.operatorNow.GetId() != p.GetId() {
 		return types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_OPERATOR, "")
 	}
+	if r.GetLastCard() == nil || r.GetLastCard().SenderInfo.GetId() == p.GetId() {
+		return types.NewError(twoonone_pb.Error_ERROR_PLAYER_IS_ONLY_OPERATOR, "")
+	}
 	if serr := r.noSendCard(logger, p); serr != nil {
 		return serr
 	}
