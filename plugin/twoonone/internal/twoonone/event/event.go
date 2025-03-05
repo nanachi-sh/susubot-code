@@ -34,7 +34,7 @@ func NewEventStream(roomHash string) EventStream {
 		now:      context.Background(),
 	}
 	es.read.Lock()
-	es.emits()
+	go es.emits()
 	return es
 }
 
