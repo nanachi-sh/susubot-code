@@ -65,9 +65,8 @@ func (e *eventStream) Emit(resp *twoonone_pb.RoomEventResponse) {
 	e.wait.RLock()
 	e.wait.RUnlock()
 	e.now = context.WithValue(e.now, myevent{}, resp)
-	if e.read.TryLock() {
-		e.read.Unlock()
-	}
+	e.read.TryLock()
+	e.read.Unlock()
 }
 
 func (e *eventStream) Close() {
