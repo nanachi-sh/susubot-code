@@ -225,6 +225,7 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 		})
 	} else { //还有未参与
 		next := r.nextRobLandownerOperator()
+		r.operatorNow = next
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
 			Body: &twoonone_pb.RoomEventResponse_RoomRobLandowner_{
 				RoomRobLandowner: &twoonone_pb.RoomEventResponse_RoomRobLandowner{
