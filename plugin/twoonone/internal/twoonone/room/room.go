@@ -354,7 +354,10 @@ func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.C
 	cardtype := r.matchCardType(sendcards)
 	cardcontious := r.calcCardContinous(sendcards, cardtype)
 	cardsize := r.calcCardSize(sendcards, cardtype)
-	fmt.Println(p, sendcards, lastcard, cardtype, cardcontious, cardsize)
+	fmt.Println("player:", p.GetName())
+	fmt.Println("sendcard:", sendcards)
+	fmt.Println("lastcard:", lastcard)
+	fmt.Println("cardtype...", cardtype, cardcontious, cardsize)
 	// 特殊情况判断
 	if cardtype == twoonone_pb.CardType_CARD_TYPE_UNKNOWN { //未知牌型
 		return types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_TYPE_UNKNOWN, "")
