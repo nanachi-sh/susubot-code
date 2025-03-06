@@ -263,17 +263,18 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 	p.SetRobLandownerAction(twoonone_pb.RobLandownerInfo_ACTION_NO_ROB)
 
 	takes := r.getTakeRobLandowners()
+	robs := r.getRobLandowners()
 	if len(takes) == len(r.players) { // 全部已参与
-		if len(takes) == 0 { //无人抢地主
+		if len(robs) == 0 { //无人抢地主
 			return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNER, "")
-		} else if len(takes) == 1 { //仅一人抢地主
-			r.landowner = takes[0]
+		} else if len(robs) == 1 { //仅一人抢地主
+			r.landowner = robs[0]
 		} else { //一人以上抢地主
 			// 按操作时间降序
-			sort.Slice(takes, func(i, j int) bool {
-				return takes[i].GetRobLandownerActionTime().UnixNano() > takes[j].GetRobLandownerActionTime().UnixNano()
+			sort.Slice(robs, func(i, j int) bool {
+				return robs[i].GetRobLandownerActionTime().UnixNano() > robs[j].GetRobLandownerActionTime().UnixNano()
 			})
-			r.landowner = takes[0]
+			r.landowner = robs[0]
 		}
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
 			Body: &twoonone_pb.RoomEventResponse_RoomNorobLandowner{
@@ -407,6 +408,7 @@ func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.C
 		types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_CONTINUOUS_NE_LAST_CARD_CONTINUOUS, "")
 	}
 	fmt.Println("s9")
+	fmt.Println(cardsize, lastcard.SendCardSize)
 	if cardsize <= lastcard.SendCardSize {
 		types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_SIZE_LE_LAST_CARD_SIZE, "")
 	}
