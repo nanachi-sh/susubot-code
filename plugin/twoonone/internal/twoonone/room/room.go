@@ -189,9 +189,8 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	if r.operatorNow.GetId() != p.GetId() {
 		return types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_OPERATOR, "")
 	}
-	robs := r.getRobLandowners()
 	p.SetRobLandownerAction(twoonone_pb.RobLandownerInfo_ACTION_ROB)
-	if len(r.getRobLandowners()) > len(robs) {
+	if len(r.getRobLandowners()) > 1 {
 		r.multiple *= 2
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
 			Body: &twoonone_pb.RoomEventResponse_RoblandownerContinuousRob{
@@ -203,17 +202,18 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	}
 
 	takes := r.getTakeRobLandowners()
+	robs := r.getRobLandowners()
 	if len(takes) == len(r.players) { // 全部已参与
-		if len(takes) == 0 { //无人抢地主
+		if len(robs) == 0 { //无人抢地主
 			return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNER, "")
-		} else if len(takes) == 1 { //仅一人抢地主
-			r.landowner = takes[0]
+		} else if len(robs) == 1 { //仅一人抢地主
+			r.landowner = robs[0]
 		} else { //一人以上抢地主
 			// 按操作时间降序
-			sort.Slice(takes, func(i, j int) bool {
-				return takes[i].GetRobLandownerActionTime().UnixNano() > takes[j].GetRobLandownerActionTime().UnixNano()
+			sort.Slice(robs, func(i, j int) bool {
+				return robs[i].GetRobLandownerActionTime().UnixNano() > robs[j].GetRobLandownerActionTime().UnixNano()
 			})
-			r.landowner = takes[0]
+			r.landowner = robs[0]
 		}
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
 			Body: &twoonone_pb.RoomEventResponse_RoomRobLandowner_{
@@ -509,7 +509,7 @@ func (r *Room) gameFinish(logger logx.Logger) error {
 
 func (r *Room) playerSendCard(logger logx.Logger, p *player.Player, sendcards []card.Card, ct twoonone_pb.CardType, cs int, cc int) error {
 	if !p.DeleteCards(sendcards) {
-		types.NewError(twoonone_pb.Error_ERROR_PLAYER_CARD_NO_EXIST, "")
+		return types.NewError(twoonone_pb.Error_ERROR_PLAYER_CARD_NO_EXIST, "")
 	}
 	// 特殊牌型倍率翻倍
 	switch ct {
