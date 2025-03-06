@@ -251,24 +251,19 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 	r.lock.Lock()
 	r.lock.Unlock()
-	fmt.Println("noroblo", p)
 	if p.GetRoomHash() != r.GetHash() {
 		return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_EXIST_PLAYER, "")
 	}
-	fmt.Println("s1")
 	if r.stage != twoonone_pb.RoomStage_ROOM_STAGE_ROB_LANDOWNERING {
 		return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNERING, "")
 	}
-	fmt.Println("s2")
 	if r.operatorNow.GetId() != p.GetId() {
 		return types.NewError(twoonone_pb.Error_ERROR_PLAYER_NO_OPERATOR, "")
 	}
-	fmt.Println("s3")
 	p.SetRobLandownerAction(twoonone_pb.RobLandownerInfo_ACTION_NO_ROB)
 
 	takes := r.getTakeRobLandowners()
 	if len(takes) == len(r.players) { // 全部已参与
-		fmt.Println("s4")
 		if len(takes) == 0 { //无人抢地主
 			return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNER, "")
 		} else if len(takes) == 1 { //仅一人抢地主
@@ -288,9 +283,7 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 				},
 			},
 		})
-		fmt.Println("s7")
 	} else { //还有未参与
-		fmt.Println("s5")
 		next := r.nextRobLandownerOperator()
 		r.operatorNow = next
 		r.event.Emit(&twoonone_pb.RoomEventResponse{
@@ -301,7 +294,6 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 				},
 			},
 		})
-		fmt.Println("s6")
 		return nil
 	}
 	r.startSendCard()
@@ -313,7 +305,6 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 			},
 		},
 	})
-	fmt.Println("s8")
 	return nil
 }
 
@@ -363,6 +354,7 @@ func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.C
 	cardtype := r.matchCardType(sendcards)
 	cardcontious := r.calcCardContinous(sendcards, cardtype)
 	cardsize := r.calcCardSize(sendcards, cardtype)
+	fmt.Println(p, sendcards, lastcard, cardtype, cardcontious, cardsize)
 	// 特殊情况判断
 	if cardtype == twoonone_pb.CardType_CARD_TYPE_UNKNOWN { //未知牌型
 		return types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_TYPE_UNKNOWN, "")
