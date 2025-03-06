@@ -7,12 +7,16 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	if !request_verify(r) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	w.Header().Add("Access-Control-Allow-Origin", "https://twoonone.unturned.fun:8080")
-	w.Header().Add("Access-Control-Allow-Methods", "GET, POST")
+	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	next(w, r)
 }
