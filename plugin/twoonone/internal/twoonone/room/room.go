@@ -360,46 +360,57 @@ func (r *Room) sendCard(logger logx.Logger, p *player.Player, sendcards []card.C
 	fmt.Println("cardtype...", cardtype, cardcontious, cardsize)
 	// 特殊情况判断
 	if cardtype == twoonone_pb.CardType_CARD_TYPE_UNKNOWN { //未知牌型
+		fmt.Println("s1")
 		return types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_TYPE_UNKNOWN, "")
 	} else if lastcard == nil { //本局第一次出牌
+		fmt.Println("s2")
 		if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 			return serr
 		}
 		return nil
 	} else if lastcard.SenderInfo.GetId() == p.GetId() { //同一人操作
+		fmt.Println("s3")
 		if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 			return serr
 		}
 		return nil
 	} else if cardtype == twoonone_pb.CardType_CARD_TYPE_KING_BOOM { // 王炸
+		fmt.Println("s4")
 		if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 			return serr
 		}
 		return nil
 	} else if cardtype == twoonone_pb.CardType_CARD_TYPE_BOOM && lastcard.SendCardType == twoonone_pb.CardType_CARD_TYPE_BOOM { //上一副与当前都为炸弹
+		fmt.Println("s5")
 		if cardsize <= lastcard.SendCardSize {
 			types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_SIZE_LE_LAST_CARD_SIZE, "")
 		}
+		fmt.Println("s51")
 		if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 			return serr
 		}
 		return nil
 	} else if cardtype == twoonone_pb.CardType_CARD_TYPE_BOOM && lastcard.SendCardType != twoonone_pb.CardType_CARD_TYPE_KING_BOOM { //上一副不为王炸且也不为炸弹
+		fmt.Println("s6")
 		if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 			return serr
 		}
 		return nil
 	}
+	fmt.Println("s7")
 	//完全正常出牌
 	if cardtype != lastcard.SendCardType {
 		types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_TYPE_NE_LAST_CARD_TYPE, "")
 	}
+	fmt.Println("s8")
 	if cardcontious != lastcard.SendCardContinous {
 		types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_CONTINUOUS_NE_LAST_CARD_CONTINUOUS, "")
 	}
+	fmt.Println("s9")
 	if cardsize <= lastcard.SendCardSize {
 		types.NewError(twoonone_pb.Error_ERROR_SEND_CARD_SIZE_LE_LAST_CARD_SIZE, "")
 	}
+	fmt.Println("s10")
 	if serr := r.playerSendCard(logger, p, sendcards, cardtype, cardsize, cardcontious); serr != nil {
 		return serr
 	}
