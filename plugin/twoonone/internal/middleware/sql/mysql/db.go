@@ -153,15 +153,23 @@ func (dbh *db_handler) UpdateUser(logger logx.Logger, id string, actions ...data
 		logger.Error("invalid argument")
 		return pkg_types.NewError(twoonone_pb.Error_ERROR_UNDEFINED, "")
 	}
-	u := func() twoonone_model.Twoonone {
-		u := new(twoonone_model.Twoonone)
-		for _, v := range actions {
-			v.Merge(logger, u)
-		}
-		return *u
-	}()
-	u.Id = id
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+	u, err := func() (twoonone_model.Twoonone, error) {
+		u, err := getUser(logger, ctx, id)
+		if err != nil {
+			return twoonone_model.Twoonone{}, err
+		}
+		for _, v := range actions {
+			v.Merge(logger, &u)
+		}
+		return u, nil
+	}()
+	if err != nil {
+		return err
+	}
+	u.Id = id
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	if serr := updateUser(logger, ctx, u); serr != nil {
 		return serr
