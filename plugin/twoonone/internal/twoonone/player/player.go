@@ -183,6 +183,7 @@ func FormatInternalPlayer2Protobuf(x *Player) *twoonone_pb.PlayerInfo {
 			RoomHash:         x.roomHash,
 			RoblandownerInfo: &x.robLandownerInfo,
 			Role:             x.role,
+			CardsLength:      int32(len(x.cards)),
 		},
 	}
 }

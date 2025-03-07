@@ -75,6 +75,7 @@ message PlayerInfo {
         string room_hash = 1;
         RobLandownerInfo roblandowner_info = 2;
         Role role = 3;
+        int32 cards_length = 4;
     }
     message UserInfo {
         string id = 1;
@@ -134,7 +135,6 @@ message CreateRoomResponse {
 
 message JoinRoomRequest {
     string room_hash = 1;
-    string user_id = 2;
 }
 
 message JoinRoomResponse{
@@ -142,8 +142,7 @@ message JoinRoomResponse{
 }
 
 message ExitRoomRequest {
-    string user_id = 1;
-    string room_hash = 2;
+    string room_hash = 1;
 }
 
 message ExitRoomResponse{
@@ -151,8 +150,7 @@ message ExitRoomResponse{
 }
 
 message RobLandownerRequest {
-    string user_id = 1;
-    string room_hash = 2;
+    string room_hash = 1;
 }
 
 message RobLandownerResponse{
@@ -160,8 +158,7 @@ message RobLandownerResponse{
 }
 
 message NoRobLandownerRequest {
-    string user_id = 1;
-    string room_hash = 2;
+    string room_hash = 1;
 }
 
 message NoRobLandownerResponse{
@@ -169,9 +166,8 @@ message NoRobLandownerResponse{
 }
 
 message SendCardRequest {
-    string user_id = 1;
-    string room_hash = 2;
-    repeated Card sendcards = 3;
+    string room_hash = 1;
+    repeated Card sendcards = 2;
 }
 
 message SendCardResponse{
@@ -179,17 +175,14 @@ message SendCardResponse{
 }
 
 message NoSendCardRequest {
-    string user_id = 1;
-    string room_hash = 2;
+    string room_hash = 1;
 }
 
 message NoSendCardResponse{
     map<string, string> extra = 100;
 }
 
-message GetDailyCoinRequest {
-    string user_id = 1;
-}
+message GetDailyCoinRequest{}
 
 message GetDailyCoinResponse{
     map<string, string> extra = 100;
@@ -197,7 +190,6 @@ message GetDailyCoinResponse{
 
 message StartRoomRequest {
     string room_hash = 1;
-    string user_id = 2;
 }
 
 message StartRoomResponse{
