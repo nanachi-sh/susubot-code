@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/middleware/sql"
@@ -136,7 +137,7 @@ func (p *Player) UpdateToDatabaseAndClean(logger logx.Logger) error {
 			return serr
 		}
 	} else if p.coinChanged < 0 {
-		if serr := db.UpdateUser(logger, p.GetId(), sql.DecCoin(p.coinChanged)); serr != nil {
+		if serr := db.UpdateUser(logger, p.GetId(), sql.DecCoin(math.Abs(p.coinChanged))); serr != nil {
 			return serr
 		}
 	}
@@ -146,7 +147,7 @@ func (p *Player) UpdateToDatabaseAndClean(logger logx.Logger) error {
 			return serr
 		}
 	} else if p.winCountChanged < 0 {
-		if serr := db.UpdateUser(logger, p.GetId(), sql.DecWinCount(uint(p.winCountChanged))); serr != nil {
+		if serr := db.UpdateUser(logger, p.GetId(), sql.DecWinCount(uint(math.Abs(float64(p.winCountChanged))))); serr != nil {
 			return serr
 		}
 	}
@@ -156,7 +157,7 @@ func (p *Player) UpdateToDatabaseAndClean(logger logx.Logger) error {
 			return serr
 		}
 	} else if p.loseCountChanged < 0 {
-		if serr := db.UpdateUser(logger, p.GetId(), sql.DecLoseCount(uint(p.loseCountChanged))); serr != nil {
+		if serr := db.UpdateUser(logger, p.GetId(), sql.DecLoseCount(uint(math.Abs(float64(p.loseCountChanged))))); serr != nil {
 			return serr
 		}
 	}
