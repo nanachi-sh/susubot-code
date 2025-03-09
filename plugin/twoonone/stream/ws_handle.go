@@ -82,7 +82,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			default:
 			}
-			if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			if err := conn.WriteMessage(websocket.PingMessage, []byte("PING MESSAGE")); err != nil {
 				logger.Error(err)
 				return
 			}
