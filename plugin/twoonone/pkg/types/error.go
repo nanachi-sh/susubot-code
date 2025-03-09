@@ -75,7 +75,7 @@ func (e *AppError) Message() string {
 
 func (e *AppError) StatusCode() int {
 	if e.statusCode == 0 {
-		return http.StatusBadRequest
+		return http.StatusOK
 	}
 	return e.statusCode
 }
