@@ -126,9 +126,6 @@ func init() {
 		"Log": map[string]any{
 			"MaxContentLength": 16 * 1024,
 		},
-		"Middlewares": map[string]any{
-			"Timeout": false,
-		},
 	}
 	buf, err := json.Marshal(m)
 	if err != nil {

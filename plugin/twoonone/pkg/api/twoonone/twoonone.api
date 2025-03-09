@@ -116,7 +116,6 @@ service twoonone-api {
 	// 验证OIDC Token
 	// 签发与验证Extra JWT
 	middleware: HeaderMiddleware,OIDCAuthMiddleware,ExtraJWTMiddleware
-	timeout:    3600s
 )
 service twoonone-api {
 	@handler NOEDIT_ws

@@ -1,6 +1,8 @@
 package stream
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -44,22 +46,39 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 		conn.WriteJSON(resp)
 		return
 	}
+	closed, close := context.WithCancel()
 	// websocket stream
-	for {
-		e, ok := event.Read()
-		if !ok {
-			// 桌事件结束
-			return
-		}
-		if ep := e.GetRoomExitPlayer(); ep != nil {
-			if ep.LeaverInfo.User.Id == req.Extra.UserId {
+	go func() {
+		defer close()
+		for {
+			e, ok := event.Read()
+			if !ok {
+				// 桌事件结束
+				return
+			}
+			if ep := e.GetRoomExitPlayer(); ep != nil {
+				if ep.LeaverInfo.User.Id == req.Extra.UserId {
+					return
+				}
+			}
+			resp, _ := handler.Generate(e, nil)
+			if err := conn.WriteJSON(resp); err != nil {
+				logger.Error(err)
 				return
 			}
 		}
-		resp, _ := handler.Generate(e, nil)
-		if err := conn.WriteJSON(resp); err != nil {
-			logger.Error(err)
-			return
+	}()
+	go func() {
+		defer close()
+		for {
+			mt, buf, err := conn.ReadMessage()
+			if err != nil {
+				logger.Error(err)
+				return
+			}
+			fmt.Println(mt)
+			fmt.Println(string(buf))
 		}
-	}
+	}()
+	<-closed.Done()
 }
