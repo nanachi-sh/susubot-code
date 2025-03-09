@@ -20,7 +20,7 @@ var (
 
 	DEBUG bool
 
-	HTTPAPI_LISTEN_PORT   int
+	HTTPAPI_LISTEN_PORT int
 
 	DATABASE_IP       netip.Addr
 	DATABASE_PORT     int
@@ -125,6 +125,9 @@ func init() {
 		"Port": HTTPAPI_LISTEN_PORT,
 		"Log": map[string]any{
 			"MaxContentLength": 16 * 1024,
+		},
+		"Middlewares": map[string]any{
+			"Timeout": false,
 		},
 	}
 	buf, err := json.Marshal(m)
