@@ -177,6 +177,19 @@ func (r *Room) setLandownerCards(cards [3]card.Card) {
 	copy(r.landownerCards[:], cards[:])
 }
 
+func (r *Room) reRobLandownering(logger logx.Logger) {
+	for _, v := range r.players {
+		v.ClearCards()
+		v.SetRobLandownerAction(twoonone_pb.RobLandownerInfo_ACTION_EMPTY)
+	}
+	r.landownerCards = [3]card.Card{}
+	r.stage = twoonone_pb.RoomStage_ROOM_STAGE_WAITTING_START
+	r.operatorNow = nil
+	if err := r.Start(logger); err != nil {
+		logger.Error(err)
+	}
+}
+
 func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	r.lock.Lock()
 	r.lock.Unlock()
@@ -205,6 +218,7 @@ func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
 	robs := r.getRobLandowners()
 	if len(takes) == len(r.players) { // 全部已参与
 		if len(robs) == 0 { //无人抢地主
+			go r.reRobLandownering(logger)
 			return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNER, "")
 		} else if len(robs) == 1 { //仅一人抢地主
 			r.landowner = robs[0]
@@ -266,6 +280,7 @@ func (r *Room) NoRobLandowner(logger logx.Logger, p *player.Player) error {
 	robs := r.getRobLandowners()
 	if len(takes) == len(r.players) { // 全部已参与
 		if len(robs) == 0 { //无人抢地主
+			go r.reRobLandownering(logger)
 			return types.NewError(twoonone_pb.Error_ERROR_ROOM_NO_ROB_LANDOWNER, "")
 		} else if len(robs) == 1 { //仅一人抢地主
 			r.landowner = robs[0]
