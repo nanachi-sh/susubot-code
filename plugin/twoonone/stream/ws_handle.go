@@ -2,8 +2,8 @@ package stream
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/internal/handler"
@@ -56,6 +56,11 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 				// 桌事件结束
 				return
 			}
+			select {
+			case <-closed.Done():
+				return
+			default:
+			}
 			if ep := e.GetRoomExitPlayer(); ep != nil {
 				if ep.LeaverInfo.User.Id == req.Extra.UserId {
 					return
@@ -71,13 +76,16 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer close()
 		for {
-			mt, buf, err := conn.ReadMessage()
-			if err != nil {
+			time.Sleep(time.Second * 30)
+			select {
+			case <-closed.Done():
+				return
+			default:
+			}
+			if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				logger.Error(err)
 				return
 			}
-			fmt.Println(mt)
-			fmt.Println(string(buf))
 		}
 	}()
 	<-closed.Done()
