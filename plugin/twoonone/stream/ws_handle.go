@@ -46,7 +46,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 		conn.WriteJSON(resp)
 		return
 	}
-	closed, close := context.WithCancel()
+	closed, close := context.WithCancel(context.Background())
 	// websocket stream
 	go func() {
 		defer close()
