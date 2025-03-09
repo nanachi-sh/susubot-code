@@ -5,6 +5,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/nanachi-sh/susubot-code/plugin/twoonone/restful/internal/svc"
 
@@ -87,5 +88,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
+		rest.WithTimeout(3600000*time.Millisecond),
 	)
 }
