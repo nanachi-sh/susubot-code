@@ -232,6 +232,9 @@ message RoomEventResponse {
         PlayerInfo operator_info = 1;
         PlayerInfo next_operator_info = 2;
     }
+    message RoomReRobLandowner {
+        PlayerInfo next_operator_info = 1;
+    }
     
     message RobLandownerIntoSendingCard {
         PlayerInfo sendcarder_info = 1;
@@ -284,5 +287,6 @@ message RoomEventResponse {
         RoomNoRobLandowner room_norob_landowner = 12;
         RoomSendCard room_sendcard = 13;
         RoomNoSendCard room_no_sendcard = 14;
+        RoomReRobLandowner room_re_roblandowner = 15;
     }
 }

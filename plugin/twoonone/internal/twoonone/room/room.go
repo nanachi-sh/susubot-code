@@ -188,6 +188,13 @@ func (r *Room) reRobLandownering(logger logx.Logger) {
 	if err := r.Start(logger); err != nil {
 		logger.Error(err)
 	}
+	r.event.Emit(&twoonone_pb.RoomEventResponse{
+		Body: &twoonone_pb.RoomEventResponse_RoomReRoblandowner{
+			RoomReRoblandowner: &twoonone_pb.RoomEventResponse_RoomReRobLandowner{
+				NextOperatorInfo: player.FormatInternalPlayer2Protobuf(r.operatorNow),
+			},
+		},
+	})
 }
 
 func (r *Room) RobLandowner(logger logx.Logger, p *player.Player) error {
