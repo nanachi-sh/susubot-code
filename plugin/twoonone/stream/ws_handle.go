@@ -2,7 +2,6 @@ package stream
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -83,12 +82,10 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			default:
 			}
-			fmt.Println("ping message sending")
 			if err := conn.WriteMessage(websocket.PingMessage, []byte("PING MESSAGE")); err != nil {
 				logger.Error(err)
 				return
 			}
-			fmt.Println("ping message ok")
 		}
 	}()
 	<-closed.Done()
