@@ -21,7 +21,7 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://twoonone.unturned.fun:8080", "https://twoonone.susu.love"))
+	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://twoonone.unturned.fun:8080", "https://twoonone.susu.love", "https://twoonone.unturned.fun"))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
