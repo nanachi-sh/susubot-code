@@ -22,11 +22,13 @@ var (
 
 	DEBUG bool
 
-	Captcha = base64Captcha.NewCaptcha(base64Captcha.NewDriverMath(
+	Captcha = base64Captcha.NewCaptcha(base64Captcha.NewDriverString(
 		64,
 		128,
 		2,
 		base64Captcha.OptionShowHollowLine,
+		4,
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
 		nil,
 		base64Captcha.DefaultEmbeddedFonts,
 		nil,
