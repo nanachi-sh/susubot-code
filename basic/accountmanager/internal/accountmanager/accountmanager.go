@@ -156,6 +156,25 @@ func userRegister(logger logx.Logger, req *types.UserRegisterRequest) (resp any,
 }
 
 func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequest) (resp any, err error) {
+	{
+		result, err := configs.LDAP.Search(ldap.NewSearchRequest(
+			configs.LDAP_BASIC_DN,
+			ldap.ScopeChildren,
+			ldap.DerefFindingBaseObj,
+			1, 5, false,
+			fmt.Sprintf("(&(objectClass=inetOrgPerson)(mail=%s))", req.Email),
+			nil, nil,
+		))
+		if err != nil {
+			logger.Error(err)
+			err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+			return nil, err
+		}
+		if len(result.Entries) > 0 {
+			err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXIST, "")
+			return nil, err
+		}
+	}
 	code := utils.RandomString(4, utils.Dict_Number)
 	rKey := fmt.Sprintf("verifycode_email_%s", req.Email)
 	if err = configs.Redis.Hset(rKey, "verify_code", code); err != nil {
