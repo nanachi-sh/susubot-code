@@ -26,13 +26,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/user/verify-code/email",
 					Handler: UserVerifyCode_EmailHandler(serverCtx),
 				},
-				{
-					Method:  http.MethodGet,
-					Path:    "/verify-code",
-					Handler: VerifyCodeHandler(serverCtx),
-				},
 			}...,
 		),
+		rest.WithPrefix("/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/verify-code",
+				Handler: VerifyCodeHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/v1"),
 	)
 }

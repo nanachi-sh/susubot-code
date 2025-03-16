@@ -30,7 +30,12 @@ service accountmanager-api {
 
 	@handler UserVerifyCode_Email
 	post /user/verify-code/email (UserVerifyCodeEmailRequest) returns (any)
+}
 
+@server (
+	prefix: /v1
+)
+service accountmanager-api {
 	@handler VerifyCode
 	get /verify-code returns (any)
 }
