@@ -175,7 +175,7 @@ func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequ
 	msg.SetHeader("To", req.Email)
 	msg.SetHeader("Subject", "验证码")
 	msg.SetBody("text/html", fmt.Sprintf("你的验证码为：%s\r\n请在三十分钟内使用", code))
-	if err = smtpDialer.DialAndSend(); err != nil {
+	if err = smtpDialer.DialAndSend(msg); err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
 		if _, err = configs.Redis.Del(rKey); err != nil {
