@@ -2,6 +2,7 @@ package verifycode
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
@@ -13,6 +14,13 @@ import (
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	fmt.Println(r)
+	fmt.Println(r.Form.Get("test"))
+	fmt.Println(r.PostForm.Get("test"))
+	buf, err := io.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(buf))
 	fmt.Println("s1")
 	verify_id := r.PostForm.Get("verify_id")
 	fmt.Println("s2")
