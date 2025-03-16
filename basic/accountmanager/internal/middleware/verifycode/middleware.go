@@ -15,7 +15,7 @@ import (
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	fmt.Println(r)
 	fmt.Println(r.Form.Get("test"))
-	fmt.Println(r.PostForm.Get("test"))
+	fmt.Println(r.PostFormValue("test"))
 	buf, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
