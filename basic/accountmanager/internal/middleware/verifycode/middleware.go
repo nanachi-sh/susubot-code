@@ -12,7 +12,7 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	fmt.Println(r.Form, r.PostForm, r.Form.Get("verify_id"), r.Form.Get("answer"))
+	fmt.Println(r)
 	fmt.Println("s1")
 	verify_id := r.PostForm.Get("verify_id")
 	fmt.Println("s2")
