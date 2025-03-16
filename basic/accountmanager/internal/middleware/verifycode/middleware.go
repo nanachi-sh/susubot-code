@@ -12,16 +12,16 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	fmt.Println(r.Form, r.Form.Get("verify_id"), r.Form.Get("answer"))
+	fmt.Println(r.Form, r.PostForm, r.Form.Get("verify_id"), r.Form.Get("answer"))
 	fmt.Println("s1")
-	verify_id := r.Form.Get("verify_id")
+	verify_id := r.PostForm.Get("verify_id")
 	fmt.Println("s2")
 	if verify_id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	fmt.Println("s3")
-	answer := r.Form.Get("answer")
+	answer := r.PostForm.Get("answer")
 	if answer == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
