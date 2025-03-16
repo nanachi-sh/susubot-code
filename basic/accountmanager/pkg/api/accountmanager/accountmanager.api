@@ -1,0 +1,37 @@
+syntax = "v1"
+
+type UserRegisterRequest {
+	VerifyCode string `form:"verify_code"`
+	Email      string `form:"email"`
+	Password   string `form:"password"`
+}
+
+type UserVerifyCodeEmailRequest {
+	Email string `form:"email"`
+}
+
+type VerifyCodeResponse {
+	B64      string
+	VerifyId string
+}
+
+type VerifyCodeAuthMiddlewareRequest {
+	VerifyId string `form:"verify_id"`
+	Answer   string `form:"answer"`
+}
+
+@server (
+	prefix:     /v1
+	middleware: VerifyCodeAuthMiddleware
+)
+service accountmanager-api {
+	@handler UserRegister
+	post /user/register (UserRegisterRequest) returns (any)
+
+	@handler UserVerifyCode_Email
+	post /user/verify-code/email (UserVerifyCodeEmailRequest) returns (any)
+
+	@handler VerifyCode
+	get /verify-code returns (any)
+}
+

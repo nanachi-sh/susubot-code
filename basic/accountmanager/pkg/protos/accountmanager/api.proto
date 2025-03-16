@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package accountmanager.api;
+
+option go_package = "protos/accountmanager";
+
+enum Error {
+    ERROR_UNKNOWN = 0;
+    ERROR_UNDEFINED = 1;
+    ERROR_INVALID_ARGUMENT = 2;
+
+    ERROR_NO_VERIFYCODE_AUTH = 1001;
+    ERROR_EMAIL_EXIST = 1002; //邮箱已注册
+    ERROR_VERIFYCODE_ANSWER_FAIL = 1003; //验证码答案错误
+    ERROR_EMAIL_VERIFYCODE_ANSWER_FAIL = 1004; //邮箱验证码答案错误
+}

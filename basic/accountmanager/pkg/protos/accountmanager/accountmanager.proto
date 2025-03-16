@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package accountmanager;
+
+option go_package = "protos/accountmanager";
+
+message UserRegisterRequest {
+    string verify_code = 1;
+    string email = 2;
+    string password = 3; //CBC加密
+}
+
+message UserRegisterResponse {
+    
+}
+
+message UserVerifyCodeEmailRequest {
+    string email = 1;
+}
+
+message UserVerifyCodeEmailResponse {
+    
+}
+
+message VerifyCodeRequest {
+    
+}
+
+message VerifyCodeResponse {
+    string b64 = 1;
+    string verify_id = 2;
+}
