@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/config"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/handler"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/svc"
@@ -12,7 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/accountmanager-api.yaml", "the config file")
+var configFile = flag.String("f", configs.APIServer_Config, "the config file")
 
 func main() {
 	flag.Parse()

@@ -1,6 +1,10 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/middleware/verifycode"
+)
 
 type VerifyCodeAuthMiddleware struct {
 }
@@ -11,9 +15,6 @@ func NewVerifyCodeAuthMiddleware() *VerifyCodeAuthMiddleware {
 
 func (m *VerifyCodeAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO generate middleware implement function, delete after code implementation
-
-		// Passthrough to next handler if need
-		next(w, r)
+		verifycode.Handle(w, r, next)
 	}
 }
