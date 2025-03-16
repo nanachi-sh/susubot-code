@@ -1,8 +1,6 @@
 package verifycode
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
@@ -13,28 +11,16 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	fmt.Println(r)
-	fmt.Println(r.Form.Get("test"))
-	fmt.Println(r.PostFormValue("test"))
-	buf, err := io.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(buf))
-	fmt.Println("s1")
-	verify_id := r.PostForm.Get("verify_id")
-	fmt.Println("s2")
+	verify_id := r.PostFormValue("verify_id")
 	if verify_id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println("s3")
-	answer := r.PostForm.Get("answer")
+	answer := r.PostFormValue("answer")
 	if answer == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println("s4")
 	if !configs.Captcha.Verify(verify_id, answer, false) {
 		ret, httpCode := handler.Generate(nil, types.NewError(accountmanager.Error_ERROR_VERIFYCODE_ANSWER_FAIL, ""))
 		httpx.WriteJsonCtx(r.Context(), w, httpCode, ret)
