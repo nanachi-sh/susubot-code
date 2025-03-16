@@ -1,6 +1,7 @@
 package accountmanager
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"sort"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
+	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/model/applications"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/utils"
 	accountmanager_pb "github.com/nanachi-sh/susubot-code/basic/accountmanager/pkg/protos/accountmanager"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/pkg/types"
@@ -131,6 +133,20 @@ func userRegister(logger logx.Logger, req *types.UserRegisterRequest) (resp any,
 	if err = configs.LDAP.Add(l_req); err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+		return
+	}
+	if _, err = configs.Model_Applications.Insert(context.Background(), &applications.Twoonone{
+		Id:               id,
+		Wincount:         0,
+		Losecount:        0,
+		LastGetdaliyTime: 0,
+		Coin:             0,
+	}); err != nil {
+		logger.Error(err)
+		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+		if err := configs.LDAP.Del(ldap.NewDelRequest(fmt.Sprintf("uid=%s,%s", id, configs.LDAP_BASIC_DN), nil)); err != nil {
+			logger.Error(err)
+		}
 		return
 	}
 	return &accountmanager_pb.UserRegisterResponse{}, nil
