@@ -174,7 +174,7 @@ func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequ
 	msg.SetHeader("From", fmt.Sprintf("nobody <%s>", configs.SMTP_USERNAME))
 	msg.SetHeader("To", req.Email)
 	msg.SetHeader("Subject", "验证码")
-	msg.SetBody("text/html", fmt.Sprintf("你的验证码为：%s<br />请在三十分钟内使用", code))
+	msg.SetBody("text/html", fmt.Sprintf("你的验证码为：%s 请在三十分钟内使用", code))
 	if err = smtpDialer.DialAndSend(msg); err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")

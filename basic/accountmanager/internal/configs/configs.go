@@ -161,6 +161,11 @@ func init() {
 		logger.Fatalln(err)
 	}
 	LDAP_PASSWORD = str
+	str, err = utils.EnvToString("LDAP_BASIC_DN")
+	if err != nil {
+		logger.Fatalln(err)
+	}
+	LDAP_BASIC_DN = str
 
 	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
