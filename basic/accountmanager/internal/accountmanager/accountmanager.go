@@ -126,20 +126,17 @@ func userRegister(logger logx.Logger, req *types.UserRegisterRequest) (resp any,
 	l_req.Attribute("sn", []string{utils.RandomString(10, utils.Dict_Mixed)})
 	l_req.Attribute("displayName", []string{"用户_" + utils.RandomString(16, utils.Dict_Number)})
 	l_req.Attribute("mail", []string{req.Email})
-	fmt.Println("desEnc", req.Password)
 	passwordPlain := decryptPassword(req.Password)
 	if passwordPlain == "" {
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "密码解密失败")
 		return
 	}
-	fmt.Println("desDec", passwordPlain)
 	ssha_pwd, err := SSHAEncoder{}.Encode([]byte(passwordPlain))
 	if err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
 		return
 	}
-	fmt.Println("ssha", string(ssha_pwd))
 	l_req.Attribute("userPassword", []string{string(ssha_pwd)})
 	if err = configs.LDAP.Add(l_req); err != nil {
 		logger.Error(err)

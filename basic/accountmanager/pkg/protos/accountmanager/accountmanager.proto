@@ -30,3 +30,8 @@ message VerifyCodeResponse {
     string b64 = 1;
     string verify_id = 2;
 }
+
+message Extra {
+   string verify_id = 1;
+   string answer = 2; 
+}

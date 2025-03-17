@@ -21,7 +21,7 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	server := rest.MustNewServer(c.RestConf)
+	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://accounts.unturned.fun:8080", "https://accounts.unturned.fun"))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
