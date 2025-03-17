@@ -25,10 +25,10 @@ var (
 	Captcha = base64Captcha.NewCaptcha(base64Captcha.NewDriverString(
 		64,
 		128,
-		2,
+		3,
 		base64Captcha.OptionShowHollowLine,
 		4,
-		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+		utils.Dict_Number,
 		nil,
 		base64Captcha.DefaultEmbeddedFonts,
 		nil,
