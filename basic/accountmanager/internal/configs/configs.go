@@ -16,6 +16,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -238,7 +239,7 @@ func init() {
 
 // call
 func init() {
-	client, err := grpc.NewClient(fmt.Sprintf("%s:%d", DEX_HOST, DEX_PORT))
+	client, err := grpc.NewClient(fmt.Sprintf("%s:%d", DEX_HOST, DEX_PORT), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Fatalln(err)
 	}
