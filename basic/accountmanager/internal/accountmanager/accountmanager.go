@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
@@ -184,6 +185,26 @@ func checkEmailExist(logger logx.Logger, email string) (bool, error) {
 	}
 }
 
+func checkEmailWaiting(logger logx.Logger, email string) (bool, error) {
+	rKey := fmt.Sprintf("verifycode_email_%s", email)
+	gen_time_str, err := configs.Redis.Hget(rKey, "generate_time")
+	if err != nil {
+		return false, nil
+	}
+	gen_time, err := strconv.ParseInt(gen_time_str, 10, 0)
+	if err != nil {
+		logger.Error(err)
+		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+		return false, err
+	}
+	gen_time_ := time.Unix(gen_time, 0)
+	now := time.Now()
+	if now.Sub(gen_time_) <= time.Minute {
+		return true, nil
+	}
+	return false, nil
+}
+
 func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequest) (resp any, err error) {
 	exist, err := checkEmailExist(logger, req.Email)
 	if err != nil {
@@ -193,14 +214,27 @@ func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequ
 		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXISTED, "")
 		return
 	}
-	code := utils.RandomString(4, utils.Dict_Number)
 	rKey := fmt.Sprintf("verifycode_email_%s", req.Email)
+	ok, err := checkEmailWaiting(logger, req.Email)
+	if err != nil {
+		return
+	}
+	if ok {
+		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_VERIFYCODE_SEND_WAITING, "")
+		return
+	}
+	code := utils.RandomString(4, utils.Dict_Number)
 	if err = configs.Redis.Hset(rKey, "verify_code", code); err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
 		return
 	}
 	if err = configs.Redis.Hset(rKey, "email", req.Email); err != nil {
+		logger.Error(err)
+		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+		return
+	}
+	if err = configs.Redis.Hset(rKey, "generate_time", strconv.FormatInt(time.Now().Unix(), 10)); err != nil {
 		logger.Error(err)
 		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
 		return
