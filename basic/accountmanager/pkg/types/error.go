@@ -15,7 +15,7 @@ func init() {
 		int32(accountmanager_pb.Error_ERROR_UNDEFINED):                    "未定义错误",
 		int32(accountmanager_pb.Error_ERROR_INVALID_ARGUMENT):             "参数错误",
 		int32(accountmanager_pb.Error_ERROR_NO_VERIFYCODE_AUTH):           "未进行验证码验证",
-		int32(accountmanager_pb.Error_ERROR_EMAIL_EXIST):                  "该邮箱已注册",
+		int32(accountmanager_pb.Error_ERROR_EMAIL_EXISTED):                "该邮箱已注册",
 		int32(accountmanager_pb.Error_ERROR_VERIFYCODE_ANSWER_FAIL):       "验证码不正确",
 		int32(accountmanager_pb.Error_ERROR_EMAIL_VERIFYCODE_ANSWER_FAIL): "邮箱验证码不正确",
 	}

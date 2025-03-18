@@ -3,6 +3,8 @@ module github.com/nanachi-sh/susubot-code/basic/accountmanager
 go 1.23.0
 
 require (
+	github.com/deatil/go-cryptobin v1.0.5028
+	github.com/dexidp/dex/api/v2 v2.3.0
 	github.com/go-ldap/ldap/v3 v3.4.10
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/zeromicro/go-zero v1.8.1
@@ -17,7 +19,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/deatil/go-cryptobin v1.0.5028 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.7 // indirect

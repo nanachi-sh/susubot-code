@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 
+	dex "github.com/dexidp/dex/api/v2"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/model/applications"
@@ -51,6 +52,14 @@ func (r *Request) UserVerifyCode_Email(req *types.UserVerifyCodeEmailRequest) (r
 	return userVerifyCode_Email(r.logger, req)
 }
 
+func (r *Request) UserLogin(req *types.UserLoginRequest) (resp any, err error) {
+	if !checkEmailValid(req.Email) {
+		err = types.NewError(accountmanager_pb.Error_ERROR_INVALID_ARGUMENT, "邮箱格式错误，或为不支持的邮箱，支持邮箱如下：QQ邮箱，网易邮箱，Google邮箱")
+		return
+	}
+	return userLogin(r.logger, req)
+}
+
 func checkEmailValid(email string) bool {
 	ok, err := regexp.MatchString(`^\w{1,64}@(qq\.com|vip\.qq\.com|126\.com|163\.com|gmail\.com)$`, email)
 	if err != nil {
@@ -59,13 +68,34 @@ func checkEmailValid(email string) bool {
 	return ok
 }
 
+func userLogin(logger logx.Logger, req *types.UserLoginRequest) (resp any, err error) {
+	dex_resp, err := configs.Call_Dex.VerifyPassword(context.Background(), &dex.VerifyPasswordReq{
+		Email:    req.Email,
+		Password: req.Password,
+	})
+	if err != nil {
+		logger.Error(err)
+		err = types.NewError(accountmanager_pb.Error_ERROR_UNDEFINED, "内部错误")
+		return
+	}
+	if dex_resp.NotFound {
+		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_NO_EXIST, "")
+		return
+	}
+	if !dex_resp.Verified {
+		err = types.NewError(accountmanager_pb.Error_ERROR_PASSWORD_FAIL, "")
+		return
+	}
+	return &accountmanager_pb.UserLoginResponse{}, nil
+}
+
 func userRegister(logger logx.Logger, req *types.UserRegisterRequest) (resp any, err error) {
 	exist, err := checkEmailExist(logger, req.Email)
 	if err != nil {
 		return
 	}
 	if exist {
-		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXIST, "")
+		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXISTED, "")
 		return
 	}
 	rKey := fmt.Sprintf("verifycode_email_%s", req.Email)
@@ -190,7 +220,7 @@ func userVerifyCode_Email(logger logx.Logger, req *types.UserVerifyCodeEmailRequ
 		return
 	}
 	if exist {
-		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXIST, "")
+		err = types.NewError(accountmanager_pb.Error_ERROR_EMAIL_EXISTED, "")
 		return
 	}
 	code := utils.RandomString(4, utils.Dict_Number)

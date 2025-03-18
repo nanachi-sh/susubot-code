@@ -31,6 +31,15 @@ message VerifyCodeResponse {
     string verify_id = 2;
 }
 
+message UserLoginRequest {
+    string email = 1;
+    string password = 2; //CBC加密
+}
+
+message UserLoginResponse {
+    
+}
+
 message Extra {
    string verify_id = 1;
    string answer = 2; 
