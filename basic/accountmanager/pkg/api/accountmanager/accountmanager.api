@@ -20,11 +20,6 @@ type VerifyCodeAuthMiddlewareRequest {
 	Answer   string `form:"answer"`
 }
 
-type UserLoginRequest {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
 @server (
 	prefix:     /v1
 	middleware: VerifyCodeAuthMiddleware
@@ -35,9 +30,6 @@ service accountmanager-api {
 
 	@handler UserVerifyCode_Email
 	post /user/verify-code/email (UserVerifyCodeEmailRequest) returns (any)
-
-	@handler UserLogin
-	post /user/login (UserLoginRequest) returns (any)
 }
 
 @server (

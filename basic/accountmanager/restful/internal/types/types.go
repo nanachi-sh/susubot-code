@@ -3,11 +3,6 @@
 
 package types
 
-type UserLoginRequest struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
 type UserRegisterRequest struct {
 	VerifyCode string `form:"verify_code"`
 	Email      string `form:"email"`
