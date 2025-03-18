@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	dex "github.com/dexidp/dex/api/v2"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/mojocn/base64Captcha"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/model/applications"
@@ -16,7 +15,6 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -40,8 +38,6 @@ var (
 
 	Model_Applications applications.TwoononeModel
 
-	Call_Dex dex.DexClient
-
 	LDAP *ldap.Conn
 
 	HTTP_LISTEN_PORT int
@@ -63,9 +59,6 @@ var (
 	LDAP_USERNAME string
 	LDAP_PASSWORD string
 	LDAP_BASIC_DN string
-
-	DEX_HOST netip.Addr
-	DEX_PORT int
 
 	APIServer_Config string = "api_server.yaml"
 )
@@ -176,22 +169,6 @@ func init() {
 	}
 	LDAP_BASIC_DN = str
 
-	str, err = utils.EnvToString("DEX_HOST")
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	addr, err = utils.ResolvIP(str)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	DEX_HOST = addr
-
-	port, err = utils.EnvPortToPort("DEX_PORT")
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	DEX_PORT = int(port)
-
 	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
 			logger.Fatalln("Debug状态设置不正确")
@@ -235,15 +212,6 @@ func init() {
 		logger.Fatalln(err)
 	}
 	LDAP = ldapconn
-}
-
-// call
-func init() {
-	client, err := grpc.NewClient(fmt.Sprintf("%s:%d", DEX_HOST, DEX_PORT), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logger.Fatalln(err)
-	}
-	Call_Dex = dex.NewDexClient(client)
 }
 
 func GRPCOptions() []grpc.ServerOption {
