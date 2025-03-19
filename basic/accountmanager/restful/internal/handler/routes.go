@@ -48,7 +48,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
-					Path:    "/:uri",
+					Path:    "/.:uri",
 					Handler: ReverseProxy_GETHandler(serverCtx),
 				},
 				{
