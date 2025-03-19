@@ -25,20 +25,17 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	r.URL.Scheme = u.Scheme
+	r.URL.Host = u.Host
+	r.Host = u.Host
 	// u, err := url.Parse("https://test.unturned.fun:1080/v1/verify-code")
 	// if err != nil {
 	// 	logger.Error(err)
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// 	return
 	// }
-	director := func(req *http.Request) {
-		*req = *r
-		req.URL.Host = "sso.unturned.fun:1080"
-		req.Host = "sso.unturned.fun:1080"
-	}
 	logger.Info("s2")
 	reverse := httputil.NewSingleHostReverseProxy(u)
-	reverse.Director = director
 	reverse.ServeHTTP(w, r)
 	logger.Info("s3")
 }
