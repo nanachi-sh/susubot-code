@@ -25,8 +25,10 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	sid := func(r *http.Request) string {
 		sid, err := r.Cookie("SID")
-		if err != nil && err != http.ErrNoCookie {
-			logger.Error(err)
+		if err != nil {
+			if err != http.ErrNoCookie {
+				logger.Error(err)
+			}
 			return ""
 		}
 		return sid.Value
