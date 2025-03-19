@@ -1,8 +1,6 @@
 package reverseproxy
 
 import (
-	"bytes"
-	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -39,12 +37,6 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	reverse := httputil.NewSingleHostReverseProxy(u)
 	reverse.ModifyResponse = func(r *http.Response) error {
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			logger.Error(err)
-		}
-		logger.Info(string(buf))
-		r.Write(bytes.NewBuffer(buf))
 		return nil
 	}
 	reverse.ServeHTTP(w, r)
