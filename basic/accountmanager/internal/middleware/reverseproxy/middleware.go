@@ -6,9 +6,12 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func Handle(w http.ResponseWriter, r *http.Request) {
@@ -20,15 +23,46 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var modifyResponse func(*bytes.Buffer) = func(*bytes.Buffer) {}
+	sid := func(r *http.Request) string {
+		sid, err := r.Cookie("SID")
+		if err != nil && err != http.ErrNoCookie {
+			logger.Error(err)
+			return ""
+		}
+		return sid.Value
+	}(r)
+	if sid == "" {
+		uuid, err := uuid.NewRandom()
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		sid = uuid.String()
+		http.SetCookie(w, &http.Cookie{
+			Name:     "SID",
+			Value:    sid,
+			HttpOnly: true,
+			Secure:   true,
+			Expires:  time.Now().AddDate(0, 0, 1),
+		})
+	}
+
+	var modifyResponse func(*http.Response, *bytes.Buffer) = func(r *http.Response, b *bytes.Buffer) {}
 
 	// Auth/Token
 	if len(r.RequestURI) >= 4 && r.RequestURI[:4] == "/auth" {
-
+		body, err := configs.Redis.Hget(sid, "cache_session")
+		if err == nil {
+			httpx.OkJson(w, body)
+			return
+		}
 	} else if len(r.RequestURI) >= 5 && r.RequestURI[:5] == "/token" {
-		// 将dex响应内容保存至redis，并给用户添加唯一标识符(感觉又梦回到session了)
-		modifyResponse = func(responseBody *bytes.Buffer) {
-			responseBody.Bytes()
+		// 将dex响应内容保存至redis，并给用户添加唯一标识符(感觉梦回到session)
+		modifyResponse = func(resp *http.Response, responseBody *bytes.Buffer) {
+			if resp.StatusCode != http.StatusOK {
+				return
+			}
+			configs.Redis.Hset(sid, "cache_session", responseBody.String())
 		}
 	}
 
@@ -49,7 +83,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	reverse.ServeHTTP(w, r)
 }
 
-func modifyResponseBase(r *http.Response, modifyResponse func(buffer *bytes.Buffer)) error {
+func modifyResponseBase(r *http.Response, modifyResponse func(r *http.Response, b *bytes.Buffer)) error {
 	// 获取响应
 	buffer := new(bytes.Buffer)
 	_, err := io.Copy(buffer, r.Body)
@@ -57,6 +91,6 @@ func modifyResponseBase(r *http.Response, modifyResponse func(buffer *bytes.Buff
 		return err
 	}
 	r.Body = io.NopCloser(buffer)
-	modifyResponse(buffer)
+	modifyResponse(r, buffer)
 	return nil
 }
