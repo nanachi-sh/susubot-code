@@ -1,6 +1,10 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/middleware/reverseproxy"
+)
 
 type ReverseProxyMiddleware struct {
 }
@@ -11,9 +15,6 @@ func NewReverseProxyMiddleware() *ReverseProxyMiddleware {
 
 func (m *ReverseProxyMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO generate middleware implement function, delete after code implementation
-
-		// Passthrough to next handler if need
-		next(w, r)
+		reverseproxy.Handle(w, r, next)
 	}
 }
