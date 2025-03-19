@@ -60,6 +60,8 @@ var (
 	LDAP_PASSWORD string
 	LDAP_BASIC_DN string
 
+	OIDC_ISSUER string
+
 	APIServer_Config string = "api_server.yaml"
 )
 
@@ -168,6 +170,12 @@ func init() {
 		logger.Fatalln(err)
 	}
 	LDAP_BASIC_DN = str
+
+	str, err = utils.EnvToString("OIDC_ISSUER")
+	if err != nil {
+		logger.Fatalln(err)
+	}
+	OIDC_ISSUER = str
 
 	if d := os.Getenv("DEBUG"); d != "" {
 		if debug, err := strconv.ParseBool(d); err != nil {
