@@ -1,12 +1,14 @@
 package reverseproxy
 
 import (
-	"fmt"
 	"net/http"
 )
 
 func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// API
-	fmt.Println(r.RequestURI)
+	if len(r.RequestURI) >= 3 && r.RequestURI[:3] == "/v1" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	next(w, r)
 }
