@@ -1,7 +1,6 @@
 package reverseproxy
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -18,10 +17,10 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	u, err := url.ParseRequestURI(fmt.Sprintf("%s%s", configs.OIDC_ISSUER, r.RequestURI))
+	u, err := url.Parse(configs.OIDC_ISSUER)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	reverse := httputil.NewSingleHostReverseProxy(u)
