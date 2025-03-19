@@ -9,13 +9,11 @@ import (
 type ServiceContext struct {
 	Config                   config.Config
 	VerifyCodeAuthMiddleware rest.Middleware
-	ReverseProxyMiddleware   rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                   c,
 		VerifyCodeAuthMiddleware: middleware.NewVerifyCodeAuthMiddleware().Handle,
-		ReverseProxyMiddleware:   middleware.NewReverseProxyMiddleware().Handle,
 	}
 }

@@ -41,22 +41,4 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 		rest.WithPrefix("/v1"),
 	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.ReverseProxyMiddleware},
-			[]rest.Route{
-				{
-					Method:  http.MethodGet,
-					Path:    "/:uri",
-					Handler: ReverseProxy_GETHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/:uri",
-					Handler: ReverseProxy_POSTHandler(serverCtx),
-				},
-			}...,
-		),
-	)
 }

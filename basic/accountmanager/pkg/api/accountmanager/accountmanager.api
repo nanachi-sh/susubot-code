@@ -40,14 +40,3 @@ service accountmanager-api {
 	get /verify-code returns (any)
 }
 
-@server (
-	middleware: ReverseProxyMiddleware
-)
-service accountmanager-api {
-	@handler ReverseProxy_GET
-	get /:uri
-
-	@handler ReverseProxy_POST
-	post /:uri
-}
-
