@@ -19,6 +19,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		return
 	}
 
+	logger.Info("s1")
 	u, err := url.Parse(configs.OIDC_ISSUER)
 	if err != nil {
 		logger.Error(err)
@@ -28,7 +29,9 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	r.URL.Scheme = u.Scheme
 	r.URL.Host = u.Host
 	r.Host = u.Host
+	logger.Info("s2")
 
 	reverse := httputil.NewSingleHostReverseProxy(u)
 	reverse.ServeHTTP(w, r)
+	logger.Info("s3")
 }
