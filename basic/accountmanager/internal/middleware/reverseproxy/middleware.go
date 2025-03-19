@@ -32,6 +32,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// 	return
 	// }
 	director := func(req *http.Request) {
+		*req = *r
 		req.URL.Host = "sso.unturned.fun:1080"
 		req.Host = "sso.unturned.fun:1080"
 	}
