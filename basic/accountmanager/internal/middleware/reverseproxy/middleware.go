@@ -43,6 +43,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 			logger.Error(err)
 		}
 		logger.Info(string(buf))
+		return nil
 	}
 	reverse.ServeHTTP(w, r)
 }
