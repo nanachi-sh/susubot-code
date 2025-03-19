@@ -3,10 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
-	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/middleware/reverseproxy"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/config"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/handler"
 	"github.com/nanachi-sh/susubot-code/basic/accountmanager/restful/internal/svc"
@@ -23,7 +21,7 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://accounts.unturned.fun:8080", "https://accounts.unturned.fun"), rest.WithNotFoundHandler(http.HandlerFunc(reverseproxy.Handle)))
+	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://accounts.unturned.fun:8080", "https://accounts.unturned.fun"))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
