@@ -40,14 +40,14 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	reverse := httputil.NewSingleHostReverseProxy(u)
 	reverse.ModifyResponse = func(r *http.Response) error {
-		writer := new(bytes.Buffer)
-		l, err := io.Copy(writer, r.Body)
+		buffer := new(bytes.Buffer)
+		_, err := io.Copy(buffer, r.Body)
 		if err != nil {
 			logger.Error(err)
 			return nil
 		}
-		fmt.Println(l)
-		fmt.Println(string(writer.Bytes()))
+		r.Body = io.NopCloser(buffer)
+		fmt.Println(buffer.String())
 		return nil
 	}
 	reverse.ServeHTTP(w, r)
