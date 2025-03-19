@@ -38,7 +38,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 	reverse := httputil.NewSingleHostReverseProxy(u)
 	reverse.ModifyResponse = func(r *http.Response) error {
-		buf := make([]byte, 0)
+		buf := make([]byte, 512)
 		fmt.Println(buf)
 		l, _ := r.Body.Read(buf)
 		fmt.Println(buf, l)
