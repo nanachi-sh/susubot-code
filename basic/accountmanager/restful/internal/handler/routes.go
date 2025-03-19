@@ -56,11 +56,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/:uri",
 					Handler: ReverseProxy_POSTHandler(serverCtx),
 				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/.well-known/openid-configuration",
-					Handler: ReverseProxy_GETHandler(serverCtx),
-				},
 			}...,
 		),
 	)
