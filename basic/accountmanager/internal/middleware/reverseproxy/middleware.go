@@ -13,6 +13,7 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	logger := logx.WithContext(r.Context())
 	logger.Info("in")
 	// API请求
+	logger.Info(r.RequestURI, r.URL)
 	if len(r.RequestURI) >= 3 && r.RequestURI[:3] == "/v1" {
 		w.Write([]byte("404 page not found\n"))
 		w.WriteHeader(http.StatusNotFound)
