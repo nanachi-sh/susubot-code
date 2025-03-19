@@ -5,7 +5,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/nanachi-sh/susubot-code/basic/accountmanager/internal/configs"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -19,7 +18,13 @@ func Handle(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		return
 	}
 	logger.Info("s1")
-	u, err := url.Parse(configs.OIDC_ISSUER)
+	// u, err := url.Parse(configs.OIDC_ISSUER)
+	// if err != nil {
+	// 	logger.Error(err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	u, err := url.Parse("https://test.unturned.fun:1080/v1/verify-code")
 	if err != nil {
 		logger.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
