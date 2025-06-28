@@ -8,6 +8,8 @@ require (
 	google.golang.org/grpc v1.69.2
 )
 
+require github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
+
 require (
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
