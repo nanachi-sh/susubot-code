@@ -127,6 +127,7 @@ func Start() {
 		if err != nil {
 			logger.Fatalln(err)
 		}
+		fmt.Println(string(resp.Buf))
 		go func() {
 			respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
 				Buf:            resp.Buf,
