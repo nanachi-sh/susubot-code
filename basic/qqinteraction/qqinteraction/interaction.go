@@ -3,10 +3,15 @@ package qqinteraction
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
+	"image/color/palette"
 	"image/draw"
+	"image/gif"
+	"image/jpeg"
 	"image/png"
 	"math/rand"
 	"net/http"
@@ -27,6 +32,7 @@ import (
 	randomfortune_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomfortune"
 	twoonone_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/twoonone"
 	uno_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/uno"
+	"github.com/nfnt/resize"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -174,6 +180,8 @@ func Start() {
 							go twoonone(message, text)
 						case pluginType_Uno:
 							go uno(message, text)
+						case pluginType_TEST:
+							go test(message, text)
 						}
 					}
 				}
@@ -185,17 +193,20 @@ func Start() {
 
 func message_match(text string) ([]pluginType, bool) {
 	ret := []pluginType{}
-	if randomanimal_match(text) != randomanimal_Unknown {
-		ret = append(ret, pluginType_RandomAnimal)
-	}
-	if randomfortune_match(text) != randomfortune_Unknown {
-		ret = append(ret, pluginType_RandomFortune)
-	}
-	if twoonone_match(text) != twoonone_Unknown {
-		ret = append(ret, pluginType_TwoOnOne)
-	}
-	if uno_match(text) != uno_Unknown {
-		ret = append(ret, pluginType_Uno)
+	// if randomanimal_match(text) != randomanimal_Unknown {
+	// 	ret = append(ret, pluginType_RandomAnimal)
+	// }
+	// if randomfortune_match(text) != randomfortune_Unknown {
+	// 	ret = append(ret, pluginType_RandomFortune)
+	// }
+	// if twoonone_match(text) != twoonone_Unknown {
+	// 	ret = append(ret, pluginType_TwoOnOne)
+	// }
+	// if uno_match(text) != uno_Unknown {
+	// 	ret = append(ret, pluginType_Uno)
+	// }
+	if text == "蔡徐坤" {
+		ret = append(ret, pluginType_TEST)
 	}
 	if len(ret) == 0 {
 		return nil, false
@@ -211,6 +222,7 @@ const (
 	pluginType_RandomFortune
 	pluginType_TwoOnOne
 	pluginType_Uno
+	pluginType_TEST
 )
 
 func randomanimal(message *response_pb.Response_Message, text string) {
@@ -2641,6 +2653,194 @@ func (unoR *roomUNO) listenEvent() {
 			return
 		}
 	}
+}
+
+func test(message *response_pb.Response_Message, text string) {
+	if message.Group == nil {
+		return
+	}
+	buf, err := genGIF(message.Group.SenderId)
+	if err != nil {
+		panic(err)
+	}
+	resph, err := define.Handler_RequestC.SendGroupMessage(define.ConnectorCtx, &request_pb.SendGroupMessageRequest{
+		GroupId: message.Group.GroupId,
+		MessageChain: []*request_pb.MessageChainObject{
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_At,
+				At: &request_pb.MessageChain_At{
+					TargetId: message.Group.SenderId,
+				},
+			},
+			&request_pb.MessageChainObject{
+				Type: request_pb.MessageChainType_MessageChainType_Image,
+				Image: &request_pb.MessageChain_Image{
+					Buf: buf,
+				},
+			},
+		},
+	})
+	req := resph.GetBuf()
+	_, err = define.ConnectorC.Write(define.ConnectorCtx, &connector_pb.WriteRequest{
+		Buf: req,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+func genGIF(id string) ([]byte, error) {
+	targets, err := loadTarget("targets")
+	if err != nil {
+		panic(err)
+	}
+	avatar, err := loadAvatar(id)
+	if err != nil {
+		panic(err)
+	}
+	output := &gif.GIF{}
+	m := map[int]struct {
+		p     *image.Paletted
+		delay int
+	}{}
+	wg := new(sync.WaitGroup)
+	for _, target := range targets {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			w := target.rect.Max.X - target.rect.Min.X
+			h := target.rect.Max.Y - target.rect.Min.Y
+			dia := max(w, h) + 8
+			r := dia / 2
+			bg := image.NewRGBA(target.image.Bounds())
+			draw.Draw(bg, bg.Rect, target.image, image.Point{}, draw.Src)
+			avatar := resize.Resize(uint(dia), uint(dia), avatar, resize.Lanczos3)
+			avatarCircle := image.NewRGBA(avatar.Bounds())
+			draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{p: image.Pt(r, r), r: r}, image.Point{}, draw.Over)
+			draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatarCircle, image.Point{}, draw.Over)
+			p := image.NewPaletted(bg.Rect, palette.Plan9)
+			draw.Draw(p, p.Rect, bg, image.Point{}, draw.Over)
+			m[target.frame] = struct {
+				p     *image.Paletted
+				delay int
+			}{p, 10}
+		}()
+	}
+	wg.Wait()
+	for frame := 1; ; frame++ {
+		d, ok := m[frame]
+		if !ok {
+			break
+		}
+		output.Image = append(output.Image, d.p)
+		output.Delay = append(output.Delay, d.delay)
+	}
+	buffer := new(bytes.Buffer)
+	if err := gif.EncodeAll(buffer, output); err != nil {
+		panic(err)
+	}
+	return buffer.Bytes(), nil
+}
+
+type target struct {
+	frame int
+	image image.Image
+	rect  image.Rectangle
+}
+
+func loadTarget(dir string) ([]*target, error) {
+	m := map[int]*target{}
+	entrys, err := os.ReadDir(dir)
+	if err != nil {
+		panic(err)
+	}
+	for _, entry := range entrys {
+		path := fmt.Sprintf("%s/%s", dir, entry.Name())
+		spl := strings.Split(entry.Name(), ".")
+		format := spl[1]
+		spl = strings.Split(spl[0], "_")
+		frame := spl[1]
+		frameI, err := strconv.ParseInt(frame, 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		if _, ok := m[int(frameI)]; !ok {
+			m[int(frameI)] = &target{frame: int(frameI)}
+		}
+		d := m[int(frameI)]
+		buf, err := os.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+		if format == "jpg" {
+			img, err := jpeg.Decode(bytes.NewBuffer(buf))
+			if err != nil {
+				panic(err)
+			}
+			d.image = img
+		} else if format == "json" {
+			j := make(map[string]any)
+			if err := json.Unmarshal(buf, &j); err != nil {
+				panic(err)
+			}
+			p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
+			xy1 := p[1].([]any)
+			xy2 := p[0].([]any)
+			x1, y1 := xy1[0].(float64), xy1[1].(float64)
+			x2, y2 := xy2[0].(float64), xy2[1].(float64)
+			d.rect = image.Rect(
+				int(x1),
+				int(y1),
+				int(x2),
+				int(y2),
+			)
+		}
+	}
+	targets := []*target{}
+	for frame := 1; ; frame++ {
+		d, ok := m[frame]
+		if !ok {
+			break
+		}
+		targets = append(targets, d)
+	}
+	return targets, nil
+}
+
+// func loadAvatar(path string) (image.Image, error) {
+// 	buf, err := os.ReadFile(path)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return jpeg.Decode(bytes.NewBuffer(buf))
+// }
+
+func loadAvatar(id string) (image.Image, error) {
+	resp, err := http.Get(fmt.Sprintf("https://q2.qlogo.cn/headimg_dl?dst_uin=%s&spec=5", id))
+	if err != nil {
+		panic(err)
+	}
+	return jpeg.Decode(resp.Body)
+}
+
+type circle struct {
+	p image.Point
+	r int
+}
+
+func (c *circle) ColorModel() color.Model {
+	return color.AlphaModel
+}
+
+func (c *circle) Bounds() image.Rectangle {
+	return image.Rect(c.p.X-c.r, c.p.Y-c.r, c.p.X+c.r, c.p.Y+c.r)
+}
+
+func (c *circle) At(x, y int) color.Color {
+	xx, yy, rr := float64(x-c.p.X)+0.5, float64(y-c.p.Y)+0.5, float64(c.r)
+	if xx*xx+yy*yy < rr*rr {
+		return color.RGBA{0, 0, 0, 255}
+	}
+	return color.Alpha{0}
 }
 
 func uno(message *response_pb.Response_Message, text string) {

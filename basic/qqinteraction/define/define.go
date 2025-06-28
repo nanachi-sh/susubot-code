@@ -12,6 +12,7 @@ import (
 
 	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/log"
 	connector_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/connector"
+	fileweb_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/fileweb"
 	request_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/handler/request"
 	response_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/handler/response"
 	randomanimal_pb "github.com/nanachi-sh/susubot-code/basic/qqinteraction/protos/randomanimal"
@@ -40,6 +41,7 @@ var (
 	RandomFortuneCtx  context.Context
 	TwoOnOneC         twoonone_pb.TwoOnOneClient
 	TwoOnOneCtx       context.Context
+	FilewebC          fileweb_pb.FileWebClient
 	UnoC              uno_pb.UnoClient
 	UnoCtx            context.Context
 	PrivilegeUserHash string
@@ -117,6 +119,7 @@ func init() {
 		"service-target": "randomfortune",
 		"version":        "stable",
 	}))
+	FilewebC = fileweb_pb.NewFileWebClient(GRPCClient)
 	TwoOnOneC = twoonone_pb.NewTwoOnOneClient(GRPCClient)
 	TwoOnOneCtx = metadata.NewOutgoingContext(context.Background(), metadata.New(map[string]string{
 		"service-target": "twoonone",
