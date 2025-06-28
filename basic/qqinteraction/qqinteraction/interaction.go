@@ -139,6 +139,9 @@ func Start() {
 				return
 			}
 			respu := respum.GetResponse()
+			if respu == nil {
+				return
+			}
 			switch respu.Type {
 			case response_pb.ResponseType_ResponseType_CmdEvent:
 				return
