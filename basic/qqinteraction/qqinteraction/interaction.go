@@ -3457,10 +3457,11 @@ func uno(message *response_pb.Response_Message, text string) {
 				if err != nil {
 					continue
 				}
-				if resp.CmdEvent.Echo != echo {
+				ce := resp.GetResponse().GetCmdEvent()
+				if ce.Echo != echo {
 					continue
 				}
-				gfl := resp.CmdEvent.GetFriendList
+				gfl := ce.GetFriendList
 				if !gfl.OK {
 					logger.Printf("获取好友列表失败, retcode: %v\n", *gfl.Retcode)
 					return
