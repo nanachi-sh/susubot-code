@@ -205,7 +205,7 @@ func message_match(text string) ([]pluginType, bool) {
 	// if uno_match(text) != uno_Unknown {
 	// 	ret = append(ret, pluginType_Uno)
 	// }
-	if text == "蔡徐坤" {
+	if strings.Index(text, "蔡徐坤") > -1 {
 		ret = append(ret, pluginType_TEST)
 	}
 	if len(ret) == 0 {
