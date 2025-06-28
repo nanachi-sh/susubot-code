@@ -137,6 +137,7 @@ func Start() {
 				logger.Println(err)
 				return
 			}
+			fmt.Println(respum, respum.Type)
 			switch *respum.Type {
 			case response_pb.ResponseType_ResponseType_CmdEvent:
 				return
