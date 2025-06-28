@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: basic/handler/protos/handler/response/response.proto
+// source: pkg/protos/handler/response/response.proto
 
 package response
 
@@ -117,5 +117,5 @@ var ResponseHandler_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "basic/handler/protos/handler/response/response.proto",
+	Metadata: "pkg/protos/handler/response/response.proto",
 }

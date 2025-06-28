@@ -127,7 +127,7 @@ func Start() {
 		if err != nil {
 			logger.Fatalln(err)
 		}
-		fmt.Println(string(resp.Buf))
+		fmt.Println()
 		go func() {
 			respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
 				Buf:            resp.Buf,
@@ -138,13 +138,13 @@ func Start() {
 				logger.Println(err)
 				return
 			}
-			fmt.Println(respum, respum.Type)
-			switch *respum.Type {
+			respu := respum.GetResponse()
+			switch respu.Type {
 			case response_pb.ResponseType_ResponseType_CmdEvent:
 				return
 			case response_pb.ResponseType_ResponseType_Message:
 				var mcs []*response_pb.MessageChainObject
-				message := respum.Message
+				message := respu.GetMessage()
 				switch *message.Type {
 				case response_pb.MessageType_MessageType_Private:
 					mcs = message.Private.MessageChain
@@ -1905,10 +1905,11 @@ func twoonone(message *response_pb.Response_Message, text string) {
 				if err != nil {
 					continue
 				}
-				if resp.CmdEvent.Echo != echo {
+				ce := resp.GetResponse().GetCmdEvent()
+				if ce.Echo != echo {
 					continue
 				}
-				gfl := resp.CmdEvent.GetFriendList
+				gfl := ce.GetFriendList
 				if !gfl.OK {
 					logger.Printf("获取好友列表失败, retcode: %v\n", *gfl.Retcode)
 					return

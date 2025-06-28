@@ -8,6 +8,14 @@ service ResponseHandler {
     rpc Unmarshal (UnmarshalRequest) returns (UnmarshalResponse);
 }
 
+enum Errors {
+    EMPTY = 0;
+    Undefined = 1;
+    TypeNoMatch = 2;
+    MessageChainError = 3;
+    CmdEventTypeNoSet = 4;
+}
+
 enum ResponseType {     //机器人响应类型
     ResponseType_Message = 0;     //消息事件
     ResponseType_QQEvent = 1;     //QQ事件
@@ -328,9 +336,18 @@ message UnmarshalRequest {
 }
 
 message UnmarshalResponse {
-    optional ResponseType Type = 1;
-    optional Response_Message Message = 2;
-    optional Response_QQEvent QQEvent = 3;
-    optional Response_CmdEvent CmdEvent = 4;
-    optional Response_BotEvent BotEvent = 5;
+    message ResponseDefine {
+        oneof Body {
+            Response_Message Message = 2;
+            Response_QQEvent QQEvent = 3;
+            Response_CmdEvent CmdEvent = 4;
+            Response_BotEvent BotEvent = 5;
+        }
+        ResponseType Type = 1;
+    }
+
+    oneof Body {
+        ResponseDefine Response = 1;
+        Errors err = 2;
+    }
 }

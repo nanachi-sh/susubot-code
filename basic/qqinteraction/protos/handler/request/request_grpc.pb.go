@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.2
-// source: basic/handler/protos/handler/request/request.proto
+// source: pkg/protos/handler/request/request.proto
 
 package request
 
@@ -383,5 +383,5 @@ var RequestHandler_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "basic/handler/protos/handler/request/request.proto",
+	Metadata: "pkg/protos/handler/request/request.proto",
 }
