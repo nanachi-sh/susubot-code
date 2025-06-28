@@ -2659,7 +2659,13 @@ func test(message *response_pb.Response_Message, text string) {
 	if message.Group == nil {
 		return
 	}
-	buf, err := genGIF(message.Group.SenderId)
+	genId := message.Group.SenderId
+	for _, v := range message.Group.MessageChain {
+		if v.At != nil {
+			genId = v.At.TargetId
+		}
+	}
+	buf, err := genGIF(genId)
 	if err != nil {
 		panic(err)
 	}
