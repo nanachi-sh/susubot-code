@@ -133,7 +133,7 @@ func Start() {
 		if err != nil {
 			logger.Fatalln(err)
 		}
-		fmt.Println()
+		fmt.Println(string(resp.Buf))
 		go func() {
 			respum, err := define.Handler_ResponseC.Unmarshal(define.HandlerCtx, &response_pb.UnmarshalRequest{
 				Buf:            resp.Buf,
@@ -2661,6 +2661,7 @@ func test(message *response_pb.Response_Message, text string) {
 	}
 	genId := message.Group.SenderId
 	for _, v := range message.Group.MessageChain {
+		fmt.Println(v.At)
 		if v.At != nil {
 			genId = v.At.TargetId
 		}
@@ -2686,6 +2687,9 @@ func test(message *response_pb.Response_Message, text string) {
 			},
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
 	req := resph.GetBuf()
 	_, err = define.ConnectorC.Write(define.ConnectorCtx, &connector_pb.WriteRequest{
 		Buf: req,
