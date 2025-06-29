@@ -2739,7 +2739,7 @@ func genGIF(id string, is GIFs) ([]byte, error) {
 				dia := max(w, h) + 8
 				avatarCircle := image.NewRGBA(avatar.Bounds())
 				draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{image.Pt(avatar.Bounds().Max.X, avatar.Bounds().Max.Y), avatar.Bounds().Dx() / 2}, image.Point{avatar.Bounds().Max.X / 2, avatar.Bounds().Max.Y / 2}, draw.Over)
-				avatar = resize.Resize(uint(w), uint(h), avatarCircle, resize.Lanczos3)
+				avatar = resize.Resize(uint(w), uint(h), avatarCircle, resize.Bilinear)
 				bg := image.NewRGBA(target.image.Bounds())
 				draw.Copy(bg, image.Point{}, target.image, target.image.Bounds(), draw.Src, nil)
 				draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatar, image.Point{}, draw.Over)
