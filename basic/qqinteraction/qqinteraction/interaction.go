@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"math/rand"
@@ -21,6 +20,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/image/draw"
 
 	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/define"
 	"github.com/nanachi-sh/susubot-code/basic/qqinteraction/log"
@@ -2658,6 +2659,14 @@ func test(message *response_pb.Response_Message, text string) {
 	if message.Group == nil {
 		return
 	}
+	var is GIFs
+	if strings.Index(text, "蔡徐坤") > -1 {
+		is = cxk
+	} else if strings.Index(strings.ToLower(text), "rua") > -1 {
+		is = rua
+	} else {
+		return
+	}
 	genId := message.Group.SenderId
 	for _, v := range message.Group.MessageChain {
 		fmt.Println(v.At)
@@ -2665,7 +2674,7 @@ func test(message *response_pb.Response_Message, text string) {
 			genId = v.At.TargetId
 		}
 	}
-	buf, err := genGIF(genId)
+	buf, err := genGIF(genId, is)
 	if err != nil {
 		panic(err)
 	}
@@ -2697,49 +2706,84 @@ func test(message *response_pb.Response_Message, text string) {
 		panic(err)
 	}
 }
-func genGIF(id string) ([]byte, error) {
+
+type GIFs int
+
+const (
+	cxk GIFs = iota
+	rua
+)
+
+func genGIF(id string, is GIFs) ([]byte, error) {
 	dirN := strconv.FormatInt(rand.Int63(), 10)
 	if err := os.Mkdir(dirN, 0755); err != nil {
-		panic(err)
-	}
-	targets, err := loadTarget("targets")
-	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	avatar, err := loadAvatar(id)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	// output := &gif.GIF{}
-	// m := map[int]struct {
-	// 	p     *image.Paletted
-	// 	delay int
-	// }{}
-	wg := new(sync.WaitGroup)
-	for _, target := range targets {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			w := target.rect.Max.X - target.rect.Min.X
-			h := target.rect.Max.Y - target.rect.Min.Y
-			dia := max(w, h) + 8
-			r := dia / 2
-			bg := image.NewRGBA(target.image.Bounds())
-			draw.Draw(bg, bg.Rect, target.image, image.Point{}, draw.Src)
-			avatar := resize.Resize(uint(dia), uint(dia), avatar, resize.Lanczos3)
-			avatarCircle := image.NewRGBA(avatar.Bounds())
-			draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{p: image.Pt(r, r), r: r}, image.Point{}, draw.Over)
-			draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatarCircle, image.Point{}, draw.Over)
-			f, err := os.Create(fmt.Sprintf("%s/%d.png", dirN, target.frame))
-			if err != nil {
-				panic(err)
-			}
-			if err := png.Encode(f, bg); err != nil {
-				panic(err)
-			}
-		}()
+	switch is {
+	case cxk:
+		targets, err := loadTarget("cxk")
+		if err != nil {
+			panic(err)
+		}
+		wg := new(sync.WaitGroup)
+		for _, target := range targets {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				w := target.rect.Max.X - target.rect.Min.X
+				h := target.rect.Max.Y - target.rect.Min.Y
+				dia := max(w, h) + 8
+				avatarCircle := image.NewRGBA(avatar.Bounds())
+				draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{image.Pt(avatar.Bounds().Max.X, avatar.Bounds().Max.Y), avatar.Bounds().Dx() / 2}, image.Point{avatar.Bounds().Max.X / 2, avatar.Bounds().Max.Y / 2}, draw.Over)
+				avatar = resize.Resize(uint(w), uint(h), avatarCircle, resize.Lanczos3)
+				bg := image.NewRGBA(target.image.Bounds())
+				draw.Copy(bg, image.Point{}, target.image, target.image.Bounds(), draw.Src, nil)
+				draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatar, image.Point{}, draw.Over)
+				f, err := os.Create(fmt.Sprintf("%s/%d.png", dirN, target.frame))
+				if err != nil {
+					panic(err)
+				}
+				if err := png.Encode(f, bg); err != nil {
+					panic(err)
+				}
+			}()
+		}
+		wg.Wait()
+	case rua:
+		targets, err := loadTarget("rua")
+		if err != nil {
+			panic(err)
+		}
+		wg := new(sync.WaitGroup)
+		for _, target := range targets {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				bg := image.NewRGBA(target.image.Bounds())
+				draw.Copy(bg, image.Point{}, target.image, bg.Rect, draw.Src, nil)
+				w := target.rect.Max.X - target.rect.Min.X
+				h := target.rect.Max.Y - target.rect.Min.Y
+				avatarCircle := image.NewRGBA(avatar.Bounds())
+				draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{image.Pt(avatar.Bounds().Max.X, avatar.Bounds().Max.Y), avatar.Bounds().Dx() / 2}, image.Point{avatar.Bounds().Max.X / 2, avatar.Bounds().Max.Y / 2}, draw.Over)
+				avatar = resize.Resize(uint(w), uint(h), avatarCircle, resize.Bilinear)
+				draw.DrawMask(bg, target.rect, avatar, image.Point{}, &NoExistMask{bg}, image.Point{target.rect.Min.X, target.rect.Min.Y}, draw.Over)
+				f, err := os.Create(fmt.Sprintf("%s/%d.png", dirN, target.frame))
+				if err != nil {
+					panic(err)
+				}
+				if err := png.Encode(f, bg); err != nil {
+					panic(err)
+				}
+			}()
+		}
+		wg.Wait()
+	default:
+		return nil, nil
 	}
-	wg.Wait()
 	palettegen := exec.Command("ffmpeg", "-loglevel", "quiet", "-i", dirN+`/%d.png`, "-vf", "palettegen", "-y", fmt.Sprintf("%s/palette.png", dirN))
 	gifgen := exec.Command("ffmpeg", "-loglevel", "quiet", "-r", "10", "-i", dirN+`/%d.png`, "-i", fmt.Sprintf("%s/palette.png", dirN), "-lavfi", "paletteuse", "-y", fmt.Sprintf("%s/output.gif", dirN))
 	if err := palettegen.Run(); err != nil {
@@ -2758,6 +2802,28 @@ func genGIF(id string) ([]byte, error) {
 	return buf, nil
 }
 
+type NoExistMask struct {
+	img image.Image
+}
+
+func (e *NoExistMask) ColorModel() color.Model {
+	return color.AlphaModel
+}
+
+func (e *NoExistMask) Bounds() image.Rectangle {
+	return e.img.Bounds()
+}
+
+func (e *NoExistMask) At(x, y int) color.Color {
+	c := e.img.At(x, y)
+	_, _, _, a := c.RGBA()
+	if a == 0 {
+		return color.RGBA{0, 0, 0, 255}
+	} else {
+		return color.Alpha{0}
+	}
+}
+
 type target struct {
 	frame int
 	image image.Image
@@ -2765,69 +2831,66 @@ type target struct {
 }
 
 func loadTarget(dir string) ([]*target, error) {
-	m := new(sync.Map)
-	// m := map[int]*target{}
+	m := map[int]*target{}
 	entrys, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)
 	}
-	wg := new(sync.WaitGroup)
 	for _, entry := range entrys {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			path := fmt.Sprintf("%s/%s", dir, entry.Name())
-			spl := strings.Split(entry.Name(), ".")
-			format := spl[1]
-			spl = strings.Split(spl[0], "_")
-			frame := spl[1]
-			frame64, err := strconv.ParseInt(frame, 10, 32)
+		path := fmt.Sprintf("%s/%s", dir, entry.Name())
+		spl := strings.Split(entry.Name(), ".")
+		frame := spl[0]
+		format := spl[1]
+		frameI, err := strconv.ParseInt(frame, 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		if _, ok := m[int(frameI)]; !ok {
+			m[int(frameI)] = &target{frame: int(frameI)}
+		}
+		d := m[int(frameI)]
+		buf, err := os.ReadFile(path)
+		if err != nil {
+			panic(err)
+		}
+		switch format {
+		case "png":
+			img, err := png.Decode(bytes.NewBuffer(buf))
 			if err != nil {
 				panic(err)
 			}
-			frameI := int(frame64)
-			if _, ok := m.Load(frameI); !ok {
-				m.LoadOrStore(frameI, &target{frame: frameI})
-			}
-			x, _ := m.Load(frameI)
-			d := x.(*target)
-			buf, err := os.ReadFile(path)
+			d.image = img
+		case "jpg":
+			img, err := jpeg.Decode(bytes.NewBuffer(buf))
 			if err != nil {
 				panic(err)
 			}
-			if format == "jpg" {
-				img, err := jpeg.Decode(bytes.NewBuffer(buf))
-				if err != nil {
-					panic(err)
-				}
-				d.image = img
-			} else if format == "json" {
-				j := make(map[string]any)
-				if err := json.Unmarshal(buf, &j); err != nil {
-					panic(err)
-				}
-				p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
-				xy1 := p[1].([]any)
-				xy2 := p[0].([]any)
-				x1, y1 := xy1[0].(float64), xy1[1].(float64)
-				x2, y2 := xy2[0].(float64), xy2[1].(float64)
-				d.rect = image.Rect(
-					int(x1),
-					int(y1),
-					int(x2),
-					int(y2),
-				)
+			d.image = img
+		case "json":
+			j := make(map[string]any)
+			if err := json.Unmarshal(buf, &j); err != nil {
+				panic(err)
 			}
-		}()
+			p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
+			xy1 := p[1].([]any)
+			xy2 := p[0].([]any)
+			x1, y1 := xy1[0].(float64), xy1[1].(float64)
+			x2, y2 := xy2[0].(float64), xy2[1].(float64)
+			d.rect = image.Rect(
+				int(x1),
+				int(y1),
+				int(x2),
+				int(y2),
+			)
+		}
 	}
-	wg.Wait()
 	targets := []*target{}
 	for frame := 1; ; frame++ {
-		d, ok := m.Load(frame)
+		d, ok := m[frame]
 		if !ok {
 			break
 		}
-		targets = append(targets, d.(*target))
+		targets = append(targets, d)
 	}
 	return targets, nil
 }
