@@ -8,14 +8,13 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/color/palette"
 	"image/draw"
-	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
@@ -2699,6 +2698,10 @@ func test(message *response_pb.Response_Message, text string) {
 	}
 }
 func genGIF(id string) ([]byte, error) {
+	dirN := strconv.FormatInt(rand.Int63(), 10)
+	if err := os.Mkdir(dirN, 0755); err != nil {
+		panic(err)
+	}
 	targets, err := loadTarget("targets")
 	if err != nil {
 		panic(err)
@@ -2707,11 +2710,11 @@ func genGIF(id string) ([]byte, error) {
 	if err != nil {
 		panic(err)
 	}
-	output := &gif.GIF{}
-	m := map[int]struct {
-		p     *image.Paletted
-		delay int
-	}{}
+	// output := &gif.GIF{}
+	// m := map[int]struct {
+	// 	p     *image.Paletted
+	// 	delay int
+	// }{}
 	wg := new(sync.WaitGroup)
 	for _, target := range targets {
 		wg.Add(1)
@@ -2727,28 +2730,32 @@ func genGIF(id string) ([]byte, error) {
 			avatarCircle := image.NewRGBA(avatar.Bounds())
 			draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{p: image.Pt(r, r), r: r}, image.Point{}, draw.Over)
 			draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatarCircle, image.Point{}, draw.Over)
-			p := image.NewPaletted(bg.Rect, palette.Plan9)
-			draw.Draw(p, p.Rect, bg, image.Point{}, draw.Over)
-			m[target.frame] = struct {
-				p     *image.Paletted
-				delay int
-			}{p, 10}
+			f, err := os.Create(fmt.Sprintf("%s/%d.png", dirN, target.frame))
+			if err != nil {
+				panic(err)
+			}
+			if err := png.Encode(f, bg); err != nil {
+				panic(err)
+			}
 		}()
 	}
 	wg.Wait()
-	for frame := 1; ; frame++ {
-		d, ok := m[frame]
-		if !ok {
-			break
-		}
-		output.Image = append(output.Image, d.p)
-		output.Delay = append(output.Delay, d.delay)
-	}
-	buffer := new(bytes.Buffer)
-	if err := gif.EncodeAll(buffer, output); err != nil {
+	palettegen := exec.Command("ffmpeg", "-loglevel", "quiet", "-i", dirN+`/%d.png`, "-vf", "palettegen", "-y", fmt.Sprintf("%s/palette.png", dirN))
+	gifgen := exec.Command("ffmpeg", "-loglevel", "quiet", "-r", "10", "-i", dirN+`/%d.png`, "-i", fmt.Sprintf("%s/palette.png", dirN), "-lavfi", "paletteuse", "-y", fmt.Sprintf("%s/output.gif", dirN))
+	if err := palettegen.Run(); err != nil {
 		panic(err)
 	}
-	return buffer.Bytes(), nil
+	if err := gifgen.Run(); err != nil {
+		panic(err)
+	}
+	buf, err := os.ReadFile(fmt.Sprintf("%s/output.gif", dirN))
+	if err != nil {
+		panic(err)
+	}
+	if err := os.RemoveAll(dirN); err != nil {
+		panic(err)
+	}
+	return buf, nil
 }
 
 type target struct {
