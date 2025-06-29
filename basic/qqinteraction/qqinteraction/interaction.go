@@ -2658,7 +2658,6 @@ func test(message *response_pb.Response_Message, text string) {
 		return
 	}
 	var is GIFs
-	fmt.Println(strings.ToLower(text))
 	if strings.Contains(text, "蔡徐坤") {
 		is = cxk
 	} else if strings.Contains(strings.ToLower(text), "rua") {
@@ -2668,7 +2667,6 @@ func test(message *response_pb.Response_Message, text string) {
 	}
 	genId := message.Group.SenderId
 	for _, v := range message.Group.MessageChain {
-		fmt.Println(v.At)
 		if v.At != nil {
 			genId = v.At.TargetId
 		}
@@ -2722,12 +2720,14 @@ func genGIF(id string, is GIFs) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	var info *info
 	switch is {
 	case cxk:
-		targets, err := loadTarget("cxk")
+		targets, i, err := loadTarget("cxk")
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
+		info = i
 		wg := new(sync.WaitGroup)
 		for _, target := range targets {
 			wg.Add(1)
@@ -2735,13 +2735,12 @@ func genGIF(id string, is GIFs) ([]byte, error) {
 				defer wg.Done()
 				w := target.rect.Max.X - target.rect.Min.X
 				h := target.rect.Max.Y - target.rect.Min.Y
-				dia := max(w, h) + 8
 				avatarCircle := image.NewRGBA(avatar.Bounds())
 				draw.DrawMask(avatarCircle, avatarCircle.Rect, avatar, image.Point{}, &circle{image.Pt(avatar.Bounds().Max.X, avatar.Bounds().Max.Y), avatar.Bounds().Dx() / 2}, image.Point{avatar.Bounds().Max.X / 2, avatar.Bounds().Max.Y / 2}, draw.Over)
 				avatar = resize.Resize(uint(w), uint(h), avatarCircle, resize.Bilinear)
 				bg := image.NewRGBA(target.image.Bounds())
 				draw.Copy(bg, image.Point{}, target.image, target.image.Bounds(), draw.Src, nil)
-				draw.Draw(bg, image.Rect(target.rect.Min.X-dia/8, target.rect.Min.Y-dia/4, bg.Rect.Max.X, bg.Rect.Max.Y), avatar, image.Point{}, draw.Over)
+				draw.Draw(bg, target.rect, avatar, image.Point{}, draw.Over)
 				f, err := os.Create(fmt.Sprintf("%s/%d.png", dirN, target.frame))
 				if err != nil {
 					panic(err)
@@ -2753,10 +2752,11 @@ func genGIF(id string, is GIFs) ([]byte, error) {
 		}
 		wg.Wait()
 	case rua:
-		targets, err := loadTarget("rua")
+		targets, i, err := loadTarget("rua")
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
+		info = i
 		wg := new(sync.WaitGroup)
 		for _, target := range targets {
 			wg.Add(1)
@@ -2784,19 +2784,19 @@ func genGIF(id string, is GIFs) ([]byte, error) {
 		return nil, nil
 	}
 	palettegen := exec.Command("ffmpeg", "-loglevel", "quiet", "-i", dirN+`/%d.png`, "-vf", "palettegen", "-y", fmt.Sprintf("%s/palette.png", dirN))
-	gifgen := exec.Command("ffmpeg", "-loglevel", "quiet", "-r", "10", "-i", dirN+`/%d.png`, "-i", fmt.Sprintf("%s/palette.png", dirN), "-lavfi", "paletteuse", "-y", fmt.Sprintf("%s/output.gif", dirN))
+	gifgen := exec.Command("ffmpeg", "-loglevel", "quiet", "-r", fmt.Sprintf("%d", info.delay), "-i", dirN+`/%d.png`, "-i", fmt.Sprintf("%s/palette.png", dirN), "-lavfi", "paletteuse", "-y", fmt.Sprintf("%s/output.gif", dirN))
 	if err := palettegen.Run(); err != nil {
-		panic(err)
+		return nil, err
 	}
 	if err := gifgen.Run(); err != nil {
-		panic(err)
+		return nil, err
 	}
 	buf, err := os.ReadFile(fmt.Sprintf("%s/output.gif", dirN))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if err := os.RemoveAll(dirN); err != nil {
-		panic(err)
+		return nil, err
 	}
 	return buf, nil
 }
@@ -2829,20 +2829,39 @@ type target struct {
 	rect  image.Rectangle
 }
 
-func loadTarget(dir string) ([]*target, error) {
+type info struct {
+	delay int
+}
+
+func loadTarget(dir string) ([]*target, *info, error) {
 	m := map[int]*target{}
+	info := &info{}
 	entrys, err := os.ReadDir(dir)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 	for _, entry := range entrys {
 		path := fmt.Sprintf("%s/%s", dir, entry.Name())
+		if entry.Name() == "info" {
+			buf, err := os.ReadFile(path)
+			if err != nil {
+				return nil, nil, err
+			}
+			spl := strings.Split(string(buf), "\n")
+			delayS := spl[0]
+			delay, err := strconv.Atoi(delayS)
+			if err != nil {
+				return nil, nil, err
+			}
+			info.delay = delay
+			continue
+		}
 		spl := strings.Split(entry.Name(), ".")
 		frame := spl[0]
 		format := spl[1]
 		frameI, err := strconv.ParseInt(frame, 10, 32)
 		if err != nil {
-			panic(err)
+			return nil, nil, err
 		}
 		if _, ok := m[int(frameI)]; !ok {
 			m[int(frameI)] = &target{frame: int(frameI)}
@@ -2850,25 +2869,25 @@ func loadTarget(dir string) ([]*target, error) {
 		d := m[int(frameI)]
 		buf, err := os.ReadFile(path)
 		if err != nil {
-			panic(err)
+			return nil, nil, err
 		}
 		switch format {
 		case "png":
 			img, err := png.Decode(bytes.NewBuffer(buf))
 			if err != nil {
-				panic(err)
+				return nil, nil, err
 			}
 			d.image = img
 		case "jpg":
 			img, err := jpeg.Decode(bytes.NewBuffer(buf))
 			if err != nil {
-				panic(err)
+				return nil, nil, err
 			}
 			d.image = img
 		case "json":
 			j := make(map[string]any)
 			if err := json.Unmarshal(buf, &j); err != nil {
-				panic(err)
+				return nil, nil, err
 			}
 			p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
 			xy1 := p[1].([]any)
@@ -2891,7 +2910,7 @@ func loadTarget(dir string) ([]*target, error) {
 		}
 		targets = append(targets, d)
 	}
-	return targets, nil
+	return targets, info, nil
 }
 
 // func loadTarget(dir string) ([]*target, error) {
@@ -2964,7 +2983,7 @@ func loadTarget(dir string) ([]*target, error) {
 func loadAvatar(id string) (image.Image, error) {
 	resp, err := http.Get(fmt.Sprintf("https://q2.qlogo.cn/headimg_dl?dst_uin=%s&spec=5", id))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return jpeg.Decode(resp.Body)
 }
