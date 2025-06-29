@@ -2765,63 +2765,131 @@ type target struct {
 }
 
 func loadTarget(dir string) ([]*target, error) {
-	m := map[int]*target{}
+	m := new(sync.Map)
+	// m := map[int]*target{}
 	entrys, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)
 	}
+	wg := new(sync.WaitGroup)
 	for _, entry := range entrys {
-		path := fmt.Sprintf("%s/%s", dir, entry.Name())
-		spl := strings.Split(entry.Name(), ".")
-		format := spl[1]
-		spl = strings.Split(spl[0], "_")
-		frame := spl[1]
-		frameI, err := strconv.ParseInt(frame, 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		if _, ok := m[int(frameI)]; !ok {
-			m[int(frameI)] = &target{frame: int(frameI)}
-		}
-		d := m[int(frameI)]
-		buf, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
-		}
-		if format == "jpg" {
-			img, err := jpeg.Decode(bytes.NewBuffer(buf))
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			path := fmt.Sprintf("%s/%s", dir, entry.Name())
+			spl := strings.Split(entry.Name(), ".")
+			format := spl[1]
+			spl = strings.Split(spl[0], "_")
+			frame := spl[1]
+			frame64, err := strconv.ParseInt(frame, 10, 32)
 			if err != nil {
 				panic(err)
 			}
-			d.image = img
-		} else if format == "json" {
-			j := make(map[string]any)
-			if err := json.Unmarshal(buf, &j); err != nil {
+			frameI := int(frame64)
+			if _, ok := m.Load(frameI); !ok {
+				m.LoadOrStore(frameI, &target{frame: frameI})
+			}
+			x, _ := m.Load(frameI)
+			d := x.(*target)
+			buf, err := os.ReadFile(path)
+			if err != nil {
 				panic(err)
 			}
-			p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
-			xy1 := p[1].([]any)
-			xy2 := p[0].([]any)
-			x1, y1 := xy1[0].(float64), xy1[1].(float64)
-			x2, y2 := xy2[0].(float64), xy2[1].(float64)
-			d.rect = image.Rect(
-				int(x1),
-				int(y1),
-				int(x2),
-				int(y2),
-			)
-		}
+			if format == "jpg" {
+				img, err := jpeg.Decode(bytes.NewBuffer(buf))
+				if err != nil {
+					panic(err)
+				}
+				d.image = img
+			} else if format == "json" {
+				j := make(map[string]any)
+				if err := json.Unmarshal(buf, &j); err != nil {
+					panic(err)
+				}
+				p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
+				xy1 := p[1].([]any)
+				xy2 := p[0].([]any)
+				x1, y1 := xy1[0].(float64), xy1[1].(float64)
+				x2, y2 := xy2[0].(float64), xy2[1].(float64)
+				d.rect = image.Rect(
+					int(x1),
+					int(y1),
+					int(x2),
+					int(y2),
+				)
+			}
+		}()
 	}
+	wg.Wait()
 	targets := []*target{}
 	for frame := 1; ; frame++ {
-		d, ok := m[frame]
+		d, ok := m.Load(frame)
 		if !ok {
 			break
 		}
-		targets = append(targets, d)
+		targets = append(targets, d.(*target))
 	}
 	return targets, nil
 }
+
+// func loadTarget(dir string) ([]*target, error) {
+// 	m := map[int]*target{}
+// 	entrys, err := os.ReadDir(dir)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	for _, entry := range entrys {
+// 		path := fmt.Sprintf("%s/%s", dir, entry.Name())
+// 		spl := strings.Split(entry.Name(), ".")
+// 		format := spl[1]
+// 		spl = strings.Split(spl[0], "_")
+// 		frame := spl[1]
+// 		frameI, err := strconv.ParseInt(frame, 10, 32)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		if _, ok := m[int(frameI)]; !ok {
+// 			m[int(frameI)] = &target{frame: int(frameI)}
+// 		}
+// 		d := m[int(frameI)]
+// 		buf, err := os.ReadFile(path)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		if format == "jpg" {
+// 			img, err := jpeg.Decode(bytes.NewBuffer(buf))
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 			d.image = img
+// 		} else if format == "json" {
+// 			j := make(map[string]any)
+// 			if err := json.Unmarshal(buf, &j); err != nil {
+// 				panic(err)
+// 			}
+// 			p := j["shapes"].([]any)[0].(map[string]any)["points"].([]any)
+// 			xy1 := p[1].([]any)
+// 			xy2 := p[0].([]any)
+// 			x1, y1 := xy1[0].(float64), xy1[1].(float64)
+// 			x2, y2 := xy2[0].(float64), xy2[1].(float64)
+// 			d.rect = image.Rect(
+// 				int(x1),
+// 				int(y1),
+// 				int(x2),
+// 				int(y2),
+// 			)
+// 		}
+// 	}
+// 	targets := []*target{}
+// 	for frame := 1; ; frame++ {
+// 		d, ok := m[frame]
+// 		if !ok {
+// 			break
+// 		}
+// 		targets = append(targets, d)
+// 	}
+// 	return targets, nil
+// }
 
 // func loadAvatar(path string) (image.Image, error) {
 // 	buf, err := os.ReadFile(path)
