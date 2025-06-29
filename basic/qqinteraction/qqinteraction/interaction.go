@@ -2668,6 +2668,18 @@ func test(message *response_pb.Response_Message, text string) {
 		return
 	}
 	var is GIFs
+	genId := message.Group.SenderId
+	for _, v := range message.Group.MessageChain {
+		if v.At != nil {
+			genId = v.At.TargetId
+		}
+		if v.Text != nil {
+			str := strings.TrimSpace(v.Text.Text)
+			if len(str) > 0 {
+				text = str
+			}
+		}
+	}
 	fmt.Println(text)
 	if regexp.MustCompile(`蔡徐坤$`).MatchString(text) {
 		is = cxk
@@ -2675,12 +2687,6 @@ func test(message *response_pb.Response_Message, text string) {
 		is = rua
 	} else {
 		return
-	}
-	genId := message.Group.SenderId
-	for _, v := range message.Group.MessageChain {
-		if v.At != nil {
-			genId = v.At.TargetId
-		}
 	}
 	fmt.Printf("接收，生成目标 %s，目标ID %s\n", GIFs2Str(is), genId)
 	t := time.Now()
