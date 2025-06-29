@@ -2668,9 +2668,9 @@ func test(message *response_pb.Response_Message, text string) {
 		return
 	}
 	var is GIFs
-	if strings.Contains(text, "蔡徐坤") {
+	if regexp.MustCompile(`^(@.+)?蔡徐坤$`).MatchString(text) {
 		is = cxk
-	} else if strings.Contains(strings.ToLower(text), "rua") {
+	} else if regexp.MustCompile(`^(@.+)?rua$`).MatchString(text) {
 		is = rua
 	} else {
 		return
@@ -2681,13 +2681,13 @@ func test(message *response_pb.Response_Message, text string) {
 			genId = v.At.TargetId
 		}
 	}
-	fmt.Printf("接收，生成目标 %s，目标ID %s", GIFs2Str(is), genId)
+	fmt.Printf("接收，生成目标 %s，目标ID %s\n", GIFs2Str(is), genId)
 	t := time.Now()
 	buf, err := genGIF(genId, is)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("生成完毕，耗时: %s", time.Since(t).String())
+	fmt.Printf("生成完毕，耗时: %s\n", time.Since(t).String())
 	resph, err := define.Handler_RequestC.SendGroupMessage(define.ConnectorCtx, &request_pb.SendGroupMessageRequest{
 		GroupId: message.Group.GroupId,
 		MessageChain: []*request_pb.MessageChainObject{
