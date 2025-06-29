@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/jpeg"
+	_ "image/jpeg"
 	"image/png"
 	"math/rand"
 	"net/http"
@@ -2880,14 +2880,8 @@ func loadTarget(dir string) ([]*target, *info, error) {
 			return nil, nil, err
 		}
 		switch format {
-		case "png":
-			img, err := png.Decode(bytes.NewBuffer(buf))
-			if err != nil {
-				return nil, nil, err
-			}
-			d.image = img
-		case "jpg":
-			img, err := jpeg.Decode(bytes.NewBuffer(buf))
+		case "png", "jpg":
+			img, _, err := image.Decode(bytes.NewBuffer(buf))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -2993,7 +2987,8 @@ func loadAvatar(id string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	return jpeg.Decode(resp.Body)
+	img, _, err := image.Decode(resp.Body)
+	return img, err
 }
 
 type circle struct {
