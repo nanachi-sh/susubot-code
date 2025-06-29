@@ -2669,9 +2669,9 @@ func test(message *response_pb.Response_Message, text string) {
 	}
 	var is GIFs
 	fmt.Println(text)
-	if regexp.MustCompile(`^(@.+)?蔡徐坤$`).MatchString(text) {
+	if regexp.MustCompile(`蔡徐坤$`).MatchString(text) {
 		is = cxk
-	} else if regexp.MustCompile(`^(@.+)?rua$`).MatchString(text) {
+	} else if regexp.MustCompile(`rua$`).MatchString(text) {
 		is = rua
 	} else {
 		return
