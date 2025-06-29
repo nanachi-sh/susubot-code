@@ -2660,9 +2660,10 @@ func test(message *response_pb.Response_Message, text string) {
 		return
 	}
 	var is GIFs
-	if strings.Index(text, "蔡徐坤") > -1 {
+	fmt.Println(strings.ToLower(text))
+	if strings.Contains(text, "蔡徐坤") {
 		is = cxk
-	} else if strings.Index(strings.ToLower(text), "rua") > -1 {
+	} else if strings.Contains(strings.ToLower(text), "rua") {
 		is = rua
 	} else {
 		return
